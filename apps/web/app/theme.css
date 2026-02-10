@@ -1,0 +1,260 @@
+/*
+ * Lighthouse
+ * © 2026 ayushshrivastv
+ */
+
+@theme {
+    --color-primary: #6c44fc;
+    --color-darkest: #0e0f10;
+    --color-darker: #121314;
+    --color-dark: #171819;
+    --color-light: #fdf9f0;
+    --color-primary-light: #9679ffea;
+    --breakpoint-xs: 375px;
+    --breakpoint-md2: 896px;
+}
+
+/* Move these outside @theme or into @layer utilities */
+.animated-cards::before {
+    pointer-events: none;
+    position: absolute;
+    -webkit-user-select: none;
+    user-select: none;
+    border-radius: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(
+        1000px circle at var(--x) var(--y),
+        #c9ee80 0,
+        #eebbe2 10%,
+        #adc0ec 25%,
+        #c9ee80 35%,
+        rgba(255, 255, 255, 0) 50%,
+        transparent 80%
+    );
+    z-index: -1;
+    content: '';
+    inset: -1px;
+}
+
+.animated-cards:hover::before {
+    opacity: 1;
+}
+
+.shadow-inset-right {
+    position: relative;
+    overflow: hidden;
+}
+
+.shadow-inset-right::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(to left, rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.6), transparent);
+    z-index: 10;
+}
+
+.shadow-inset-left {
+    position: relative;
+    overflow: hidden;
+}
+
+.shadow-inset-left::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        to right,
+        rgba(10, 10, 10, 0.9),
+        rgba(10, 10, 10, 0.6),
+        transparent
+    );
+    z-index: 10;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(-100% - var(--gap)));
+    }
+}
+
+@keyframes marquee-vertical {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(calc(-100% - var(--gap)));
+    }
+}
+
+@theme {
+    --animate-marquee: marquee var(--duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+}
+@theme inline {
+    --animate-marquee: marquee var(--duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+    @keyframes marquee {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(calc(-100% - var(--gap)));
+        }
+    }
+    @keyframes marquee-vertical {
+        from {
+            transform: translateY(0);
+        }
+        to {
+            transform: translateY(calc(-100% - var(--gap)));
+        }
+    }
+}
+
+.terminal-loader {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    color: #6c44fc;
+    position: relative;
+}
+
+.terminal-loader::after {
+    content: '...';
+    display: inline-block;
+    animation: terminal-dots 1.5s steps(4, end) infinite;
+    width: 1em;
+    text-align: left;
+    font-size: 1.6em;
+    letter-spacing: -0.15em;
+    line-height: 1;
+}
+
+@keyframes terminal-dots {
+    0% {
+        content: '';
+    }
+    25% {
+        content: '.';
+    }
+    50% {
+        content: '..';
+    }
+    75% {
+        content: '...';
+    }
+    100% {
+        content: '';
+    }
+}
+
+/* Alternative blinking cursor style - add this class instead if preferred */
+.terminal-loader-cursor {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    color: #6c44fc;
+}
+
+.terminal-loader-cursor::after {
+    content: '▋';
+    animation: terminal-blink 1s step-end infinite;
+}
+
+@keyframes terminal-blink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.exec-button-dark {
+    background: linear-gradient(360deg, #141517 0%, #141517 50%, #1c1d20 100%);
+    color: #989899;
+    text-shadow:
+        0px 0.52px 1.05px 0px rgba(0, 0, 0, 0.12),
+        0px 1px 2px 0px rgba(0, 0, 0, 0.24),
+        0px 0.5px 1px 0px rgba(0, 0, 0, 0.4) inset;
+    box-shadow:
+        inset 0 1px 2px -1px rgba(255, 255, 255, 0.1),
+        inset 0 0 1px rgba(0, 0, 0, 0.05),
+        inset 0 -1px 0.5px rgba(0, 0, 0, 0.02),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.5);
+    border: 1px solid transparent;
+    border-top-color: #4b4c4d;
+    outline: 1px solid black;
+    backdrop-filter: blur(40px);
+    transition: all 120ms ease-out;
+}
+
+.exec-button-dark:hover {
+    background: linear-gradient(180deg, #0d0e10 0%, #1c1d20 100%);
+    color: white;
+    backdrop-filter: blur(40.73px);
+    transition: all 120ms ease-out;
+    border: 1px solid transparent;
+    border-top: rgba(255, 255, 255, 0.03) 0%;
+    border-bottom: rgba(255, 255, 255, 0.03) 100%;
+    box-shadow:
+        inset 0 0 1px rgba(0, 0, 0, 0.05),
+        inset 0 -1px 0.5px rgba(0, 0, 0, 0.02),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.08),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.32);
+}
+
+.exec-button-light {
+    background: linear-gradient(360deg, #fdf9f0 0%, #fdf9f0 50%, #fff 100%);
+    color: #4a4a4b;
+    text-shadow:
+        0px 0.52px 1.05px 0px rgba(0, 0, 0, 0.06),
+        0px 1px 2px 0px rgba(0, 0, 0, 0.08),
+        0px 0.5px 1px 0px rgba(255, 255, 255, 0.4) inset;
+    box-shadow:
+        inset 0 1px 2px -1px rgba(255, 255, 255, 0.5),
+        inset 0 0 1px rgba(0, 0, 0, 0.03),
+        inset 0 -1px 0.5px rgba(0, 0, 0, 0.04),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3),
+        0 2px 4px -1px rgba(0, 0, 0, 0.15);
+    border: 1px solid transparent;
+    border-top-color: #959494;
+    outline: 1px solid rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(40px);
+    transition: all 120ms ease-out;
+}
+
+.bg-grid {
+    background-size: 50px 50px;
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.mask-gradient {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+}
