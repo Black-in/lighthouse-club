@@ -1,0 +1,9 @@
+/*
+ * Lighthouse
+ * © 2026 ayushshrivastv
+ */
+
+export enum DAILY_LIMIT {
+  CONTRACT_DAILY_LIMIT = "CONTRACT_DAILY_LIMIT",
+  MESSAGE_PER_CONTRACT_LIMIT = "MESSAGE_PER_CONTRACT_LIMIT",
+}
