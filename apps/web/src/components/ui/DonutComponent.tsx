@@ -28,7 +28,7 @@ export default function ExplodingTorus() {
         const object = new THREE.Mesh(
             geo,
             new THREE.MeshPhongMaterial({
-                color: '#6c44fc',
+                color: '#5483B3',
                 shininess: 510,
                 flatShading: true,
                 side: THREE.DoubleSide,

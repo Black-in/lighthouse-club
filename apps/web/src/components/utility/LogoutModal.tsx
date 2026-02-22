@@ -43,7 +43,7 @@ function LogoutLeftContent() {
                     />
                     <MdSecurity
                         className={cn(
-                            'text-[#9e83ff] text-xl h-10 w-10 p-2 border border-neutral-500 rounded-[8px]',
+                            'text-[#7DA0CA] text-xl h-10 w-10 p-2 border border-neutral-500 rounded-[8px]',
                         )}
                     />
                     <HiOutlineLogout
@@ -98,7 +98,7 @@ function LogoutRightContent({
                     </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 bg-neutral-900/40 border border-neutral-800 rounded-[8px]">
-                    <MdSecurity className="text-[#9e83ff] mt-0.5 flex-shrink-0 text-lg" />
+                    <MdSecurity className="text-[#7DA0CA] mt-0.5 flex-shrink-0 text-lg" />
                     <div className="space-y-0.5">
                         <p className="text-xs font-medium text-neutral-300">Data protected</p>
                         <p className="text-xs text-neutral-500">

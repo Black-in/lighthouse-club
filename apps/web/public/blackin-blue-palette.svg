@@ -1,0 +1,31 @@
+<svg viewBox="0 0 760 980" xmlns="http://www.w3.org/2000/svg" aria-label="BlackIn blue palette reference">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c1e8ff"/>
+      <stop offset="58%" stop-color="#5483b3"/>
+      <stop offset="100%" stop-color="#021024"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="760" height="980" fill="url(#bg)"/>
+
+  <g transform="translate(170 170)">
+    <rect x="0" y="0" width="420" height="126" rx="62" fill="#021024"/>
+    <rect x="0" y="112" width="420" height="126" rx="62" fill="#052659"/>
+    <rect x="0" y="224" width="420" height="126" rx="62" fill="#5483B3"/>
+    <rect x="0" y="336" width="420" height="126" rx="62" fill="#7DA0CA"/>
+    <rect x="0" y="448" width="420" height="126" rx="62" fill="#C1E8FF"/>
+    <ellipse cx="210" cy="58" rx="180" ry="36" fill="#021024" opacity=".45" filter="url(#soft)"/>
+
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" font-size="28" fill="#09111d">
+      <text x="74" y="66" fill="#d5ecff">#021024</text>
+      <text x="74" y="178" fill="#d5ecff">#052659</text>
+      <text x="74" y="290" fill="#0f2032">#5483B3</text>
+      <text x="74" y="402" fill="#10223a">#7DA0CA</text>
+      <text x="74" y="514" fill="#0f2034">#C1E8FF</text>
+    </g>
+  </g>
+</svg>

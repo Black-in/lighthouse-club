@@ -65,7 +65,7 @@ export default function BuilderMessage({
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <div>
-                            <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-normal bg-linear-to-b from-[#7b56ff] to-[#6236ff] border-[#7b56ff] border text-light text-right mt-3">
+                            <div className="mt-3 rounded-b-[8px] rounded-tl-[8px] border border-[#5483B3] bg-linear-to-b from-[#5483B3] to-[#052659] px-4 py-2 text-right text-sm font-normal text-light">
                                 {message.content}
                             </div>
 
@@ -77,7 +77,7 @@ export default function BuilderMessage({
                                     onClick={() => handleCopy(message.content, message.id)}
                                 >
                                     {copiedId === message.id ? (
-                                        <FiCheck strokeWidth={2.5} size={12} color="#6c44fc" />
+                                        <FiCheck strokeWidth={2.5} size={12} color="#5483B3" />
                                     ) : (
                                         <FiCopy size={12} />
                                     )}
@@ -193,7 +193,7 @@ export default function BuilderMessage({
                                     onClick={() => handleCopy(message.content, message.id)}
                                 >
                                     {copiedId === message.id ? (
-                                        <FiCheck size={12} color="#6c44fc" />
+                                        <FiCheck size={12} color="#5483B3" />
                                     ) : (
                                         <FiCopy size={12} />
                                     )}

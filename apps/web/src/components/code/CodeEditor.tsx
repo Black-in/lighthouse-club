@@ -152,14 +152,14 @@ export default function CodeEditor(): JSX.Element {
                                     'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
                                     'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1 group overflow-hidden',
                                     'w-6 hover:w-[4.5rem]',
-                                    isCopied ? 'text-[#6c44fc]' : 'text-light',
+                                    isCopied ? 'text-[#5483B3]' : 'text-light',
                                 )}
                             >
                                 <span
                                     className={cn(
                                         'text-[10px] whitespace-nowrap overflow-hidden w-0 transition-all duration-200 ease-out',
                                         'group-hover:w-[2.5rem] group-hover:mr-1.5',
-                                        isCopied ? 'text-[#6c44fc]/90' : 'text-light/70',
+                                        isCopied ? 'text-[#5483B3]/90' : 'text-light/70',
                                     )}
                                 >
                                     {isCopied ? 'copied' : 'copy'}

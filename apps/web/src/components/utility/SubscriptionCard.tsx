@@ -116,7 +116,7 @@ function SubscriptionCard({
                             plan === 'PREMIUM'
                                 ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
                                 : plan === 'FREE'
-                                  ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
+                                  ? 'bg-[#052659] hover:bg-[#5483B3] text-white'
                                   : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                         }`}
                     >
@@ -199,7 +199,7 @@ export default function SubscriptionPlans() {
                     onClick={() => setBilling('MONTHLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
                         billing === 'MONTHLY'
-                            ? 'bg-[#7049FC] text-light'
+                            ? 'bg-[#052659] text-light'
                             : 'text-light/70 hover:text-light'
                     }`}
                 >
@@ -209,7 +209,7 @@ export default function SubscriptionPlans() {
                     onClick={() => setBilling('YEARLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${
                         billing === 'YEARLY'
-                            ? 'bg-[#7049FC] text-light'
+                            ? 'bg-[#052659] text-light'
                             : 'text-light/70 hover:text-light'
                     }`}
                 >

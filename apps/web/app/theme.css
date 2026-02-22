@@ -4,12 +4,12 @@
  */
 
 @theme {
-    --color-primary: #6c44fc;
+    --color-primary: #5483B3;
     --color-darkest: #0e0f10;
     --color-darker: #121314;
     --color-dark: #171819;
     --color-light: #fdf9f0;
-    --color-primary-light: #9679ffea;
+    --color-primary-light: #7DA0CA;
     --breakpoint-xs: 375px;
     --breakpoint-md2: 896px;
 }
@@ -128,7 +128,7 @@
     display: inline-block;
     font-family: 'Courier New', monospace;
     font-size: 1em;
-    color: #6c44fc;
+    color: #5483B3;
     position: relative;
 }
 
@@ -166,7 +166,7 @@
     display: inline-block;
     font-family: 'Courier New', monospace;
     font-size: 1em;
-    color: #6c44fc;
+    color: #5483B3;
 }
 
 .terminal-loader-cursor::after {

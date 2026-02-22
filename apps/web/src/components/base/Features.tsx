@@ -33,8 +33,8 @@ const featureData = [
         bottomTitle: 'Full Stack',
         description: 'From contract to client SDK to frontend boilerplate',
         icon: LighthouseMark,
-        color: '#6C44FC',
-        gradient: 'from-purple-500/20 to-violet-500/20',
+        color: '#5483B3',
+        gradient: 'from-[#052659]/30 to-[#5483B3]/30',
     },
     {
         topTitle: 'ANCHOR',
@@ -96,7 +96,7 @@ export default function Features() {
                 >
                     <div className="mt-4 w-full flex justify-center text-[7px] sm:text-sm md:text-2xl tracking-widest text-darkest font-semibold text-center px-4">
                         Transform your blockchain ideas into&nbsp;
-                        <Highlighter action="underline" color="#6C44FC">
+                        <Highlighter action="underline" color="#5483B3">
                             production-ready
                         </Highlighter>
                         &nbsp;contracts seamlessly.

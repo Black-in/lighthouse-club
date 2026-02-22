@@ -12,7 +12,6 @@ import { SiRust, SiSolana } from 'react-icons/si';
 import { IoSparkles } from 'react-icons/io5';
 import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
-import AppLogo from '../tickers/AppLogo';
 import { cn } from '@/src/lib/utils';
 import ShaderSplitPanel from './ShaderSplitPanel';
 import LighthouseMark from '../ui/svg/LighthouseMark';
@@ -24,16 +23,14 @@ interface LoginModalProps {
 
 function LoginLeftContent() {
     const logos = [
-        { logo: IoSparkles, color: '#9e83ff' },
+        { logo: IoSparkles, color: '#7DA0CA' },
         { logo: SiRust, color: '#ff6b35' },
         { logo: SiSolana, color: '#14f195' },
     ];
 
     return (
         <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8">
-            <div className="flex items-start">
-                <AppLogo className="text-sm" />
-            </div>
+            <div />
 
             <div className="space-y-2 md:space-y-4 text-left">
                 <h3 className="text-xs md:text-2xl font-bold text-light tracking-wide leading-tight">
@@ -157,11 +154,11 @@ function LoginRightContent() {
             <div className="flex md:flex-none">
                 <span className="text-[8px] md:text-xs text-neutral-300 tracking-wider">
                     By signing in, you agree to our <br className="hidden md:flex" />
-                    <span className="text-[#9e83ff] hover:underline cursor-pointer">
+                    <span className="text-[#7DA0CA] hover:underline cursor-pointer">
                         Terms & Service
                     </span>{' '}
                     and
-                    <span className="text-[#9e83ff] hover:underline cursor-pointer">
+                    <span className="text-[#7DA0CA] hover:underline cursor-pointer">
                         {' '}
                         Privacy Policy
                     </span>
@@ -180,7 +177,7 @@ export default function LoginModal({ opensignInModal, setOpenSignInModal }: Logi
             onBackgroundClick={() => setOpenSignInModal(false)}
         >
             <ShaderSplitPanel
-                imageSrc="/icons/lighthouse-mark-dark.svg"
+                imageSrc="/signin.png"
                 leftChildren={<LoginLeftContent />}
                 rightChildren={<LoginRightContent />}
             />

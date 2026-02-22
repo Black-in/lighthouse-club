@@ -22,7 +22,7 @@ const executorData = {
     [EXECUTOR.AGENTIC]: {
         title: 'Agentic',
         icon: GoInfinity,
-        color: '#6c44fc',
+        color: '#5483B3',
     },
     [EXECUTOR.PLAN]: {
         title: 'Plan',

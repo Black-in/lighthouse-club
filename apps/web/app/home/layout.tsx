@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: Props) {
                         classNames: {
                             title: 'text-white font-semibold',
                             description: 'text-gray-300',
-                            actionButton: 'bg-indigo-600 text-white hover:bg-indigo-700',
+                            actionButton: 'bg-[#052659] text-white hover:bg-[#5483B3]',
                             cancelButton: 'bg-gray-700 text-white hover:bg-gray-800',
                         },
                     }}

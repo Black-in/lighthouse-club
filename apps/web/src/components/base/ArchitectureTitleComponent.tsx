@@ -18,7 +18,7 @@ export default function ArchitectureTitleComponent({
     firstText = 'FIRST',
     secondText = 'SECOND',
     bgcolor = 'bg-[#0a0c0d]',
-    bordercolor = 'border-[#6c44fc]',
+    bordercolor = 'border-[#5483B3]',
     className,
 }: ArchitectureTitleComponentProps) {
     const ref = useRef(null);

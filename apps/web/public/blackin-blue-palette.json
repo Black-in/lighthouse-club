@@ -1,0 +1,27 @@
+{
+  "name": "BlackIn Blue Palette",
+  "source": "User-provided palette screenshot",
+  "colors": [
+    {
+      "hex": "#021024",
+      "role": "Deep background"
+    },
+    {
+      "hex": "#052659",
+      "role": "Primary dark accent"
+    },
+    {
+      "hex": "#5483B3",
+      "role": "Primary brand color"
+    },
+    {
+      "hex": "#7DA0CA",
+      "role": "Secondary accent"
+    },
+    {
+      "hex": "#C1E8FF",
+      "role": "Light highlight"
+    }
+  ],
+  "note": "Avoid purple shades. Use this palette for all new UI styling."
+}

@@ -30,7 +30,7 @@ export default function ExpandableSubscriptionCard({
     const planGradients: Record<string, string[]> = {
         FREE: ['#313647', '#435663', '#393E46', '#686D76'],
         PREMIUM: ['#435663', '#A3B087', '#1D546C', '#FF8040'],
-        PREMIUM_PLUS: ['#5100ff', '#62109F', '#6C44FC', '#DC0E0E'],
+        PREMIUM_PLUS: ['#021024', '#052659', '#5483B3', '#DC0E0E'],
     };
 
     const renderFullCard = (planData: Plan, isSelected: boolean) => {

@@ -67,7 +67,7 @@ export default async function RootLayout({
                         classNames: {
                             title: 'text-white font-semibold',
                             description: 'text-gray-300',
-                            actionButton: 'bg-indigo-600 text-white hover:bg-indigo-700',
+                            actionButton: 'bg-[#052659] text-white hover:bg-[#5483B3]',
                             cancelButton: 'bg-[#121314] text-light/70 hover:bg-gray-800',
                         },
                     }}

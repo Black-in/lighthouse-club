@@ -35,10 +35,15 @@ export default function NavbarSigninAction() {
                     as="button"
                     onClick={handler}
                     containerClassName="rounded-full"
-                    className="flex items-center gap-x-1.5 rounded-full bg-[#0a0a0a] px-4 py-2 text-[13px] font-semibold tracking-wide text-white"
+                    className="flex items-center gap-x-1.5 rounded-full bg-[#05070a] px-5 py-2 text-[13px] font-semibold tracking-wide text-white"
+                    gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+                    duration={5}
+                    speed={0.14}
+                    noiseIntensity={0.18}
+                    backdropBlur
                 >
                     <span>Sign in</span>
-                    <MdChevronRight className="text-light" />
+                    <MdChevronRight className="text-white" />
                 </HoverBorderGradient>
             ) : (
                 <div ref={dropdownRef} className="relative">

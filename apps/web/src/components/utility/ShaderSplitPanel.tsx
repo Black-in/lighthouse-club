@@ -22,7 +22,7 @@ export default function ShaderSplitPanel({
             className={cn(
                 'max-w-[350px] md:max-w-[800px] w-full ',
                 'h-[300px] md:h-[500px]',
-                'bg-linear-to-b from-[#0a0a0a] via-darkest to-[#0d0d0d]',
+                'bg-linear-to-b from-[#0a0f16] via-[#070b11] to-[#05070a]',
                 'rounded-[8px] grid grid-cols-2',
                 'overflow-hidden shadow-2xl',
             )}
@@ -36,10 +36,10 @@ export default function ShaderSplitPanel({
                     unoptimized
                     priority
                 />
-                <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#021024]/55 via-[#052659]/35 to-[#021024]/75" />
                 {leftChildren}
             </div>
-            <div className="col-span-1">
+            <div className="col-span-1 bg-linear-to-b from-[#0a0a0a] via-darkest to-[#0d0d0d]">
                 <div
                     className={cn(
                         'w-full max-w-[420px]',
