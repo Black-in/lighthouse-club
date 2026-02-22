@@ -3,21 +3,19 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import Image from 'next/image';
 import ProfileMenu from '../utility/ProfileMenu';
 import { useState } from 'react';
-import { IoIosCreate } from 'react-icons/io';
 import CompanyNavbarLogo from './CompanyNavbarLogo';
+import { MdHomeFilled } from 'react-icons/md';
+import { useRouter } from 'next/navigation';
 
 export default function HomeNavbar() {
     const [showLogoutDropdown, setShowLogoutDropdown] = useState<boolean>(false);
     const { session } = useUserSessionStore();
+    const router = useRouter();
 
     return (
         <div className="w-full min-h-14 text-light/70 px-6 select-none relative flex justify-between items-center z-10">
             <CompanyNavbarLogo />
             <div className="flex items-center justify-center gap-x-6 text-sm">
-                <div className="font-semibold cursor-pointer flex items-center justify-center gap-x-2 hover:text-primary text-light/70 transition-transform hover:-translate-y-0.5">
-                    <IoIosCreate className="hover:bg-neutral-700/70 hidden md:block rounded-sm p-[4px] h-7 w-7 select-none cursor-pointer" />
-                    <span className="">Playgroud</span>
-                </div>
                 <div className="">
                     {session?.user?.image && (
                         <Image
@@ -35,6 +33,10 @@ export default function HomeNavbar() {
                         </div>
                     )}
                 </div>
+                <MdHomeFilled
+                    onClick={() => router.push('/')}
+                    className="h-7 w-7 cursor-pointer rounded-sm p-[4px] text-light/70 transition-transform hover:-translate-y-0.5 hover:bg-neutral-700/70"
+                />
             </div>
         </div>
     );

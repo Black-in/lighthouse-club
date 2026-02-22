@@ -9,106 +9,85 @@ import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
 
 interface PricingCardProps {
-    icon: React.ReactElement;
-    description: string;
     planType: string;
-    tagTitle?: string;
-    price: string;
-    features: string[];
+    blurb: string;
+    price: number;
+    tokens: string;
+    agentLimit: string;
+    note?: string;
+    featured?: boolean;
 }
 
 export default function PricingCard({
-    icon,
     planType,
+    blurb,
     price,
-    description,
-    tagTitle,
-    features,
+    tokens,
+    agentLimit,
+    note,
+    featured = false,
 }: PricingCardProps) {
     return (
-        <div className="group relative z-20 overflow-hidden ">
+        <div className="group relative z-20 w-full max-w-[23rem] overflow-hidden">
             <div
                 className={cn(
-                    'absolute inset-0 opacity-0 group-hover:opacity-100',
-                    'transition-all duration-500 pointer-events-none z-10',
-                )}
-                style={{
-                    background:
-                        'radial-gradient(ellipse 150% 90% at 50% 0%, rgba(255,255,255,0.05), transparent 50%)',
-                }}
-            />
-            <div
-                className={cn(
-                    'absolute top-0 left-1/2 -translate-x-1/2',
-                    'h-px w-70',
-                    'bg-linear-to-r from-transparent via-light/10 to-transparent',
-                    'opacity-0 group-hover:opacity-100',
-                    'transition-all duration-300',
-                    'group-hover:scale-x-110',
-                )}
-            />
-
-            <div
-                className={cn(
-                    'w-105 h-full min-h-140 rounded-lg select-none tracking-wide shadow-md',
-                    'border-2 border-neutral-800/80 bg-linear-to-br from-dark via-darkest to-dark',
-                    'p-8 flex flex-col gap-y-7 z-20',
-                    'transition-colors duration-200 hover:shadow-xl',
+                    'min-h-[30rem] rounded-2xl border p-7 shadow-[0_28px_50px_-30px_rgba(0,0,0,0.9)] transition-all duration-300',
+                    'bg-linear-to-br from-[#0f1216] via-[#0b0d10] to-[#080a0d]',
+                    featured
+                        ? 'border-neutral-400/70 ring-1 ring-neutral-300/30'
+                        : 'border-neutral-800 hover:border-neutral-600',
                 )}
             >
-                <div className="flex justify-between items-center text-light/80">
-                    <div className="flex gap-x-2 items-center">
-                        {icon}
-                        <div className="font-semibold text-[24px] pt-0.5 leading-0">{planType}</div>
-                    </div>
-
-                    {tagTitle && (
-                        <div
-                            className={cn(
-                                'text-[14px] px-2.5 py-0.5 pt-[3px] rounded-[4px] tracking-wider font-semibold opacity-95',
-                                planType === 'Premium Plus'
-                                    ? 'bg-light text-darkest'
-                                    : planType === 'Premium'
-                                      ? 'bg-primary text-light'
-                                      : 'bg-neutral-800 text-light',
-                            )}
-                        >
-                            {tagTitle}
-                        </div>
+                <div className="mb-7 flex items-center justify-between">
+                    <h3 className="text-[1.55rem] font-semibold tracking-tight text-neutral-100">
+                        {planType}
+                    </h3>
+                    {featured && (
+                        <span className="rounded-full border border-neutral-500 bg-neutral-200/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-200">
+                            Popular
+                        </span>
                     )}
                 </div>
 
-                <div className="flex flex-col items-start gap-y-2">
-                    <div className="text-4xl tracking-wider font-semibold">{price}</div>
-                    <div className="text-light/70 text-[21px] text-left">{description}</div>
+                <div className="mb-7">
+                    <div className="flex items-end gap-x-2">
+                        <div className="text-5xl font-semibold tracking-tight text-neutral-50">
+                            ${price}
+                        </div>
+                        <div className="pb-1 text-sm text-neutral-400">/month</div>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-neutral-400">{blurb}</p>
                 </div>
 
                 <Button
                     className={cn(
-                        'font-semibold text-base hover:-translate-y-0.5 ease-in-out transform tracking-wide !py-5 !rounded-[4px]',
-                        planType === 'Free'
-                            ? 'bg-neutral-800/80 text-light hover:bg-[#1d1d1d]'
-                            : 'bg-light hover:bg-light text-darkest',
+                        'mb-7 h-11 w-full rounded-xl text-sm font-semibold tracking-wide transition-transform hover:-translate-y-0.5',
+                        featured
+                            ? 'bg-neutral-100 text-neutral-900 hover:bg-white'
+                            : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-700',
                     )}
                 >
-                    {planType === 'Free' ? 'Jump In' : 'Get Started'}
+                    Choose {planType}
                     <GoArrowUpRight />
                 </Button>
 
-                <div className="border-t border-light/14" />
+                <div className="mb-6 border-t border-neutral-800" />
 
-                <div className="text-left flex flex-col gap-y-3">
-                    {features.map((feature, index) => (
-                        <div
-                            key={index}
-                            className="text-light/70 shadow-xs px-2.5 py-1  text-sm font-light rounded-full bg-dark w-fit flex items-center gap-x-1.5"
-                        >
-                            <div>
-                                <GoCheck />
-                            </div>
-                            <div>{feature}</div>
+                <div className="flex flex-col gap-y-3 text-sm">
+                    <div className="flex items-center gap-x-2 text-neutral-300">
+                        <GoCheck className="text-emerald-400" />
+                        <span>{tokens} tokens</span>
+                    </div>
+                    <div className="flex items-center gap-x-2 text-neutral-300">
+                        <GoCheck className="text-emerald-400" />
+                        <span>{agentLimit}</span>
+                    </div>
+                    {note && (
+                        <div className="flex items-center gap-x-2 text-neutral-300">
+                            <GoCheck className="text-emerald-400" />
+                            <span>{note}</span>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>

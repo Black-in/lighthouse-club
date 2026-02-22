@@ -8,19 +8,17 @@ import HomeNavbar from '@/src/components/nav/HomeNavbar';
 import PricingHeader from '@/src/components/pricing/PricingHeader';
 import PricingSection from '@/src/components/pricing/PricingSection';
 import PricingPlanToggleNavbar from '@/src/components/pricing/PricingPlanToggleNavbar';
-import SlantLines from '@/src/components/ui/SlantLines';
 
 export default function PricingPage() {
     return (
-        <div className="min-h-screen flex flex-col bg-darkest items-center relative h-full">
+        <div className="relative flex min-h-screen h-full flex-col items-center bg-[#07090c]">
             <HomeNavbar />
-            <div className="w-full flex flex-col items-center flex-1">
+            <div className="flex w-full flex-1 flex-col items-center">
                 <PricingHeader />
-                <SlantLines />
                 <PricingPlanToggleNavbar />
                 <PricingSection />
             </div>
-            <DustParticles particleColor={0xfdf9f0} />
+            <DustParticles particleColor={0xd5d9df} />
         </div>
     );
 }
