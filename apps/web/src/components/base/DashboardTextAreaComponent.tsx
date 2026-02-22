@@ -4,32 +4,44 @@
  */
 
 import { cn } from '@/src/lib/utils';
-import { Textarea } from '../ui/textarea';
-import { Terminal } from 'lucide-react';
-import { useState, KeyboardEvent, ForwardedRef } from 'react';
+import { useState, KeyboardEvent, ForwardedRef, useRef } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
-import Image from 'next/image';
-import { RxCross2 } from 'react-icons/rx';
-import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { Template } from '@lighthouse/types';
+import { ArrowRight, ChevronDown, Plus, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
+import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
+import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
 }
 
+const modelOptions = [
+    'Auto Select',
+    'OpenAI GPT 5.3 Codex',
+    'Claude Sonnet 4.6',
+    'Gemini 3.1 Pro',
+    'Claude Opus 4.6',
+] as const;
+
 export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAreaComponentProps) {
     const [inputValue, setInputValue] = useState<string>('');
-    const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
+    const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
+    const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
+    const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number] | null>(null);
+    const templateButtonRef = useRef<HTMLButtonElement | null>(null);
+    const templatePanelRef = useRef<HTMLDivElement | null>(null);
+
     const { showMessageLimit, showContractLimit } = useLimitStore();
     const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
-    const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
-    // const { activeTemplate, resetTemplate } = useTemplateStore();
+
+    useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
 
     function handleSubmit() {
         if (!session?.user.id) {
@@ -49,92 +61,117 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
         }
     }
 
+    const isDisabled = !inputValue.trim() && !activeTemplate;
+
     return (
         <>
-            <div className="relative group ">
-                <div className="absolute -inset-1 bg-gradient-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden shadow-2xl">
-                    <div className="flex items-center justify-between px-2.5 py-1 md:px-4 md:py-3 border-b border-neutral-800/50 bg-neutral-900/50">
-                        <div className="flex items-center gap-3">
-                            <div className="flex gap-1.5">
-                                <div className="h-2 w-2 md:w-2.5 md:h-2.5 rounded-full bg-neutral-700" />
-                                <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-neutral-700" />
-                                <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-neutral-700" />
-                            </div>
-                            <div className="flex items-center gap-2 text-neutral-500 text-[10px] md:text-xs font-mono h-full">
-                                <Terminal className="w-2 h-2 md:w-3.5 md:h-3.5" />
-                                <div className="h-full items-center pt-0.5">lighthouse.dev</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-x-1.5 justify-center">
-                            <div
-                                className={cn(
-                                    'h-1.5 w-1.5 rounded-full transition-colors duration-300 mb-0.5',
-                                    isTyping
-                                        ? 'bg-green-500 shadow-lg shadow-green-500/50'
-                                        : 'bg-neutral-700',
-                                )}
-                            />
-                            <span className="text-[10px] pt-0.5 md:text-xs text-neutral-600 font-mono">
-                                {isTyping ? 'active' : 'idle'}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="relative">
-                        <div className="absolute left-4 top-5 text-neutral-600 font-mono text-xs md:text-sm select-none">
-                            &gt;
-                        </div>
-                        <Textarea
+            <div className="relative w-full">
+                <div className="relative overflow-hidden rounded-[34px] border border-neutral-800/90 bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm">
+                    <div className="px-5 pb-14 pt-3.5 md:px-6 md:pb-15 md:pt-4">
+                        <textarea
                             value={inputValue}
                             ref={inputRef}
-                            onChange={(e) => {
-                                setInputValue(e.target.value);
-                                setIsTyping(e.target.value.length > 0);
-                            }}
+                            onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="create a counter contract..."
+                            placeholder="Type @ for connectors and sources"
                             className={cn(
-                                'w-full h-20 md:h-28 bg-transparent pl-10 pr-4 py-5 text-neutral-200 border-0',
-                                'placeholder:text-neutral-800 placeholder:font-mono placeholder:text-xs md:placeholder:text-sm resize-none',
-                                'focus:outline-none transition-all duration-200',
-                                'text-md tracking-wider',
-                                'caret-[#e6e0d4]',
+                                'w-full h-[3.2rem] md:h-[3.9rem] resize-none bg-transparent border-0 p-0',
+                                'text-[clamp(1.15rem,1.45vw,1.45rem)] leading-[1.15] tracking-[-0.01em] text-neutral-100',
+                                'placeholder:text-neutral-500',
+                                'focus:outline-none caret-neutral-300',
                             )}
-                            rows={3}
+                            rows={2}
                         />
-                        {activeTemplate && (
-                            <div className="mx-3 mb-3">
-                                <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
-                                    <div
-                                        onClick={() => setActiveTemplate(null)}
-                                        className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-darkest transition-colors transform duration-100 cursor-pointer shadow-sm"
-                                    >
-                                        <RxCross2 />
-                                    </div>
-                                    <Image
-                                        src={activeTemplate.imageUrl}
-                                        alt=""
-                                        fill
-                                        className="object-cover"
-                                        unoptimized
-                                    />
-                                    <div className="absolute bottom-0 text-[13px] text-darkest w-full bg-light px-1 py-px lowercase truncate shadow-lg font-semibold tracking-wide">
-                                        {activeTemplate.title}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
 
-                    <DashboardTextAreaBottom
-                        activeTemplate={activeTemplate}
-                        setActiveTemplate={setActiveTemplate}
-                        inputValue={inputValue}
-                        handleSubmit={handleSubmit}
-                    />
+                    {activeTemplate && (
+                        <div className="absolute left-5 bottom-[3rem] md:left-6">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-neutral-600/80 bg-neutral-800/90 px-3 py-1 text-xs text-neutral-200">
+                                <span className="max-w-40 truncate">{activeTemplate.title}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTemplate(null)}
+                                    className="rounded-full p-0.5 text-neutral-300 transition-colors hover:bg-neutral-700 hover:text-white"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-4 pb-2.5 md:px-5 md:pb-3">
+                        <button
+                            ref={templateButtonRef}
+                            type="button"
+                            onClick={() => setShowTemplatePanel((prev) => !prev)}
+                            className={cn(
+                                'inline-flex h-9 w-9 items-center justify-center rounded-full border',
+                                'border-neutral-700 bg-[#0a0a0a] text-neutral-200 transition-colors',
+                                showTemplatePanel
+                                    ? 'border-neutral-500 bg-[#151515] text-white'
+                                    : 'hover:border-neutral-500 hover:bg-[#151515] hover:text-white',
+                            )}
+                        >
+                            <Plus className="h-4 w-4" strokeWidth={1.8} />
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                            <Select
+                                value={selectedModel ?? undefined}
+                                onValueChange={(val) =>
+                                    setSelectedModel(val as (typeof modelOptions)[number])
+                                }
+                            >
+                                <SelectTrigger
+                                    className={cn(
+                                        'h-9 rounded-full border border-neutral-700 bg-[#0a0a0a] px-2.5 text-neutral-300',
+                                        'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
+                                    )}
+                                >
+                                    <span className="whitespace-nowrap text-neutral-300 text-[12px] leading-none">
+                                        {selectedModel ?? 'Model'}
+                                    </span>
+                                    <ChevronDown className="h-3 w-3 text-neutral-500" />
+                                </SelectTrigger>
+                                <SelectContent className="border-neutral-800 bg-[#050505] text-neutral-100">
+                                    {modelOptions.map((model) => (
+                                        <SelectItem
+                                            key={model}
+                                            value={model}
+                                            className="data-[state=checked]:bg-white data-[state=checked]:text-black data-[highlighted]:bg-neutral-800 data-[highlighted]:text-white"
+                                        >
+                                            {model}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <button
+                                type="button"
+                                disabled={isDisabled}
+                                onClick={handleSubmit}
+                                className={cn(
+                                    'inline-flex h-9 w-9 items-center justify-center rounded-full transition-all',
+                                    isDisabled
+                                        ? 'cursor-not-allowed bg-neutral-700 text-neutral-500'
+                                        : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
+                                )}
+                            >
+                                <ArrowRight className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
+                {showTemplatePanel && (
+                    <div ref={templatePanelRef} className="relative">
+                        <BaseContractTemplatesPanel
+                            setActiveTemplate={setActiveTemplate}
+                            closePanel={() => setShowTemplatePanel(false)}
+                            className="left-0 bottom-[3.8rem] max-w-[min(92vw,34rem)] rounded-xl border-neutral-700 bg-neutral-950"
+                        />
+                    </div>
+                )}
             </div>
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
         </>
