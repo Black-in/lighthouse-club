@@ -8,8 +8,6 @@ import { signIn } from 'next-auth/react';
 import { Dispatch, SetStateAction, useState } from 'react';
 import Turnstile from 'react-turnstile';
 import { FaGithub } from 'react-icons/fa';
-import { SiRust, SiSolana } from 'react-icons/si';
-import { IoSparkles } from 'react-icons/io5';
 import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
@@ -22,41 +20,26 @@ interface LoginModalProps {
 }
 
 function LoginLeftContent() {
-    const logos = [
-        { logo: IoSparkles, color: '#7DA0CA' },
-        { logo: SiRust, color: '#ff6b35' },
-        { logo: SiSolana, color: '#14f195' },
-    ];
-
     return (
-        <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8">
-            <div />
-
-            <div className="space-y-2 md:space-y-4 text-left">
-                <h3 className="text-xs md:text-2xl font-bold text-light tracking-wide leading-tight">
-                    Where AI meets Anchor.
-                    <br />
-                    <span className="text-light">No PhD required.</span>
-                </h3>
-
-                <p className="text-[8px] md:text-sm text-light/70 leading-relaxed max-w-[300px]">
-                    Generate Rust smart contracts, deploy to Solana, and ship production-ready
-                    dApps. All with the confidence of someone who actually read the Anchor docs.
+        <div className="absolute inset-0 flex items-end p-4 md:p-8">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        'linear-gradient(to top, rgba(0,0,0,0.78) 10%, rgba(0,0,0,0.52) 35%, rgba(0,0,0,0.18) 62%, rgba(0,0,0,0) 85%)',
+                }}
+            />
+            <div
+                className="relative z-10 max-w-[420px] text-left [text-shadow:0_3px_14px_rgba(0,0,0,0.96)]"
+                style={{
+                    fontFamily:
+                        '"Canela", "Ivar Display", "Noe Display", "Baskerville", "Times New Roman", "Georgia", serif',
+                }}
+            >
+                <p className="text-[1rem] md:text-[2rem] font-normal text-white/95 leading-[1.04] tracking-[-0.01em]">
+                    The software that codes, builds, and ships on its own.
                 </p>
-
-                <div className="flex items-center gap-2 mb-2">
-                    {logos.map((l, i) => (
-                        <div
-                            key={i}
-                            className={cn(
-                                `text-[${l.color}] text-xl h-6 md:h-10 w-6 md:w-10 p-1 md:p-2 border-[0.5px] md:border border-neutral-500 rounded-[8px]`,
-                                'flex justify-center items-center',
-                            )}
-                        >
-                            <l.logo className={cn('size-4 md:size-5')} />
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     );

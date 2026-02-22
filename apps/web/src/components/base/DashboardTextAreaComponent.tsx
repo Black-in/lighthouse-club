@@ -214,7 +214,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
                             onWheel={handleTextareaWheel}
-                            placeholder="Type @ for connectors and sources"
+                            placeholder="Describe your agentic web project"
                             className={cn(
                                 'w-full h-[3.2rem] md:h-[3.9rem] resize-none bg-transparent border-0 p-0 overflow-y-auto overscroll-contain custom-scrollbar',
                                 'text-[clamp(1.15rem,1.45vw,1.45rem)] leading-[1.15] tracking-[-0.01em] text-neutral-100',

@@ -32,11 +32,10 @@ export default function ShaderSplitPanel({
                     src={imageSrc}
                     fill
                     alt="Login Illustration"
-                    className="object-cover"
+                    className="object-cover object-top"
                     unoptimized
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#021024]/55 via-[#052659]/35 to-[#021024]/75" />
                 {leftChildren}
             </div>
             <div className="col-span-1 bg-linear-to-b from-[#0a0a0a] via-darkest to-[#0d0d0d]">
