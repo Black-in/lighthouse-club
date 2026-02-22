@@ -4,19 +4,14 @@
  */
 
 'use client';
-import { IoIosCreate } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
-import NavItems, { NavItemsType } from './NavItems';
 import NavbarSigninAction from './NavSigninAction';
 import { cn } from '@/src/lib/utils';
-import { v4 as uuid } from 'uuid';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useEffect, useState } from 'react';
 import LoginModal from '../utility/LoginModal';
 import { MdHomeFilled } from 'react-icons/md';
-import AppLogo from '../tickers/AppLogo';
-
-const navItems: NavItemsType[] = [{ name: 'Pricing', link: '/pricing' }];
+import CompanyNavbarLogo from './CompanyNavbarLogo';
 
 export default function Navbar() {
     const router = useRouter();
@@ -24,16 +19,6 @@ export default function Navbar() {
     const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true);
     const [lastScrollY, setLastScrollY] = useState<number>(0);
     const { session } = useUserSessionStore();
-
-    function handleSubmit() {
-        if (!session?.user.id) {
-            setOpenLoginModal(true);
-            return;
-        }
-
-        const newContractId = uuid();
-        router.push(`/playground/${newContractId}`);
-    }
 
     useEffect(() => {
         function handleScroll() {
@@ -65,16 +50,7 @@ export default function Navbar() {
                         : '-translate-y-[calc(100%+2rem)] pointer-events-none',
                 )}
             >
-                <AppLogo size={30} />
-                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500">
-                    <div
-                        className={cn(
-                            'py-1 px-2 rounded-[8px] flex items-center justify-center transition-all duration-500',
-                        )}
-                    >
-                        <NavItems items={navItems} />
-                    </div>
-                </div>
+                <CompanyNavbarLogo priority />
                 <div className="flex items-center gap-x-4">
                     <MdHomeFilled
                         onClick={() => {
@@ -86,10 +62,13 @@ export default function Navbar() {
                         }}
                         className="hover:bg-neutral-700/70 hidden md:block rounded-sm p-[4px] h-7 w-7 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5"
                     />
-                    <IoIosCreate
-                        onClick={handleSubmit}
-                        className="hover:bg-neutral-700/70 hidden md:block rounded-sm p-[4px] h-7 w-7 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5"
-                    />
+                    <button
+                        type="button"
+                        onClick={() => router.push('/pricing')}
+                        className="hover:bg-neutral-700/70 hidden md:flex rounded-sm px-2 h-7 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5 items-center text-xs font-semibold tracking-wide"
+                    >
+                        Pricing
+                    </button>
                     <NavbarSigninAction />
                 </div>
             </div>

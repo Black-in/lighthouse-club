@@ -6,10 +6,7 @@
 'use client';
 import { ForwardedRef, useEffect, useRef } from 'react';
 import { motion, useAnimation, useInView, useScroll, useTransform } from 'framer-motion';
-import { Button } from '../ui/button';
-import { RiCodeSSlashFill } from 'react-icons/ri';
 import City from './City';
-import ActionTickers from '../tickers/ActionTickers';
 import DashboardTextAreaComponent from './DashboardTextAreaComponent';
 import HighlighterTicker from '../tickers/HighlighterTicker';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
@@ -69,29 +66,20 @@ export default function Hero({ inputRef }: HeroProps) {
                         transition={{ delay: 0.5, duration: 0.6 }}
                         className="mb-3"
                     >
-                        <h1 className="text-[28px] md:text-[60px] font-bold leading-tight bg-gradient-to-t flex flex-col from-neutral-700 via-neutral-300 to-neutral-200 bg-clip-text text-transparent">
-                            <span>Ship Solana Contracts</span>
-                            <span>in Minutes not Months</span>
+                        <h1
+                            className="text-[clamp(1.35rem,4.5vw,3.75rem)] whitespace-nowrap font-semibold leading-tight tracking-tight bg-gradient-to-t from-neutral-700 via-neutral-300 to-neutral-200 bg-clip-text text-transparent"
+                            style={{
+                                fontFamily:
+                                    '-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif',
+                            }}
+                        >
+                            <span>The web that builds itself.</span>
                         </h1>
                     </motion.div>
 
                     <HighlighterTicker />
                     <DashboardTextAreaComponent inputRef={inputRef} />
-                    <ActionTickers />
                 </motion.div>
-
-                <div className="absolute bottom-2 left-0 md:bottom-12 md:left-10 text-[10px] md:text-[18px]">
-                    <div className="md:max-w-2xl max-w-sm flex flex-col justify-start items-start text-light font-semibold">
-                        <span>Powered by AI + Anchor</span>
-                        <span className="">Build Solana Smart Contracts 10x Faster</span>
-                        <div className="flex items-end justify-center gap-x-2 md:gap-x-3 mt-2">
-                            <Button className="font-semibold text-xs md:text-base !px-4 md:!px-6 rounded-[4px]">
-                                Explore Playground
-                                <RiCodeSSlashFill />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
             </main>
         </motion.div>
     );

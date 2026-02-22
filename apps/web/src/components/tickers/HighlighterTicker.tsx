@@ -14,15 +14,11 @@ export default function HighlighterTicker() {
             transition={{ delay: 0.7, duration: 0.6 }}
             className="text-[#a7a7a7] text-xs md:text-sm mb-6 font-mono tracking-normal md:tracking-wider"
         >
-            BlackIn eats{' '}
-            <span className="text-white">
-                <Highlighter action="highlight" padding={5} iterations={1} color="#6741EF">
-                    months
-                </Highlighter>
-            </span>
-            . Ships in{' '}
+            <Highlighter action="highlight" padding={5} iterations={1} color="#6741EF">
+                Prompt it.
+            </Highlighter>{' '}
             <Highlighter action="underline" padding={0} color="#FFC412">
-                minutes
+                Ship it.
             </Highlighter>
         </motion.p>
     );

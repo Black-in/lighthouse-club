@@ -5,14 +5,13 @@
 
 'use client';
 import { MdChevronRight } from 'react-icons/md';
-import { Button } from '../ui/button';
-import { cn } from '@/src/lib/utils';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useState, useRef } from 'react';
 import LoginModal from '../utility/LoginModal';
 import ProfileMenu from '../utility/ProfileMenu';
+import { HoverBorderGradient } from '../ui/hover-border-gradient';
 
 export default function NavbarSigninAction() {
     const { session } = useUserSessionStore();
@@ -32,16 +31,15 @@ export default function NavbarSigninAction() {
     return (
         <div className="relative">
             {!session?.user ? (
-                <Button
+                <HoverBorderGradient
+                    as="button"
                     onClick={handler}
-                    className={cn(
-                        'text-[13px] font-semibold tracking-wide flex items-center justify-center transition-transform hover:-translate-y-0.5 cursor-pointer z-[10] pr-1 rounded-[8px]',
-                        'bg-primary',
-                    )}
+                    containerClassName="rounded-full"
+                    className="flex items-center gap-x-1.5 rounded-full bg-[#0a0a0a] px-4 py-2 text-[13px] font-semibold tracking-wide text-white"
                 >
                     <span>Sign in</span>
                     <MdChevronRight className="text-light" />
-                </Button>
+                </HoverBorderGradient>
             ) : (
                 <div ref={dropdownRef} className="relative">
                     <div

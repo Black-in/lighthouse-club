@@ -42,7 +42,7 @@
     "lil-gui": "^0.21.0",
     "lucide-react": "^0.545.0",
     "monaco-editor": "^0.54.0",
-    "motion": "^12.23.22",
+    "motion": "^12.23.26",
     "next": "15.5.9",
     "next-auth": "^4.24.11",
     "prettier": "^3.6.2",
@@ -60,8 +60,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@lighthouse/types": "workspace:*",
     "@eslint/eslintrc": "^3",
+    "@lighthouse/types": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
