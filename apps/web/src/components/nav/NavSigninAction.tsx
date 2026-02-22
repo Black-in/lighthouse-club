@@ -49,7 +49,7 @@ export default function NavbarSigninAction() {
                         className="flex items-center justify-center gap-x-3 hover:bg-neutral-700/70 py-1.5 px-3 rounded-lg cursor-pointer select-none"
                     >
                         <span className="text-light text-sm tracking-wider font-semibold hidden md:block">
-                            {`${session?.user?.name?.split(' ')[0]}'s lighthouse`}
+                            {`${session?.user?.name?.split(' ')[0]}'s BlackIn`}
                         </span>
                         {session?.user.image && (
                             <Image

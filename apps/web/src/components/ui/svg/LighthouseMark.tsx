@@ -4,6 +4,21 @@ type LighthouseMarkProps = SVGProps<SVGSVGElement> & {
     size?: number;
 };
 
+const PETALS = [
+    { angle: -6, rx: 3.6, ry: 12.8 },
+    { angle: 20, rx: 3.8, ry: 12.6 },
+    { angle: 46, rx: 4.1, ry: 12.1 },
+    { angle: 74, rx: 4.4, ry: 11.7 },
+    { angle: 104, rx: 4.8, ry: 10.9 },
+    { angle: 136, rx: 5.2, ry: 10.2 },
+    { angle: 170, rx: 5.3, ry: 9.8 },
+    { angle: 204, rx: 5.2, ry: 10.2 },
+    { angle: 236, rx: 4.8, ry: 10.9 },
+    { angle: 266, rx: 4.4, ry: 11.7 },
+    { angle: 294, rx: 4.1, ry: 12.1 },
+    { angle: 322, rx: 3.8, ry: 12.6 },
+] as const;
+
 export default function LighthouseMark({
     size,
     className,
@@ -14,25 +29,23 @@ export default function LighthouseMark({
             viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
             role="img"
-            aria-label="lighthouse logo"
+            aria-label="BlackIn logo"
             className={className}
             width={size}
             height={size}
             {...props}
         >
             <g fill="currentColor">
-                <ellipse cx="50" cy="20" rx="4" ry="12" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(30 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(60 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(90 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(120 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(150 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(180 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(210 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(240 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(270 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(300 50 50)" />
-                <ellipse cx="50" cy="20" rx="4" ry="12" transform="rotate(330 50 50)" />
+                {PETALS.map((petal) => (
+                    <ellipse
+                        key={petal.angle}
+                        cx="50"
+                        cy="18"
+                        rx={petal.rx}
+                        ry={petal.ry}
+                        transform={`rotate(${petal.angle} 50 50)`}
+                    />
+                ))}
             </g>
         </svg>
     );

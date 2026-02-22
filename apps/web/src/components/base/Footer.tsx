@@ -86,11 +86,11 @@ export default function Footer() {
                 className={`md:h-[35%] py-12 md:py-0 text-neutral-200 w-full flex flex-col justify-center items-center`}
             >
                 <div className="md:text-[10rem] text-4xl font-black tracking-wider flex items-center md:flex-row">
-                    <span className={cn(doto.className)}>lighthouse</span>
+                    <span className={cn(doto.className)}>BlackIn</span>
                     <LighthouseMark className="text-primary md:h-52 md:w-52 h-12 w-12 transition-all duration-500" />
                 </div>
                 <p className="text-neutral-500 md:text-sm text-xs tracking-wider mt-4 text-center px-4">
-                    © 2025 lighthouse. Powered by AI + Solana.
+                    © 2025 BlackIn. Powered by AI + Solana.
                 </p>
             </div>
         </motion.div>

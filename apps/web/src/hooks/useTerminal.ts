@@ -69,7 +69,7 @@ export function useTerminal() {
                 default:
                     addLog({
                         type: 'error',
-                        text: `lighthouse: command not found: ${trimmed}. Try --help`,
+                        text: `blackin: command not found: ${trimmed}. Try --help`,
                     });
             }
         },

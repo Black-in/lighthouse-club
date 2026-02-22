@@ -179,7 +179,7 @@ export default function Terminal() {
                         <>
                             <Prompt /> <span className={cn('ml-2', className)}>{line.text}</span>
                         </>
-                    ) : line.type === 'error' && line.text.startsWith('lighthouse:') ? (
+                    ) : line.type === 'error' && line.text.startsWith('blackin:') ? (
                         <span className={cn('ml-6', className)}>{line.text}</span>
                     ) : (
                         <>

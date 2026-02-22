@@ -1,6 +1,6 @@
 import { cn } from '@/src/lib/utils';
 import { doto } from '../base/FeatureOne';
-import LighthouseMark from '../ui/svg/LighthouseMark';
+import Image from 'next/image';
 
 interface AppLogoProps {
     className?: string;
@@ -11,12 +11,14 @@ interface AppLogoProps {
 export default function AppLogo({ className, size = 20, showLogoText = true }: AppLogoProps) {
     return (
         <div className={cn('flex items-center gap-x-2', doto.className, className)}>
-            <LighthouseMark
-                size={size}
-                className="text-primary transition-all duration-500"
-                aria-hidden="true"
+            <Image
+                src="/icons/lighthouse-mark.svg"
+                alt="BlackIn logo"
+                width={size}
+                height={size}
+                className="object-contain transition-all duration-500"
             />
-            {showLogoText && <span className="tracking-[0.1rem] font-black">lighthouse</span>}
+            {showLogoText && <span className="tracking-[0.1rem] font-black">BlackIn</span>}
         </div>
     );
 }

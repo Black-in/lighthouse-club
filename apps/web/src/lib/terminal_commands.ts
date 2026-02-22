@@ -7,7 +7,7 @@ const helpResponse = `
 WINTER COMMANDS:
 clear              Clear the terminal
 --help             Show available commands
---commands         Show lighthouse commands
+--commands         Show BlackIn commands
 --platform         Show platform details
 --hotkeys          Show hot keys/ shortcuts
 `;
@@ -20,7 +20,7 @@ Ctrl + Shift + d           Toggle shell
 
 const platformResponse = `
 PLATFORM DETAILS:
-portal              lighthouse
+portal              BlackIn
 version             1.0.0
 shell               winter
 `;
@@ -61,8 +61,8 @@ export const CommandResponse: Record<COMMAND_WRITER, string> = {
     [COMMAND_WRITER.HOT_KEYS]: hotKeysResponse,
     [COMMAND_WRITER.PLATFORM]: platformResponse,
     [COMMAND_WRITER.COMMANDS]: commandsResponse,
-    [COMMAND_WRITER.lighthouse_BUILD]: `this feature is forging in the lighthouse labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_TEST]: `this feature is forging in the lighthouse labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]: `this feature is forging in the lighthouse labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]: `this feature is forging in the lighthouse labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.lighthouse_BUILD]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.lighthouse_TEST]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
 };

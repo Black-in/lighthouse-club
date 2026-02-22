@@ -250,7 +250,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             >
                                 <SelectTrigger
                                     className={cn(
-                                        'h-9 rounded-full border border-neutral-700 bg-[#0a0a0a] px-2.5 text-neutral-300',
+                                        'h-9 !rounded-full border border-neutral-700 bg-[#0a0a0a] px-3 text-neutral-300',
                                         'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
                                     )}
                                 >
@@ -259,7 +259,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                     </span>
                                     <ChevronDown className="h-3 w-3 text-neutral-500" />
                                 </SelectTrigger>
-                                <SelectContent className="border-neutral-800 bg-[#050505] text-neutral-100">
+                                <SelectContent className="rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
                                     {modelOptions.map((model) => (
                                         <SelectItem
                                             key={model}

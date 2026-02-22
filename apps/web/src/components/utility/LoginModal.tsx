@@ -100,7 +100,7 @@ function LoginRightContent() {
                         'bg-clip-text text-transparent',
                     )}
                 >
-                    Welcome to lighthouse
+                    Welcome to BlackIn
                 </h2>
                 <p className="text-[8px] md:text-[13px] text-light/80 tracking-wide">
                     Sign in to your account

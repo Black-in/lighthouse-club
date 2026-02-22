@@ -12,22 +12,22 @@ import WalletProviders from '@/src/providers/WalletProviders';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-    title: 'lighthouse',
+    title: 'BlackIn',
     description:
-        'lighthouse is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
-    metadataBase: new URL('https://lighthouse.dev'),
+        'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+    metadataBase: new URL('https://blackin.dev'),
     openGraph: {
-        title: 'lighthouse',
+        title: 'BlackIn',
         description:
-            'lighthouse is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
-        url: 'https://lighthouse.dev',
-        siteName: 'lighthouse',
+            'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+        url: 'https://blackin.dev',
+        siteName: 'BlackIn',
         images: [
             {
                 url: '/icons/lighthouse-mark-dark.svg',
                 width: 1200,
                 height: 630,
-                alt: 'lighthouse Preview',
+                alt: 'BlackIn Preview',
             },
         ],
         type: 'website',
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
 
     twitter: {
         card: 'summary_large_image',
-        title: 'lighthouse | Smart Contract Generator',
+        title: 'BlackIn | Smart Contract Generator',
         description:
-            'lighthouse is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+            'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
         images: ['/icons/lighthouse-mark-dark.svg'],
     },
 };

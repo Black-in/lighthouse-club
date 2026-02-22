@@ -60,7 +60,7 @@ export default function PlanCard({ planData, billing }: PlanCardProps) {
                 </div>
 
                 <Button className="w-full bg-primary hover:bg-primary hover:-translate-y-0.5 text-light font-semibold py-5 text-lg rounded-[4px] tracking-wide transition-all">
-                    {planData.plan === 'FREE' ? 'Start Free' : 'Try lighthouse'}
+                    {planData.plan === 'FREE' ? 'Start Free' : 'Try BlackIn'}
                 </Button>
 
                 <div className="mt-10">

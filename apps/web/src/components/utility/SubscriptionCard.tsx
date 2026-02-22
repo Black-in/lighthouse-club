@@ -60,7 +60,7 @@ function SubscriptionCard({
                 <div className="flex justify-between items-start mb-5 sm:mb-6">
                     <div>
                         <div className="text-[10px] sm:text-xs font-medium opacity-70 uppercase tracking-wider mb-1">
-                            lighthouse
+                            BlackIn
                         </div>
                         <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                             {plan === 'PREMIUM_PLUS' ? 'Premium+' : plan}
@@ -186,7 +186,7 @@ export default function SubscriptionPlans() {
 
             <div className="relative z-10 mb-12">
                 <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
-                    Choose Your lighthouse Plan
+                    Choose Your BlackIn Plan
                 </h1>
                 <p className="text-neutral-400 max-w-2xl mx-auto text-sm sm:text-lg">
                     Get access to premium features designed to boost productivity and simplify your

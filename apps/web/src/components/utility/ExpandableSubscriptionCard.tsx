@@ -102,7 +102,7 @@ export default function ExpandableSubscriptionCard({
 
                 <div className="px-6 pb-4">
                     <Button className="w-full bg-primary hover:bg-primary hover:-translate-y-0.5 text-light font-semibold py-3 rounded-[4px] tracking-wide transition-all">
-                        {planData.plan === 'FREE' ? 'Start Free' : 'Try lighthouse'}
+                        {planData.plan === 'FREE' ? 'Start Free' : 'Try BlackIn'}
                     </Button>
                 </div>
 

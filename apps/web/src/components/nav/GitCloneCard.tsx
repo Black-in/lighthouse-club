@@ -27,7 +27,7 @@ enum CloneOptions {
 
 export default function GitCloneCard() {
     const [activeTab, setActiveTab] = useState<CloneOptions>(CloneOptions.HTTPS);
-    const [repoName, setRepoName] = useState<string>('lighthouse');
+    const [repoName, setRepoName] = useState<string>('blackin');
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [inputError, setInputError] = useState<boolean>(false);
     const [isRepoValid, setIsRepoValid] = useState<boolean | null>(null);

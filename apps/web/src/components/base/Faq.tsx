@@ -71,8 +71,8 @@ export default function Faq() {
 
     const faqs: FaqData[] = [
         {
-            question: 'What is lighthouse?',
-            answer: 'lighthouse is an AI-powered platform for building, editing, deploying, and interacting with Rust-based smart contracts on Solana using Anchor. It simplifies the entire smart contract workflow from generation to frontend integration.',
+            question: 'What is BlackIn?',
+            answer: 'BlackIn is an AI-powered platform for building, editing, deploying, and interacting with Rust-based smart contracts on Solana using Anchor. It simplifies the entire smart contract workflow from generation to frontend integration.',
         },
         {
             question: 'Do I need to know Rust to use this platform?',
@@ -84,7 +84,7 @@ export default function Faq() {
         },
         {
             question: 'Can I deploy to mainnet?',
-            answer: 'Yes! lighthouse supports one-click deployment to Solana Devnet, Testnet, and Mainnet. We also provide CLI commands and track deployed program IDs for easy management.',
+            answer: 'Yes! BlackIn supports one-click deployment to Solana Devnet, Testnet, and Mainnet. We also provide CLI commands and track deployed program IDs for easy management.',
         },
         {
             question: 'Does it generate client code for my contract?',

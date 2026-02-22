@@ -153,7 +153,7 @@ export function ConnectedWalletInfoCard() {
                 <div className="w-full flex flex-col justify-center items-center gap-y-6">
                     <div>
                         <LighthouseMark className="text-primary h-18 w-18 transition-all duration-500" />
-                        <span className="text-sm tracking-[0.1rem] ">lighthouse</span>
+                        <span className="text-sm tracking-[0.1rem] ">BlackIn</span>
                     </div>
                     <div className="flex items-center justify-center px-4 py-1.5 rounded-md bg-[#fb2c3656] border border-red-400 text-[#D8CFBC] text-xs font-mono ">
                         This feature will be available in the next version.

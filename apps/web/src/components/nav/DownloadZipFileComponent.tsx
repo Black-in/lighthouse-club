@@ -43,7 +43,7 @@ export default function DownloadZipFileComponent() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `lighthouse-${contract_name}.zip`;
+            link.download = `blackin-${contract_name}.zip`;
             document.body.appendChild(link);
             link.click();
 
