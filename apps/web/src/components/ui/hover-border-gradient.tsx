@@ -9,6 +9,7 @@ export function HoverBorderGradient({
     containerClassName,
     className,
     as: Tag = 'button',
+    roundedClassName = 'rounded-full',
     duration = 6,
     clockwise = true,
     gradientColors = ['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(2, 16, 36)'],
@@ -22,6 +23,7 @@ export function HoverBorderGradient({
         as?: React.ElementType;
         containerClassName?: string;
         className?: string;
+        roundedClassName?: string;
         duration?: number;
         clockwise?: boolean;
         gradientColors?: string[];
@@ -43,14 +45,15 @@ export function HoverBorderGradient({
     return (
         <Tag
             className={cn(
-                'relative inline-flex w-fit items-center justify-center overflow-hidden rounded-full p-px',
+                'relative inline-flex w-fit items-center justify-center overflow-hidden p-px',
+                roundedClassName,
                 backdropBlur && 'backdrop-blur-md',
                 containerClassName,
             )}
             {...props}
         >
             <motion.div
-                className="absolute inset-[-180%] z-0 rounded-full"
+                className={cn('absolute inset-[-180%] z-0', roundedClassName)}
                 style={{ background: animatedGradient }}
                 animate={animating ? { rotate: rotationValue } : { rotate: 0 }}
                 transition={
@@ -59,9 +62,9 @@ export function HoverBorderGradient({
                         : { duration: 0 }
                 }
             />
-            <div className="absolute inset-[1px] z-[1] rounded-full bg-[#05070a]" />
+            <div className={cn('absolute inset-[1px] z-[1] bg-[#05070a]', roundedClassName)} />
             <div
-                className="pointer-events-none absolute inset-[1px] z-[2] rounded-full"
+                className={cn('pointer-events-none absolute inset-[1px] z-[2]', roundedClassName)}
                 style={{
                     backgroundImage: noiseTexture,
                     opacity: safeNoiseIntensity,

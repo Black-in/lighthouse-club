@@ -5,12 +5,13 @@ import ProfileMenu from '../utility/ProfileMenu';
 import { useState } from 'react';
 import CompanyNavbarLogo from './CompanyNavbarLogo';
 import { MdHomeFilled } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function HomeNavbar() {
     const [showLogoutDropdown, setShowLogoutDropdown] = useState<boolean>(false);
     const { session } = useUserSessionStore();
     const router = useRouter();
+    const pathname = usePathname();
 
     return (
         <div className="w-full min-h-14 text-light/70 px-6 select-none relative flex justify-between items-center z-10">
@@ -33,10 +34,12 @@ export default function HomeNavbar() {
                         </div>
                     )}
                 </div>
-                <MdHomeFilled
-                    onClick={() => router.push('/')}
-                    className="h-7 w-7 cursor-pointer rounded-sm p-[4px] text-light/70 transition-transform hover:-translate-y-0.5 hover:bg-neutral-700/70"
-                />
+                {pathname === '/pricing' && (
+                    <MdHomeFilled
+                        onClick={() => router.push('/')}
+                        className="h-7 w-7 cursor-pointer rounded-sm p-[4px] text-light/70 transition-transform hover:-translate-y-0.5 hover:bg-neutral-700/70"
+                    />
+                )}
             </div>
         </div>
     );

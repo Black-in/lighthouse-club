@@ -22,6 +22,7 @@ import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { ArrowRight, ChevronDown, FileUp, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
+import { HoverBorderGradient } from '../ui/hover-border-gradient';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -57,6 +58,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const [showPlusMenu, setShowPlusMenu] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number] | null>(null);
+    const [isTextareaFocused, setIsTextareaFocused] = useState<boolean>(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
     const plusMenuRef = useRef<HTMLDivElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -166,8 +168,24 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                     className="hidden"
                     onChange={handleFileSelection}
                 />
-                <div className="relative overflow-hidden rounded-[34px] border border-neutral-800/90 bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm">
-                    <div className="px-5 pb-14 pt-3.5 md:px-6 md:pb-15 md:pt-4">
+                <HoverBorderGradient
+                    as="div"
+                    roundedClassName="rounded-[34px]"
+                    containerClassName="w-full rounded-[34px]"
+                    className="w-full !rounded-[34px] !p-0"
+                    gradientColors={
+                        isTextareaFocused
+                            ? ['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']
+                            : ['rgb(38, 38, 38)', 'rgb(38, 38, 38)', 'rgb(38, 38, 38)']
+                    }
+                    duration={5}
+                    speed={0.14}
+                    noiseIntensity={isTextareaFocused ? 0.18 : 0}
+                    animating={isTextareaFocused}
+                    backdropBlur
+                >
+                    <div className="relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)]">
+                        <div className="px-5 pb-14 pt-3.5 md:px-6 md:pb-15 md:pt-4">
                         {attachments.length > 0 && (
                             <div className="mb-3 flex flex-wrap gap-2">
                                 {attachments.map((attachment) => (
@@ -212,6 +230,8 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             value={inputValue}
                             ref={inputRef}
                             onChange={(e) => setInputValue(e.target.value)}
+                            onFocus={() => setIsTextareaFocused(true)}
+                            onBlur={() => setIsTextareaFocused(false)}
                             onKeyDown={handleKeyDown}
                             onWheel={handleTextareaWheel}
                             placeholder="Describe your agentic web project"
@@ -225,69 +245,70 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                         />
                     </div>
 
-                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-4 pb-2.5 md:px-5 md:pb-3">
-                        <button
-                            ref={plusButtonRef}
-                            type="button"
-                            onClick={() => setShowPlusMenu((prev) => !prev)}
-                            className={cn(
-                                'inline-flex h-9 w-9 items-center justify-center rounded-full border',
-                                'border-neutral-700 bg-[#0a0a0a] text-neutral-200 transition-colors',
-                                showPlusMenu
-                                    ? 'border-neutral-500 bg-[#151515] text-white'
-                                    : 'hover:border-neutral-500 hover:bg-[#151515] hover:text-white',
-                            )}
-                        >
-                            <Plus className="h-4 w-4" strokeWidth={1.8} />
-                        </button>
-
-                        <div className="flex items-center gap-1">
-                            <Select
-                                value={selectedModel ?? undefined}
-                                onValueChange={(val) =>
-                                    setSelectedModel(val as (typeof modelOptions)[number])
-                                }
-                            >
-                                <SelectTrigger
-                                    className={cn(
-                                        'h-9 !rounded-full border border-neutral-700 bg-[#0a0a0a] px-3 text-neutral-300',
-                                        'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
-                                    )}
-                                >
-                                    <span className="whitespace-nowrap text-neutral-300 text-[12px] leading-none">
-                                        {selectedModel ?? 'Model'}
-                                    </span>
-                                    <ChevronDown className="h-3 w-3 text-neutral-500" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
-                                    {modelOptions.map((model) => (
-                                        <SelectItem
-                                            key={model}
-                                            value={model}
-                                            className="data-[state=checked]:bg-white data-[state=checked]:text-black data-[highlighted]:bg-neutral-800 data-[highlighted]:text-white"
-                                        >
-                                            {model}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
+                        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-4 pb-2.5 md:px-5 md:pb-3">
                             <button
+                                ref={plusButtonRef}
                                 type="button"
-                                disabled={isDisabled}
-                                onClick={handleSubmit}
+                                onClick={() => setShowPlusMenu((prev) => !prev)}
                                 className={cn(
-                                    'inline-flex h-9 w-9 items-center justify-center rounded-full transition-all',
-                                    isDisabled
-                                        ? 'cursor-not-allowed bg-neutral-700 text-neutral-500'
-                                        : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
+                                    'inline-flex h-9 w-9 items-center justify-center rounded-full border',
+                                    'border-neutral-700 bg-[#0a0a0a] text-neutral-200 transition-colors',
+                                    showPlusMenu
+                                        ? 'border-neutral-500 bg-[#151515] text-white'
+                                        : 'hover:border-neutral-500 hover:bg-[#151515] hover:text-white',
                                 )}
                             >
-                                <ArrowRight className="h-4 w-4" />
+                                <Plus className="h-4 w-4" strokeWidth={1.8} />
                             </button>
+
+                            <div className="flex items-center gap-1">
+                                <Select
+                                    value={selectedModel ?? undefined}
+                                    onValueChange={(val) =>
+                                        setSelectedModel(val as (typeof modelOptions)[number])
+                                    }
+                                >
+                                    <SelectTrigger
+                                        className={cn(
+                                            'h-9 !rounded-full border border-neutral-700 bg-[#0a0a0a] px-3 text-neutral-300',
+                                            'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
+                                        )}
+                                    >
+                                        <span className="whitespace-nowrap text-neutral-300 text-[12px] leading-none">
+                                            {selectedModel ?? 'Model'}
+                                        </span>
+                                        <ChevronDown className="h-3 w-3 text-neutral-500" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
+                                        {modelOptions.map((model) => (
+                                            <SelectItem
+                                                key={model}
+                                                value={model}
+                                                className="data-[state=checked]:bg-white data-[state=checked]:text-black data-[highlighted]:bg-neutral-800 data-[highlighted]:text-white"
+                                            >
+                                                {model}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <button
+                                    type="button"
+                                    disabled={isDisabled}
+                                    onClick={handleSubmit}
+                                    className={cn(
+                                        'inline-flex h-9 w-9 items-center justify-center rounded-full transition-all',
+                                        isDisabled
+                                            ? 'cursor-not-allowed bg-neutral-700 text-neutral-500'
+                                            : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
+                                    )}
+                                >
+                                    <ArrowRight className="h-4 w-4" />
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </HoverBorderGradient>
 
                 {showPlusMenu && (
                     <div

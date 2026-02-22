@@ -7,18 +7,13 @@
 import { useRouter } from 'next/navigation';
 import NavbarSigninAction from './NavSigninAction';
 import { cn } from '@/src/lib/utils';
-import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useEffect, useState } from 'react';
-import LoginModal from '../utility/LoginModal';
-import { MdHomeFilled } from 'react-icons/md';
 import CompanyNavbarLogo from './CompanyNavbarLogo';
 
 export default function Navbar() {
     const router = useRouter();
-    const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true);
     const [lastScrollY, setLastScrollY] = useState<number>(0);
-    const { session } = useUserSessionStore();
 
     useEffect(() => {
         function handleScroll() {
@@ -52,27 +47,16 @@ export default function Navbar() {
             >
                 <CompanyNavbarLogo priority />
                 <div className="flex items-center gap-x-4">
-                    <MdHomeFilled
-                        onClick={() => {
-                            if (!session?.user.token) {
-                                setOpenLoginModal(true);
-                                return;
-                            }
-                            router.push('/home');
-                        }}
-                        className="hover:bg-neutral-700/70 hidden md:block rounded-sm p-[4px] h-7 w-7 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5"
-                    />
                     <button
                         type="button"
                         onClick={() => router.push('/pricing')}
-                        className="hover:bg-neutral-700/70 hidden md:flex rounded-sm px-2 h-7 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5 items-center text-xs font-semibold tracking-wide"
+                        className="hover:bg-neutral-700/70 hidden md:flex rounded-md px-3 h-9 text-light/70 select-none cursor-pointer transition-transform hover:-translate-y-0.5 items-center text-sm font-semibold tracking-wide"
                     >
                         Pricing
                     </button>
                     <NavbarSigninAction />
                 </div>
             </div>
-            <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
         </>
     );
 }
