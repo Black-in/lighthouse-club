@@ -12,6 +12,7 @@ interface CodeEditorState {
     currentCode: string;
     currentFile: FileNode | null;
     fileTree: FileNode[];
+    originalFileContents: Record<string, string>;
     editedFiles: Record<string, FileNode>;
     collapseFileTree: boolean;
     collapseChat: boolean;
@@ -34,6 +35,7 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
         currentCode: '',
         currentFile: null,
         fileTree: [],
+        originalFileContents: {},
         editedFiles: {},
         collapseFileTree: false,
         collapseChat: false,
@@ -68,9 +70,14 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                 return;
             }
             const editedFiles = { ...state.editedFiles, [fileId]: file };
+            const originalFileContents = { ...state.originalFileContents };
+            if (originalFileContents[fileId] === undefined) {
+                originalFileContents[fileId] = state.currentCode ?? '';
+            }
 
             set({
                 fileTree: newTree,
+                originalFileContents,
                 editedFiles,
                 currentCode: content,
             });
@@ -118,6 +125,7 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                       type: NODE.FOLDER,
                       children: [],
                   };
+            const nextOriginalFileContents = { ...state.originalFileContents };
 
             // Helper: recursively find folder by path
             function findOrCreateFolder(root: FileNode, parts: string[]): FileNode {
@@ -158,6 +166,9 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                 const parts = path.split('/').filter(Boolean);
                 const fileName = parts.pop();
                 if (!fileName) continue;
+                if (nextOriginalFileContents[path] === undefined) {
+                    nextOriginalFileContents[path] = content;
+                }
 
                 const parentFolder = findOrCreateFolder(existingTree, parts);
                 const fileId = parts.length ? `${parts.join('/')}/${fileName}` : fileName;
@@ -175,6 +186,7 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
 
             set({
                 fileTree: [existingTree],
+                originalFileContents: nextOriginalFileContents,
                 currentFile: null,
                 currentCode: '',
             });
@@ -200,6 +212,7 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
         reset: () => {
             set({
                 fileTree: [],
+                originalFileContents: {},
                 currentFile: null,
                 currentCode: '',
                 editedFiles: {},

@@ -4,23 +4,39 @@
  */
 
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { PiGithubLogoFill } from 'react-icons/pi';
 import { Button } from '../ui/button';
 import { FaGithub } from 'react-icons/fa';
-
-type ConnectionStatus = 'idle' | 'connecting' | 'connected';
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 
 export default function GithubPanel() {
-    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
+    const [isConnecting, setIsConnecting] = useState<boolean>(false);
+    const { session } = useUserSessionStore();
+    const hasGithub = Boolean(session?.user?.hasGithub || session?.user?.githubUsername);
 
-    const handleGithubConnect = () => {
-        setConnectionStatus('connecting');
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (new URLSearchParams(window.location.search).get('githubLinked') === 'true') {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
-        setTimeout(() => {
-            setConnectionStatus('connected');
-        }, 2000);
-    };
+    async function handleGithubConnect() {
+        try {
+            setIsConnecting(true);
+            if (session?.user?.id) {
+                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300`;
+            }
+            await signIn('github', {
+                callbackUrl: `${window.location.pathname}`,
+                redirect: true,
+            });
+        } finally {
+            setIsConnecting(false);
+        }
+    }
 
     return (
         <div className="flex flex-col items-center justify-start h-full w-full text-light/90">
@@ -31,16 +47,16 @@ export default function GithubPanel() {
                     Connect your GitHub account to automatically push your generated contract to
                     your repository.
                 </p>
-                {connectionStatus !== 'connected' ? (
+                {!hasGithub ? (
                     <Button
                         onClick={handleGithubConnect}
-                        disabled={connectionStatus === 'connecting'}
+                        disabled={isConnecting}
                         size="xs"
                         className="bg-[#24292e] text-light hover:bg-[#24292e] gap-2.5 tracking-wider cursor-pointer font-semibold rounded-[4px] w-full"
                     >
                         <FaGithub className="size-3.5 text-light" />
                         <span className="text-[11px]">
-                            {connectionStatus === 'connecting' ? 'Connecting...' : 'Connect GitHub'}
+                            {isConnecting ? 'Connecting...' : 'Connect GitHub'}
                         </span>
                     </Button>
                 ) : (

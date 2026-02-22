@@ -5,13 +5,14 @@
 
 'use client';
 import BuilderDashboard from '@/src/components/builder/BuilderDashboard';
+import PlaygroundLeftRail from '@/src/components/builder/PlaygroundLeftRail';
 import BuilderNavbar from '@/src/components/nav/BuilderNavbar';
 import { cleanWebSocketClient } from '@/src/lib/singletonWebSocket';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useChatStore } from '@/src/store/user/useChatStore';
-import React, { useEffect, use } from 'react';
+import React, { useEffect, use, useState } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import Playground from '@/src/lib/server/playground';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
@@ -30,6 +31,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const { open, hide } = useReviewModalStore();
     const { setTemplates } = useTemplateStore();
     const contract = useCurrentContract();
+    const [showLeftRail, setShowLeftRail] = useState(false);
 
     useEffect(() => {
         const get_templates = async () => {
@@ -92,9 +94,19 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     return (
         <div className="h-screen w-screen flex flex-col overflow-hidden tracking-wider bg-black">
-            <BuilderNavbar />
-            <div className="flex-1 min-h-0 flex flex-col">
-                <BuilderDashboard />
+            <BuilderNavbar
+                leftRailVisible={showLeftRail}
+                onToggleLeftRail={() => setShowLeftRail((prev) => !prev)}
+            />
+            <div className="relative flex-1 min-h-0 flex flex-col">
+                <div
+                    className={`h-full w-full min-h-0 transition-[padding] duration-300 ease-out ${
+                        showLeftRail ? 'pl-20' : 'pl-0'
+                    }`}
+                >
+                    <BuilderDashboard />
+                </div>
+                <PlaygroundLeftRail visible={showLeftRail} />
             </div>
             <ContractReviewCard
                 contractId={use(params).contractId}

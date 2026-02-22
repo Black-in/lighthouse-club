@@ -20,11 +20,12 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { Line } from '@/src/types/terminal_types';
 import { useCommandHistoryStore } from '@/src/store/code/useCommandHistoryStore';
 import { isValidCommandFunction, useTerminal } from '@/src/hooks/useTerminal';
+import { useTerminalVisibilityStore } from '@/src/store/code/useTerminalVisibilityStore';
 
 export default function Terminal() {
-    const [showTerminal, setShowTerminal] = useState<boolean>(false);
     const [currentInput, setCurrentInput] = useState<string>('');
     const [isValidCommand, setIsValidCommand] = useState<boolean>(false);
+    const { showTerminal, setShowTerminal, toggleTerminal } = useTerminalVisibilityStore();
     const { currentFile, currentCursorPosition } = useCodeEditor();
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -41,14 +42,10 @@ export default function Terminal() {
 
     useShortcuts({
         'meta+j': function () {
-            setShowTerminal(function (p) {
-                return !p;
-            });
+            toggleTerminal();
         },
         'ctrl+j': function () {
-            setShowTerminal(function (p) {
-                return !p;
-            });
+            toggleTerminal();
         },
     });
 
@@ -225,7 +222,7 @@ export default function Terminal() {
                             <Button className="w-auto bg-transparent hover:bg-dark p-0 rounded cursor-pointer text-light/60 items-center">
                                 <PiTerminal className="size-4" />
                                 <span className="text-xs font-sans tracking-wide leading-0">
-                                    winter
+                                    BlackIn
                                 </span>
                             </Button>
                             <ToolTipComponent content="clear">
@@ -294,20 +291,16 @@ export default function Terminal() {
             )}
 
             <div className="absolute bottom-0 left-0 right-0 h-6 flex justify-between items-center px-3 text-[11px] text-light/70 bg-darkest border-t border-neutral-800 z-20">
-                <div
-                    className="flex items-center space-x-1.5 hover:bg-neutral-800/50 px-2 py-0.5 rounded-md cursor-pointer transition text-[11px]"
-                    onClick={function () {
-                        setShowTerminal(function (prev) {
-                            return !prev;
-                        });
-                    }}
-                >
-                    <span className="font-bold text-light/50 tracking-wider">Ctrl/Cmd + J</span>
-                    <span className="text-light/50 flex items-center space-x-1 tracking-widest">
-                        <span>to toggle</span>
-                        <MdTerminal className="size-4" />
-                    </span>
-                </div>
+                <ToolTipComponent side="top" content="Toggle terminal (Ctrl/Cmd + J)">
+                    <div
+                        className="flex items-center justify-center hover:bg-neutral-800/50 px-2 py-0.5 rounded-md cursor-pointer transition text-[11px]"
+                        onClick={function () {
+                            toggleTerminal();
+                        }}
+                    >
+                        <MdTerminal className="size-4 text-light/70" />
+                    </div>
+                </ToolTipComponent>
                 <div className="flex items-center space-x-4 text-light/60">
                     <ToolTipComponent
                         side="top"

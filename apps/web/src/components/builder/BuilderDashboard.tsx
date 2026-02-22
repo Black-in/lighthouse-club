@@ -12,7 +12,7 @@ import BuilderLoader from './BuilderLoader';
 import { JSX, useEffect } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import SidePanel from '../code/SidePanel';
-import EditorSidePanel, { SidePanelValues } from '../code/EditorSidePanel';
+import { SidePanelValues } from '../code/EditorSidePanel';
 import Terminal from '../code/Terminal';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
 import { useTerminalLogStore } from '@/src/store/code/useTerminalLogStore';
@@ -22,6 +22,7 @@ import FileTree from '../code/Filetree';
 import GithubPanel from '../code/GithubPanel';
 import PlanPanel from '../code/PlanPanel';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
+import RightPanelActions from './RightPanelActions';
 
 export default function BuilderDashboard(): JSX.Element {
     const contract = useCurrentContract();
@@ -80,7 +81,10 @@ export default function BuilderDashboard(): JSX.Element {
                 }}
                 className="hidden sm:flex sm:flex-1 pb-4 px-4 h-full min-h-0 min-w-0"
             >
-                <div className="w-full h-full min-h-0 z-10 border-neutral-800 border rounded-[4px] relative overflow-hidden bg-[#08090a]">
+                <div className="w-full h-full min-h-0 z-10 border border-neutral-800/90 rounded-[16px] relative overflow-hidden bg-[#08090a]">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-end px-4 pt-4">
+                        <RightPanelActions />
+                    </div>
                     {loading ? <BuilderLoader /> : <Editing />}
                 </div>
             </motion.div>
@@ -113,8 +117,7 @@ function Editing() {
     }
 
     return (
-        <div className="flex h-full min-h-0">
-            <EditorSidePanel />
+        <div className="flex h-full min-h-0 rounded-[16px] overflow-hidden">
             <SidePanel>{renderSidePanels()}</SidePanel>
             {renderEditorPanels()}
             <Terminal />

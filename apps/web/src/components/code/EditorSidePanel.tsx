@@ -1,7 +1,6 @@
 import { LuFile } from 'react-icons/lu';
 import { PiGithubLogoFill } from 'react-icons/pi';
 import ToolTipComponent from '../ui/TooltipComponent';
-import { Dispatch, SetStateAction } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
@@ -15,13 +14,17 @@ export enum SidePanelValues {
     PLAN = 'PLAN',
 }
 
-interface EditorSidePanel {
-    setSidePanelRenderer:
-        | Dispatch<SetStateAction<SidePanelValues>>
-        | ((value: SidePanelValues | null) => void);
+interface EditorSidePanelProps {
+    className?: string;
+    showShell?: boolean;
+    onGithubClick?: () => void;
 }
 
-export default function EditorSidePanel() {
+export default function EditorSidePanel({
+    className,
+    showShell = true,
+    onGithubClick,
+}: EditorSidePanelProps) {
     const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
         useCodeEditor();
     const { currentState, setCurrentState } = useSidePanelStore();
@@ -36,14 +39,20 @@ export default function EditorSidePanel() {
         {
             icon: <PiGithubLogoFill size={21} />,
             value: SidePanelValues.GITHUB,
-            onClick: () => handleToggleSidebar(SidePanelValues.GITHUB),
+            onClick: () => {
+                if (onGithubClick) {
+                    onGithubClick();
+                    return;
+                }
+                handleToggleSidebar(SidePanelValues.GITHUB);
+            },
             tooltip: 'GitHub Repository',
         },
         {
             icon: <LighthouseChat size={22} />,
             value: SidePanelValues.CHAT,
             onClick: () => setCollapsechat(!collapseChat),
-            tooltip: 'Agent Sessions',
+            tooltip: 'Toggle Chat Panel',
         },
         {
             icon: <FaTelegramPlane size={19} />,
@@ -85,7 +94,13 @@ export default function EditorSidePanel() {
     }
 
     return (
-        <div className="h-full min-w-14 bg-[#090a0b] border-neutral-800 border-r">
+        <div
+            className={cn(
+                'h-full min-w-14',
+                showShell && 'bg-[#090a0b] border-neutral-800 border-r',
+                className,
+            )}
+        >
             <div className="flex flex-col gap-y-7 items-center py-5">
                 {sidePanelData.map((item, index) => (
                     <ToolTipComponent key={index} side="right" content={item.tooltip}>

@@ -20,9 +20,10 @@
 }
 
 .soft-scroll {
-    scroll-behavior: smooth;
+    scroll-behavior: smooth !important;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: y proximity;
 }
 
 @layer utilities {
