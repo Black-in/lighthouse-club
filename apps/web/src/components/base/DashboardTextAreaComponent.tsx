@@ -23,6 +23,7 @@ import { ArrowRight, ChevronDown, FileUp, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -57,7 +58,9 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const [showPlusMenu, setShowPlusMenu] = useState<boolean>(false);
-    const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number] | null>(null);
+    const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number]>(
+        'Auto Select',
+    );
     const [isTextareaFocused, setIsTextareaFocused] = useState<boolean>(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
     const plusMenuRef = useRef<HTMLDivElement | null>(null);
@@ -67,6 +70,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const { showMessageLimit, showContractLimit } = useLimitStore();
     const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
+    const skipAuth = shouldSkipAuthClient();
 
     useHandleClickOutside([plusButtonRef, plusMenuRef], setShowPlusMenu);
 
@@ -85,7 +89,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     }, []);
 
     function handleSubmit() {
-        if (!session?.user.id) {
+        if (!session?.user.id && !skipAuth) {
             setOpenLoginModal(true);
             return;
         }
@@ -263,7 +267,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
 
                             <div className="flex items-center gap-1">
                                 <Select
-                                    value={selectedModel ?? undefined}
+                                    value={selectedModel}
                                     onValueChange={(val) =>
                                         setSelectedModel(val as (typeof modelOptions)[number])
                                     }
@@ -275,7 +279,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                         )}
                                     >
                                         <span className="whitespace-nowrap text-neutral-300 text-[12px] leading-none">
-                                            {selectedModel ?? 'Model'}
+                                            {selectedModel}
                                         </span>
                                         <ChevronDown className="h-3 w-3 text-neutral-500" />
                                     </SelectTrigger>

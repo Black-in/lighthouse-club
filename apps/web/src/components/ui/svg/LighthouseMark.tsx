@@ -4,21 +4,6 @@ type LighthouseMarkProps = SVGProps<SVGSVGElement> & {
     size?: number;
 };
 
-const PETALS = [
-    { angle: -6, rx: 3.6, ry: 12.8 },
-    { angle: 20, rx: 3.8, ry: 12.6 },
-    { angle: 46, rx: 4.1, ry: 12.1 },
-    { angle: 74, rx: 4.4, ry: 11.7 },
-    { angle: 104, rx: 4.8, ry: 10.9 },
-    { angle: 136, rx: 5.2, ry: 10.2 },
-    { angle: 170, rx: 5.3, ry: 9.8 },
-    { angle: 204, rx: 5.2, ry: 10.2 },
-    { angle: 236, rx: 4.8, ry: 10.9 },
-    { angle: 266, rx: 4.4, ry: 11.7 },
-    { angle: 294, rx: 4.1, ry: 12.1 },
-    { angle: 322, rx: 3.8, ry: 12.6 },
-] as const;
-
 export default function LighthouseMark({
     size,
     className,
@@ -35,18 +20,10 @@ export default function LighthouseMark({
             height={size}
             {...props}
         >
-            <g fill="currentColor">
-                {PETALS.map((petal) => (
-                    <ellipse
-                        key={petal.angle}
-                        cx="50"
-                        cy="18"
-                        rx={petal.rx}
-                        ry={petal.ry}
-                        transform={`rotate(${petal.angle} 50 50)`}
-                    />
-                ))}
-            </g>
+            <path
+                d="M50 10C49.6 29.5 46.9 45.4 39.9 56.5C33.4 66.8 25.5 73.9 16 79C27.1 72.9 37.9 69.7 50 69.7C62.1 69.7 72.9 72.9 84 79C74.5 73.9 66.6 66.8 60.1 56.5C53.1 45.4 50.4 29.5 50 10Z"
+                fill="currentColor"
+            />
         </svg>
     );
 }

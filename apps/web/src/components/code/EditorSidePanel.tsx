@@ -85,7 +85,7 @@ export default function EditorSidePanel() {
     }
 
     return (
-        <div className="h-full min-w-14 bg-darker border-neutral-800 border-r">
+        <div className="h-full min-w-14 bg-[#090a0b] border-neutral-800 border-r">
             <div className="flex flex-col gap-y-7 items-center py-5">
                 {sidePanelData.map((item, index) => (
                     <ToolTipComponent key={index} side="right" content={item.tooltip}>

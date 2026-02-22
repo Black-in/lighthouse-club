@@ -54,7 +54,7 @@ export default function BuilderDashboard(): JSX.Element {
     }, [isConnected]);
 
     return (
-        <div className="w-full h-full flex flex-row bg-darkest z-0 overflow-hidden">
+        <div className="w-full h-full flex flex-row bg-black z-0 overflow-hidden">
             <AnimatePresence mode="wait">
                 {!collapseChat && (
                     <motion.div
@@ -78,9 +78,9 @@ export default function BuilderDashboard(): JSX.Element {
                     duration: 0.3,
                     ease: [0.4, 0, 0.2, 1],
                 }}
-                className="hidden sm:flex sm:flex-1 pb-4 px-4 h-full min-w-0"
+                className="hidden sm:flex sm:flex-1 pb-4 px-4 h-full min-h-0 min-w-0"
             >
-                <div className="w-full h-full z-10 border-neutral-800 border rounded-[4px] relative overflow-hidden">
+                <div className="w-full h-full min-h-0 z-10 border-neutral-800 border rounded-[4px] relative overflow-hidden bg-[#08090a]">
                     {loading ? <BuilderLoader /> : <Editing />}
                 </div>
             </motion.div>
@@ -113,7 +113,7 @@ function Editing() {
     }
 
     return (
-        <div className="flex h-full">
+        <div className="flex h-full min-h-0">
             <EditorSidePanel />
             <SidePanel>{renderSidePanels()}</SidePanel>
             {renderEditorPanels()}

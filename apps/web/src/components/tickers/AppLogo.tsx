@@ -12,7 +12,7 @@ export default function AppLogo({ className, size = 20, showLogoText = true }: A
     return (
         <div className={cn('flex items-center gap-x-2', doto.className, className)}>
             <Image
-                src="/icons/lighthouse-mark.svg"
+                src="/icons/blackin-mark-dark.svg"
                 alt="BlackIn logo"
                 width={size}
                 height={size}

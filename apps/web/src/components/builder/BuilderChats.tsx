@@ -21,6 +21,8 @@ export default function BuilderChats() {
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const shouldAutoScrollRef = useRef<boolean>(true);
     const [chatLoading, setChatLoading] = useState<boolean>(false);
     const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();
@@ -31,10 +33,17 @@ export default function BuilderChats() {
     const { resetTemplate } = useBuilderChatStore();
 
     useEffect(() => {
-        if (messageEndRef.current) {
+        if (messageEndRef.current && shouldAutoScrollRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+
+    function handleChatScroll() {
+        const el = chatContainerRef.current;
+        if (!el) return;
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        shouldAutoScrollRef.current = distanceFromBottom < 72;
+    }
 
     useEffect(() => {
         async function fetchChats() {
@@ -79,7 +88,12 @@ export default function BuilderChats() {
             className="w-screen sm:w-full sm:max-w-md sm:min-w-md flex flex-col pt-4"
             style={{ height: 'calc(100vh - 3.5rem)' }}
         >
-            <div className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar">
+            <div
+                ref={chatContainerRef}
+                data-lenis-prevent
+                onScroll={handleChatScroll}
+                className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar soft-scroll"
+            >
                 {chatLoading ? (
                     <BuilderChatSkeletons loading={chatLoading} />
                 ) : (

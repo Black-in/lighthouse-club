@@ -26,7 +26,7 @@ export default function SidePanel({ children }: SidePanelProps) {
 
     return (
         <div
-            className="flex max-h-full bg-darker text-neutral-200 border-r border-neutral-800 min-w-[15rem] max-w-[18rem] cursor-ew-resize "
+            className="flex max-h-full bg-[#090a0b] text-neutral-200 border-r border-neutral-800 min-w-[15rem] max-w-[18rem] cursor-ew-resize "
             style={{
                 width: `min(${dimension}px, calc(100% - 6rem))`,
                 maxWidth: 'calc(100% - 6rem)',

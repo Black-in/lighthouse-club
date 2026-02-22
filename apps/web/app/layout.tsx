@@ -10,6 +10,7 @@ import { authOption } from './api/auth/[...nextauth]/options';
 import SessionSetter from '@/src/lib/SessionSeter';
 import WalletProviders from '@/src/providers/WalletProviders';
 import { Toaster } from 'sonner';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
     title: 'BlackIn',
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
         siteName: 'BlackIn',
         images: [
             {
-                url: '/icons/lighthouse-mark-dark.svg',
+                url: '/icons/blackin-mark-dark.svg',
                 width: 1200,
                 height: 630,
                 alt: 'BlackIn Preview',
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
         title: 'BlackIn | Smart Contract Generator',
         description:
             'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
-        images: ['/icons/lighthouse-mark-dark.svg'],
+        images: ['/icons/blackin-mark-dark.svg'],
     },
 };
 
@@ -47,7 +48,19 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const session = await getServerSession(authOption);
+    const headerStore = await headers();
+    const host = headerStore.get('host') ?? '';
+    const hostname = host.split(':')[0];
+    const isLocalHost =
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '::1' ||
+        hostname.endsWith('.local');
+    const skipAuth =
+        process.env.NODE_ENV !== 'production' ||
+        process.env.NEXT_PUBLIC_SKIP_AUTH === 'true' ||
+        isLocalHost;
+    const session = skipAuth ? null : await getServerSession(authOption);
 
     return (
         <html lang="en">

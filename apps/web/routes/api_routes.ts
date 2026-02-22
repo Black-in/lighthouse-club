@@ -3,9 +3,9 @@
  * © 2026 ayushshrivastv
  */
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, '') ?? '';
 
-export const API_URL = BACKEND_URL + '/api/v1';
+export const API_URL = backendBase ? `${backendBase}/api/v1` : '/api/v1';
 export const SIGNIN_URL = API_URL + '/sign-in';
 
 export const GENERATE_CONTRACT = API_URL + '/generate';

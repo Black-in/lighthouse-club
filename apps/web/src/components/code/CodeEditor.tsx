@@ -3,9 +3,9 @@ import { JSX, useCallback, useState } from 'react';
 import { Editor, Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import LighthouseMark from '../ui/svg/LighthouseMark';
 import { FiCheck, FiCopy } from 'react-icons/fi';
 import { cn } from '@/src/lib/utils';
+import LighthouseMark from '../ui/svg/LighthouseMark';
 
 export default function CodeEditor(): JSX.Element {
     const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } =
@@ -35,7 +35,7 @@ export default function CodeEditor(): JSX.Element {
             base: 'vs-dark',
             inherit: true,
             rules: [
-                { token: '', foreground: 'BFBFBF', background: '151617' },
+                { token: '', foreground: 'BFBFBF', background: '070708' },
                 { token: 'identifier', foreground: 'C8C8C8' },
                 { token: 'delimiter', foreground: '8B939D' },
                 { token: 'white', foreground: 'C8C8C8' },
@@ -101,21 +101,21 @@ export default function CodeEditor(): JSX.Element {
                 { token: 'warning', foreground: 'D9DF78' },
             ],
             colors: {
-                'editor.background': '#151617', // unchanged
+                'editor.background': '#070708',
                 'editor.foreground': '#C8C8C8',
                 'editorCursor.foreground': '#E6E6E6',
-                'editor.lineHighlightBackground': '#242528',
+                'editor.lineHighlightBackground': '#111215',
                 'editorLineNumber.foreground': '#4A4B4E',
                 'editorLineNumber.activeForeground': '#A0A0A0',
-                'editor.selectionBackground': '#323844',
-                'editor.inactiveSelectionBackground': '#26272A',
-                'editorIndentGuide.background': '#242526',
-                'editorIndentGuide.activeBackground': '#3F3F3F',
-                'editorGutter.background': '#151617',
-                'editorWhitespace.foreground': '#292B2F',
-                'scrollbarSlider.background': '#26272A',
-                'scrollbarSlider.hoverBackground': '#323337',
-                'scrollbarSlider.activeBackground': '#404145',
+                'editor.selectionBackground': '#20242d',
+                'editor.inactiveSelectionBackground': '#17191e',
+                'editorIndentGuide.background': '#16171a',
+                'editorIndentGuide.activeBackground': '#272a30',
+                'editorGutter.background': '#070708',
+                'editorWhitespace.foreground': '#1d1f24',
+                'scrollbarSlider.background': '#17191e',
+                'scrollbarSlider.hoverBackground': '#20242d',
+                'scrollbarSlider.activeBackground': '#2b303a',
             },
         });
     }, []);
@@ -144,7 +144,7 @@ export default function CodeEditor(): JSX.Element {
             <div className="flex-1 min-w-0 h-full">
                 {currentFile ? (
                     <>
-                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#151617] text-gray-300 text-sm ">
+                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#070708] text-gray-300 text-sm ">
                             <span>{filePathModifier(currentFile?.id)}</span>
                             <div
                                 onClick={handleCopyFileContent}
@@ -190,8 +190,8 @@ export default function CodeEditor(): JSX.Element {
                         />
                     </>
                 ) : (
-                    <div className="w-full h-full flex justify-center items-center bg-[#151617]">
-                        <LighthouseMark size={200} className="text-neutral-800" />
+                    <div className="w-full h-full flex justify-center items-center bg-[#070708]">
+                        <LighthouseMark size={188} className="text-neutral-800" />
                     </div>
                 )}
             </div>

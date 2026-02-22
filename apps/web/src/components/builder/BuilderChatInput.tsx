@@ -6,14 +6,13 @@
 import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import React, { useState, KeyboardEvent, useRef } from 'react';
+import React, { useEffect, useState, KeyboardEvent, useRef } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import LoginModal from '../utility/LoginModal';
 import { ChatRole } from '@lighthouse/types';
 import { v4 as uuid } from 'uuid';
-import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { TbExternalLink } from 'react-icons/tb';
 import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
@@ -21,28 +20,59 @@ import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 import BuilderChatInputFeatures from './BuilderChatInputFeatures';
+import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
+import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { X } from 'lucide-react';
+
+interface AttachmentItem {
+    id: string;
+    file: File;
+    kind: 'image' | 'pdf';
+    previewUrl?: string;
+}
+
+const getFileUniqueKey = (file: File) => `${file.name}-${file.size}-${file.lastModified}`;
+
+const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+};
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
+    const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+    const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const { session } = useUserSessionStore();
+    const attachmentsRef = useRef<AttachmentItem[]>([]);
 
     // Get contract-specific data
     const contract = useCurrentContract();
     const resetTemplate = useBuilderChatStore((state) => state.resetTemplate);
 
-    const templateButtonRef = useRef<HTMLButtonElement | null>(null);
-    const templatePanelRef = useRef<HTMLDivElement | null>(null);
-    const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const { set_states, handleGeneration } = useGenerate();
     const [hasExistingMessages, setHasExistingMessages] = useState<boolean>(false);
     const params = useParams();
     const contractId = params.contractId as string;
     const { showMessageLimit, setShowMessageLimit, showContractLimit, showRegenerateTime } =
         useLimitStore();
-    const [showMoreOptionsPanel, setShowMoreOptionsPanel] = useState<boolean>(false);
+    const skipAuth = shouldSkipAuthClient();
 
-    useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
+    useEffect(() => {
+        attachmentsRef.current = attachments;
+    }, [attachments]);
+
+    useEffect(() => {
+        return () => {
+            attachmentsRef.current.forEach((attachment) => {
+                if (attachment.previewUrl) {
+                    URL.revokeObjectURL(attachment.previewUrl);
+                }
+            });
+        };
+    }, []);
 
     function formatPretty(isoString: string) {
         const date = new Date(isoString);
@@ -67,7 +97,10 @@ export default function BuilderChatInput() {
     }
 
     async function handleSubmit() {
-        if (!session?.user.id) {
+        if (!inputValue.trim() && attachments.length === 0) {
+            return;
+        }
+        if (!session?.user.id && !skipAuth) {
             setOpenLoginModal(true);
             return;
         }
@@ -76,6 +109,14 @@ export default function BuilderChatInput() {
         }
         set_states(contractId, inputValue, contract.activeTemplate?.id);
         handleGeneration(contractId, inputValue, contract.activeTemplate?.id);
+        setAttachments((prev) => {
+            prev.forEach((attachment) => {
+                if (attachment.previewUrl) {
+                    URL.revokeObjectURL(attachment.previewUrl);
+                }
+            });
+            return [];
+        });
     }
 
     const userMessagesLength = contract.messages.filter((m) => m.role === ChatRole.USER).length;
@@ -104,6 +145,45 @@ export default function BuilderChatInput() {
         }
     }
 
+    function handleFilesSelected(files: File[]) {
+        const supportedFiles = files.filter((file) => {
+            const lower = file.name.toLowerCase();
+            const isPdf = file.type === 'application/pdf' || lower.endsWith('.pdf');
+            const isImage = file.type.startsWith('image/');
+            return isPdf || isImage;
+        });
+
+        if (supportedFiles.length === 0) return;
+
+        setAttachments((prev) => {
+            const existing = new Set(prev.map((attachment) => getFileUniqueKey(attachment.file)));
+            const next = [...prev];
+            for (const file of supportedFiles) {
+                const key = getFileUniqueKey(file);
+                if (existing.has(key)) continue;
+                const isImage = file.type.startsWith('image/');
+                next.push({
+                    id: uuid(),
+                    file,
+                    kind: isImage ? 'image' : 'pdf',
+                    previewUrl: isImage ? URL.createObjectURL(file) : undefined,
+                });
+                existing.add(key);
+            }
+            return next;
+        });
+    }
+
+    function removeAttachment(idToRemove: string) {
+        setAttachments((prev) => {
+            const removing = prev.find((attachment) => attachment.id === idToRemove);
+            if (removing?.previewUrl) {
+                URL.revokeObjectURL(removing.previewUrl);
+            }
+            return prev.filter((attachment) => attachment.id !== idToRemove);
+        });
+    }
+
     return (
         <>
             <div className="relative group w-full flex flex-col">
@@ -121,7 +201,6 @@ export default function BuilderChatInput() {
                             className="bg-red-600/20 hover:bg-red-500/20 transition-colors duration-100 rounded-[4px] aspect-square h-5.5 w-5.5 leading-snug cursor-pointer flex items-center justify-center"
                             onClick={() => {
                                 setHasExistingMessages(false);
-                                setShowTemplatePanel(false);
                                 resetTemplate();
                             }}
                         >
@@ -154,53 +233,123 @@ export default function BuilderChatInput() {
                     </div>
                 )}
 
-                <div className="relative rounded-[8px] border border-neutral-800/80 bg-darkest">
-                    <div className="relative flex flex-col">
-                        <div className="absolute left-4 top-5 text-neutral-600 font-mono text-sm select-none">
-                            &gt;
-                        </div>
-
-                        <Textarea
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="create a counter program..."
-                            disabled={hasExistingMessages}
+                <HoverBorderGradient
+                    as="div"
+                    roundedClassName="rounded-[34px]"
+                    containerClassName="w-full rounded-[34px]"
+                    className="w-full !rounded-[34px] !p-0"
+                    gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+                    duration={5}
+                    speed={0.14}
+                    noiseIntensity={0.16}
+                    animating
+                    backdropBlur
+                >
+                    <div
+                        className={cn(
+                            'relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm transition-all duration-200',
+                            isInputFocused && 'md:scale-[1.005]',
+                        )}
+                    >
+                        <div
                             className={cn(
-                                'w-full focus:h-28 h-15 bg-transparent pl-10 pr-4 py-5 text-neutral-200 border-0 shadow-none',
-                                'placeholder:text-neutral-800 placeholder:text-sm resize-none',
-                                'focus:outline-none transition-all duration-200',
-                                'text-md tracking-wider caret-[#e6e0d4]',
-                                hasExistingMessages && 'cursor-not-allowed opacity-50',
+                                'px-5 pt-3.5 pb-[3.3rem] md:px-6 md:pt-4 transition-all duration-200',
+                                isInputFocused ? 'md:pb-[3.7rem]' : 'md:pb-[3.3rem]',
                             )}
-                            rows={3}
-                        />
+                        >
+                            {attachments.length > 0 && (
+                                <div className="mb-3 flex flex-wrap gap-2">
+                                    {attachments.map((attachment) => (
+                                        <div
+                                            key={attachment.id}
+                                            className="inline-flex max-w-[16.5rem] items-center gap-2 rounded-xl border border-neutral-700/90 bg-[#1a1a1d] p-2"
+                                        >
+                                            {attachment.kind === 'image' && attachment.previewUrl ? (
+                                                <Image
+                                                    src={attachment.previewUrl}
+                                                    alt={attachment.file.name}
+                                                    width={40}
+                                                    height={40}
+                                                    unoptimized
+                                                    className="h-10 w-10 rounded-md object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-red-500/20 text-[10px] font-semibold tracking-wide text-red-300">
+                                                    PDF
+                                                </div>
+                                            )}
+                                            <div className="flex min-w-0 flex-col">
+                                                <span className="max-w-[10rem] truncate text-sm text-neutral-200">
+                                                    {attachment.file.name}
+                                                </span>
+                                                <span className="text-xs text-neutral-400">
+                                                    {formatFileSize(attachment.file.size)}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeAttachment(attachment.id)}
+                                                className="rounded-full p-1 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-white"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <Textarea
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setIsInputFocused(true)}
+                                onBlur={() => setIsInputFocused(false)}
+                                placeholder="Prompt BlackIn to build your next web workflow"
+                                disabled={hasExistingMessages}
+                                className={cn(
+                                    'w-full h-[3.1rem] md:h-[3.8rem] focus:h-[4.9rem] bg-transparent px-0 py-0 text-neutral-200 border-0 shadow-none',
+                                    'placeholder:text-neutral-600 placeholder:text-sm resize-none',
+                                    'focus:outline-none transition-all duration-200',
+                                    'text-md tracking-wider caret-[#e6e0d4]',
+                                    hasExistingMessages && 'cursor-not-allowed opacity-50',
+                                )}
+                                rows={3}
+                            />
 
-                        {contract.activeTemplate && !hasExistingMessages && (
-                            <div className="mx-3 mb-3">
-                                <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
-                                    <div
-                                        onClick={() => resetTemplate()}
-                                        className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-darkest cursor-pointer shadow-sm"
-                                    >
-                                        <RxCross2 />
-                                    </div>
-                                    <Image
-                                        src={contract.activeTemplate.imageUrl}
-                                        alt=""
-                                        fill
-                                        className="object-cover"
-                                        unoptimized
-                                    />
-                                    <div className="absolute bottom-0 text-[13px] text-darkest w-full bg-light px-1 py-px lowercase truncate font-semibold tracking-wide">
-                                        {contract.activeTemplate.title}
+                            {contract.activeTemplate && !hasExistingMessages && (
+                                <div className="mt-3">
+                                    <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
+                                        <div
+                                            onClick={() => resetTemplate()}
+                                            className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-darkest cursor-pointer shadow-sm"
+                                        >
+                                            <RxCross2 />
+                                        </div>
+                                        <Image
+                                            src={contract.activeTemplate.imageUrl}
+                                            alt=""
+                                            fill
+                                            className="object-cover"
+                                            unoptimized
+                                        />
+                                        <div className="absolute bottom-0 text-[13px] text-darkest w-full bg-light px-1 py-px lowercase truncate font-semibold tracking-wide">
+                                            {contract.activeTemplate.title}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        <div className="absolute inset-x-0 bottom-0">
+                            <BuilderChatInputFeatures
+                                inputValue={inputValue}
+                                onSubmit={handleSubmit}
+                                onFilesSelected={handleFilesSelected}
+                                canSubmit={attachments.length > 0}
+                                disabled={hasExistingMessages}
+                            />
+                        </div>
                     </div>
-                    <BuilderChatInputFeatures />
-                </div>
+                </HoverBorderGradient>
             </div>
 
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />

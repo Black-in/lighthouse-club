@@ -91,7 +91,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId]);
 
     return (
-        <div className="h-screen w-screen flex flex-col overflow-hidden tracking-wider">
+        <div className="h-screen w-screen flex flex-col overflow-hidden tracking-wider bg-black">
             <BuilderNavbar />
             <div className="flex-1 min-h-0 flex flex-col">
                 <BuilderDashboard />

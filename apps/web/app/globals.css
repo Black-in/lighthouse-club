@@ -19,6 +19,12 @@
     scrollbar-width: none;
 }
 
+.soft-scroll {
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
 @layer utilities {
     .zigzag-text {
         --c: #1095c1; /* Color for the zigzag lines */

@@ -313,8 +313,8 @@ export default function Terminal() {
                         side="top"
                         content={
                             isConnected
-                                ? 'winter shell is plugged in and cozy.'
-                                : 'winter shell drifted into a snowstorm… finding the signal again.'
+                                ? 'Connection is active.'
+                                : 'Connection is unavailable.'
                         }
                     >
                         <div className="flex items-center gap-2 cursor-default">
@@ -332,9 +332,7 @@ export default function Terminal() {
                                 />
                             </span>
                             <span className="font-semibold test-[13px] tracking-wide">
-                                {isConnected
-                                    ? 'winter shell is connected'
-                                    : 'winter shell disconnected'}
+                                {isConnected ? 'connected' : 'disconnected'}
                             </span>
                         </div>
                     </ToolTipComponent>

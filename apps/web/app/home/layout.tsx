@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import SessionSetter from '@/src/lib/SessionSeter';
 import { authOption } from '@/app/api/auth/[...nextauth]/options';
 import { Toaster } from 'sonner';
+import { headers } from 'next/headers';
 
 interface Props {
     children: React.ReactNode;
@@ -19,37 +20,44 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Props) {
-    const session = await getServerSession(authOption);
+    const headerStore = await headers();
+    const host = headerStore.get('host') ?? '';
+    const hostname = host.split(':')[0];
+    const isLocalHost =
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '::1' ||
+        hostname.endsWith('.local');
+    const skipAuth =
+        process.env.NODE_ENV !== 'production' ||
+        process.env.NEXT_PUBLIC_SKIP_AUTH === 'true' ||
+        isLocalHost;
+    const session = skipAuth ? null : await getServerSession(authOption);
 
     return (
-        <html lang="en">
-            <body
-                className={`flex h-screen w-screen items-center justify-center bg-neutral-900`}
-                suppressHydrationWarning
-            >
-                {children}
-                <Toaster
-                    theme="dark"
-                    closeButton
-                    visibleToasts={4}
-                    toastOptions={{
-                        style: {
-                            background: '#0c0d0e',
-                            color: '#FFFFFF',
-                            border: '1px solid #2C2C2E',
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
-                        },
-                        classNames: {
-                            title: 'text-white font-semibold',
-                            description: 'text-gray-300',
-                            actionButton: 'bg-[#052659] text-white hover:bg-[#5483B3]',
-                            cancelButton: 'bg-gray-700 text-white hover:bg-gray-800',
-                        },
-                    }}
-                />
-                <SessionSetter session={session} />
-            </body>
-        </html>
+        <div className="flex h-screen w-screen items-center justify-center bg-neutral-900">
+            {children}
+            <Toaster
+                theme="dark"
+                closeButton
+                visibleToasts={4}
+                toastOptions={{
+                    style: {
+                        background: '#0c0d0e',
+                        color: '#FFFFFF',
+                        border: '1px solid #2C2C2E',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+                    },
+                    classNames: {
+                        title: 'text-white font-semibold',
+                        description: 'text-gray-300',
+                        actionButton: 'bg-[#052659] text-white hover:bg-[#5483B3]',
+                        cancelButton: 'bg-gray-700 text-white hover:bg-gray-800',
+                    },
+                }}
+            />
+            <SessionSetter session={session} />
+        </div>
     );
 }

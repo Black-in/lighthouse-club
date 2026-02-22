@@ -60,7 +60,7 @@ export default function BuilderLoader() {
     const filePath = currentFileEditing ? currentFileEditing.split('/').slice(0, -1).join('/') : '';
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-darker">
+        <div className="w-full h-full flex items-center justify-center bg-[#070708]">
             <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-md">
                 <LighthouseMark className="text-neutral-600 h-20 w-20 animate-pulse" />
 

@@ -90,7 +90,7 @@ export default function PublicReviewCard() {
                         <div className="flex items-center gap-x-3">
                             <div className="flex items-center gap-3 relative h-7 w-7 rounded-full overflow-hidden">
                                 <Image
-                                    src={session.user.image || '/icons/lighthouse-mark.svg'}
+                                    src={session.user.image || '/icons/blackin-mark-dark.svg'}
                                     alt=""
                                     fill
                                     unoptimized

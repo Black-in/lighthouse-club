@@ -11,6 +11,7 @@ import {
 } from '@/routes/api_routes';
 import { Contract, Template } from '@lighthouse/types';
 import axios from 'axios';
+import { shouldSkipAuthClient } from '../auth-bypass';
 
 export default class Marketplace {
     public static async getUserContracts(token: string): Promise<Contract[]> {
@@ -44,11 +45,25 @@ export default class Marketplace {
     }
 
     public static async getTemplates(): Promise<Template[]> {
+        const skipTemplatesFetch =
+            process.env.NODE_ENV !== 'production' ||
+            process.env.NEXT_PUBLIC_SKIP_TEMPLATES_FETCH === 'true' ||
+            process.env.NEXT_PUBLIC_SKIP_AUTH === 'true' ||
+            shouldSkipAuthClient();
+
+        if (skipTemplatesFetch) {
+            return [];
+        }
+
         try {
             const { data } = await axios.get(GET_ALL_TEMPLATES);
 
             return data.data;
         } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                // Some environments do not expose templates endpoint.
+                return [];
+            }
             console.error('Failed to fetch templates', error);
             return [];
         }

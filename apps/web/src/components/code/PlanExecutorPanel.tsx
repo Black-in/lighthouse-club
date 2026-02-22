@@ -103,9 +103,10 @@ export default function PlanExecutorPanel({
 
     return (
         <div
+            data-lenis-prevent
             className={cn(
-                'max-w-170 px-4 py-5 pb-20 text-left relative transition-all duration-300 overflow-x-hidden overflow-y-auto mt-1',
-                collapse ? 'max-h-48 min-h-48' : 'min-h-fit',
+                'max-w-170 px-4 py-5 pb-28 text-left relative transition-all duration-300 overflow-x-hidden overflow-y-auto mt-1 custom-scrollbar soft-scroll scroll-pb-16',
+                collapse ? 'max-h-48 min-h-48' : expanded ? 'h-full min-h-0' : 'min-h-fit',
                 className,
             )}
         >

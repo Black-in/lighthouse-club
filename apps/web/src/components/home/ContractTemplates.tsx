@@ -44,7 +44,7 @@ export default function ContractTemplates() {
                     >
                         <div className="bg-[#0A0C0D70] overflow-hidden shadow-sm border border-neutral-800 rounded-[8px] relative">
                             <Image
-                                src={'/icons/lighthouse-mark-dark.svg'}
+                                src={'/icons/blackin-mark-dark.svg'}
                                 alt="BlackIn template"
                                 fill
                                 className="object-cover opacity-90"

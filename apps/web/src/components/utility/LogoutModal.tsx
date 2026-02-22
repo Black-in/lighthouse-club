@@ -149,7 +149,7 @@ export default function LogoutModal({ openLogoutModal, setOpenLogoutModal }: Log
         >
             <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                 <ShaderSplitPanel
-                    imageSrc="/icons/lighthouse-mark-dark.svg"
+                    imageSrc="/icons/blackin-mark-dark.svg"
                     leftChildren={<LogoutLeftContent />}
                     rightChildren={<LogoutRightContent setOpenLogoutModal={setOpenLogoutModal} />}
                 />

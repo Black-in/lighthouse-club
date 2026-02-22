@@ -23,7 +23,7 @@ export default function PlanPanel(): JSX.Element {
     //         </div>
     //     );
     return (
-        <div className="w-full flex justify-center bg-[#16171a]">
+        <div className="w-full h-full min-h-0 flex justify-center bg-[#070708] overflow-hidden">
             <PlanExecutorPanel
                 plan={DUMMY_PLAN}
                 onCollapse={() => {
@@ -41,7 +41,7 @@ export default function PlanPanel(): JSX.Element {
                 collapse={collapsePanel}
                 expanded
                 editExeutorPlanPanel={editExeutorPlanPanel}
-                className="w-full px-4 py-2"
+                className="w-full h-full min-h-0 px-4 py-2"
             />
         </div>
     );

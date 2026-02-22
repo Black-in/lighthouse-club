@@ -16,11 +16,5 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-        <html lang="en">
-            <body className={`antialiased bg-black`} suppressHydrationWarning>
-                <LenisProvider>{children}</LenisProvider>
-            </body>
-        </html>
-    );
+    return <LenisProvider>{children}</LenisProvider>;
 }

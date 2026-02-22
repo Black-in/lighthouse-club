@@ -9,6 +9,7 @@ import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
 import GenerateContract from '../lib/server/generate_contract';
 import { ChatRole, STAGE, Template } from '@lighthouse/types';
+import { shouldSkipAuthClient } from '../lib/auth-bypass';
 
 export default function useGenerate() {
     const { session } = useUserSessionStore();
@@ -69,11 +70,12 @@ export default function useGenerate() {
     }
 
     function handleGeneration(contractId: string, instruction?: string, templateId?: string) {
-        if (!session?.user.token) return;
+        const skipAuth = shouldSkipAuthClient();
+        if (!session?.user.token && !skipAuth) return;
         const { setLoading } = useBuilderChatStore.getState();
         setLoading(true);
         GenerateContract.start_agentic_executor(
-            session.user.token,
+            session?.user?.token ?? '',
             contractId,
             instruction,
             templateId,

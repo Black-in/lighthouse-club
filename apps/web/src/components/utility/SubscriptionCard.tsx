@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import LighthouseMark from '../ui/svg/LighthouseMark';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
-import { useRouter } from 'next/navigation';
+import PricingModal from '../pricing/PricingModal';
 
 export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
 export type BillingPeriod = 'MONTHLY' | 'YEARLY';
@@ -175,7 +175,7 @@ export const plans: Plan[] = [
 export default function SubscriptionPlans() {
     const [billing, setBilling] = useState<BillingPeriod>('MONTHLY');
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-    const router = useRouter();
+    const [openPricingModal, setOpenPricingModal] = useState<boolean>(false);
 
     return (
         <section
@@ -232,7 +232,7 @@ export default function SubscriptionPlans() {
                         billing={billing}
                         features={planData.features}
                         isBest={planData.isBest}
-                        onClick={() => router.push('/pricing')}
+                        onClick={() => setOpenPricingModal(true)}
                     />
                 ))}
             </div>
@@ -247,6 +247,11 @@ export default function SubscriptionPlans() {
                     setBilling={setBilling}
                 />
             )}
+
+            <PricingModal
+                openPricingModal={openPricingModal}
+                setOpenPricingModal={setOpenPricingModal}
+            />
         </section>
     );
 }
