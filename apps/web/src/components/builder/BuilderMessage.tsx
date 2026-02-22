@@ -10,7 +10,6 @@ import AppLogo from '../tickers/AppLogo';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import Image from 'next/image';
 import { TextShimmer } from '../ui/shimmer-text';
-import { formatChatTime } from '@/src/lib/format_chat_time';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
@@ -19,7 +18,7 @@ import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { SidePanelValues } from '../code/EditorSidePanel';
 import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
-import { FiCopy, FiCheck, FiClock } from 'react-icons/fi';
+import { FiCopy, FiCheck } from 'react-icons/fi';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 interface BuilderMessageProps {
@@ -50,27 +49,17 @@ export default function BuilderMessage({
         setTimeout(() => setCopiedId(null), 2000);
     }
 
-    function TimeDisplay({ date }: { date: Date }) {
-        return (
-            <div className="flex items-center gap-1 text-xs text-neutral-500">
-                <FiClock size={12} />
-                <span>{formatChatTime(new Date(date))}</span>
-            </div>
-        );
-    }
-
     return (
         <div className="w-full shrink-0">
             {message.role === 'USER' && (
                 <div className="flex justify-end items-start w-full">
-                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                    <div className="flex items-start gap-x-2 max-w-[86%]">
                         <div>
-                            <div className="mt-3 rounded-b-[8px] rounded-tl-[8px] border border-[#5483B3] bg-linear-to-b from-[#5483B3] to-[#052659] px-4 py-2 text-right text-sm font-normal text-light">
+                            <div className="mt-3 ml-auto w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-left text-sm font-normal text-white whitespace-pre-wrap break-words">
                                 {message.content}
                             </div>
 
-                            <div className="flex justify-end items-center gap-2 mt-1">
-                                <TimeDisplay date={message.createdAt} />
+                            <div className="flex justify-end items-center mt-1">
                                 <button
                                     type="button"
                                     className="text-xs cursor-pointer"
@@ -79,7 +68,7 @@ export default function BuilderMessage({
                                     {copiedId === message.id ? (
                                         <FiCheck strokeWidth={2.5} size={12} color="#5483B3" />
                                     ) : (
-                                        <FiCopy size={12} />
+                                        <FiCopy size={12} color="#ffffff" />
                                     )}
                                 </button>
                             </div>
@@ -100,7 +89,7 @@ export default function BuilderMessage({
 
             {message.role === 'TEMPLATE' && (
                 <div className="flex justify-end items-start w-full">
-                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                    <div className="flex items-start gap-x-2 max-w-[86%]">
                         <div className="flex flex-col gap-y-2">
                             <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end mt-3">
                                 {message.template?.imageUrl && (
@@ -112,10 +101,6 @@ export default function BuilderMessage({
                                         unoptimized
                                     />
                                 )}
-                            </div>
-
-                            <div className="flex justify-end items-center gap-2">
-                                <TimeDisplay date={message.createdAt} />
                             </div>
                         </div>
 
@@ -159,9 +144,9 @@ export default function BuilderMessage({
 
             {message.role === 'USER' && loading && !messages.some((m) => m.role === 'AI') && (
                 <div className="flex justify-start w-full mt-2 ">
-                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                    <div className="flex items-start gap-x-2 max-w-[86%]">
                         <AppLogo showLogoText={false} size={22} />
-                        <div className="px-4 py-2 rounded-[4px] text-sm font-normal bg-dark text-light text-left tracking-wider text-[13px] italic">
+                        <div className="px-4 py-2 rounded-2xl border border-neutral-800 text-sm font-normal bg-[#08090a] text-white text-left tracking-wider text-[13px] italic">
                             <div className="flex items-center gap-x-1">
                                 <div className="flex space-x-1">
                                     <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -176,17 +161,16 @@ export default function BuilderMessage({
 
             {message.role === 'AI' && (
                 <div className="flex justify-start w-full">
-                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                    <div className="flex items-start gap-x-2 max-w-[86%]">
                         <div className="w-8 h-8 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
                             <AppLogo showLogoText={false} size={22} />
                         </div>
                         <div className="flex flex-col">
-                            <div className="px-4 py-2 rounded-tr-[8px] rounded-b-[8px] text-sm font-normal bg-linear-to-b from-[#111212]  to-[#121313] border border-neutral-800 text-light/80 text-left tracking-wider mt-2.5">
+                            <div className="mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
                                 {returnParsedData(message.content)}
                             </div>
 
-                            <div className="flex items-center gap-2 mt-1">
-                                <TimeDisplay date={message.createdAt} />
+                            <div className="flex items-center mt-1">
                                 <button
                                     type="button"
                                     className="text-xs cursor-pointer"
@@ -195,7 +179,7 @@ export default function BuilderMessage({
                                     {copiedId === message.id ? (
                                         <FiCheck size={12} color="#5483B3" />
                                     ) : (
-                                        <FiCopy size={12} />
+                                        <FiCopy size={12} color="#ffffff" />
                                     )}
                                 </button>
                             </div>

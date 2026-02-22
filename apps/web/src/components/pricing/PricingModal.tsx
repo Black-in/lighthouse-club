@@ -6,11 +6,12 @@
 'use client';
 
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { MdHomeFilled } from 'react-icons/md';
 import OpacityBackground from '../utility/OpacityBackground';
 import PricingHeader from './PricingHeader';
 import PricingPlanToggleNavbar from './PricingPlanToggleNavbar';
 import PricingSection from './PricingSection';
+import { useRouter } from 'next/navigation';
 
 interface PricingModalProps {
     openPricingModal: boolean;
@@ -18,6 +19,8 @@ interface PricingModalProps {
 }
 
 export default function PricingModal({ openPricingModal, setOpenPricingModal }: PricingModalProps) {
+    const router = useRouter();
+
     useEffect(() => {
         if (!openPricingModal) return;
 
@@ -45,11 +48,14 @@ export default function PricingModal({ openPricingModal, setOpenPricingModal }: 
             >
                 <button
                     type="button"
-                    onClick={() => setOpenPricingModal(false)}
-                    className="absolute right-4 top-4 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full border border-neutral-700 bg-[#0b0d10] text-neutral-300 transition-colors hover:border-neutral-500 hover:bg-neutral-900 hover:text-white"
-                    aria-label="Close pricing"
+                    onClick={() => {
+                        setOpenPricingModal(false);
+                        router.push('/');
+                    }}
+                    className="absolute right-4 top-4 z-30 rounded-sm p-[4px] text-light/70 transition-transform hover:-translate-y-0.5 hover:bg-neutral-700/70"
+                    aria-label="Go home"
                 >
-                    <X className="h-4 w-4" />
+                    <MdHomeFilled className="h-8 w-8" />
                 </button>
 
                 <div

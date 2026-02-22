@@ -109,6 +109,7 @@ export default function BuilderChatInput() {
         }
         set_states(contractId, inputValue, contract.activeTemplate?.id);
         handleGeneration(contractId, inputValue, contract.activeTemplate?.id);
+        setInputValue('');
         setAttachments((prev) => {
             prev.forEach((attachment) => {
                 if (attachment.previewUrl) {
