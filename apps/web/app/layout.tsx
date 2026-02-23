@@ -11,6 +11,7 @@ import SessionSetter from '@/src/lib/SessionSeter';
 import WalletProviders from '@/src/providers/WalletProviders';
 import { Toaster } from 'sonner';
 import { headers } from 'next/headers';
+import { shouldEnableDevAccessServer } from '@/src/lib/runtime-mode';
 
 export const metadata: Metadata = {
     title: 'BlackIn',
@@ -51,15 +52,7 @@ export default async function RootLayout({
     const headerStore = await headers();
     const host = headerStore.get('host') ?? '';
     const hostname = host.split(':')[0];
-    const isLocalHost =
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname === '::1' ||
-        hostname.endsWith('.local');
-    const skipAuth =
-        process.env.NODE_ENV !== 'production' ||
-        process.env.NEXT_PUBLIC_SKIP_AUTH === 'true' ||
-        isLocalHost;
+    const skipAuth = shouldEnableDevAccessServer(hostname);
     const session = skipAuth ? null : await getServerSession(authOption);
 
     return (

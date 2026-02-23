@@ -5,11 +5,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import WebSocketClient, { MessageHandler } from '../class/socket.client';
-import { cleanWebSocketClient } from '../lib/singletonWebSocket';
+import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import { COMMAND } from '@lighthouse/types';
 import { COMMAND_WRITER } from '../lib/terminal_commands';
+import { shouldSkipAuthClient } from '../lib/auth-bypass';
 
 export const useWebSocket = () => {
     const socket = useRef<WebSocketClient | null>(null);
@@ -19,19 +20,24 @@ export const useWebSocket = () => {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        const token = session?.user?.token;
+        const skipAuth = shouldSkipAuthClient();
+        const token = session?.user?.token || (skipAuth ? 'dev-local-token' : undefined);
         if (!token || !contractId) return;
 
         let interval: NodeJS.Timeout | null = null;
 
         try {
-            // socket.current = getWebSocketClient(token, contractId);
+            socket.current = getWebSocketClient(token, contractId);
+            if (!socket.current) {
+                setIsConnected(false);
+                return;
+            }
 
             interval = setInterval(() => {
                 if (socket.current) {
                     setIsConnected(socket.current.is_connected ?? false);
                 }
-            }, 200);
+            }, 250);
         } catch (err) {
             console.error('Failed to initialize WS:', err);
             setIsConnected(false);
@@ -47,9 +53,10 @@ export const useWebSocket = () => {
 
     function subscribeToHandler(handler: MessageHandler) {
         if (!socket.current) {
-            return;
+            return () => undefined;
         }
-        socket.current?.subscribe(handler);
+        socket.current.subscribe(handler);
+        return () => socket.current?.unsubscribe(handler);
     }
 
     function sendSocketMessage(command: COMMAND, message: COMMAND_WRITER) {

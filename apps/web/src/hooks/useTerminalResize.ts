@@ -10,12 +10,28 @@ interface UseTerminalResizeProps {
 }
 
 export function useTerminalResize({ onClose }: UseTerminalResizeProps) {
+    const STORAGE_KEY = 'blackin.terminal.height.v1';
     const [height, setHeight] = useState(220);
     const [isResizing, setIsResizing] = useState(false);
 
     const startResize = useCallback(() => {
         setIsResizing(true);
     }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedHeight = window.localStorage.getItem(STORAGE_KEY);
+        if (!storedHeight) return;
+        const parsed = Number(storedHeight);
+        if (!Number.isNaN(parsed) && parsed >= 100 && parsed <= 600) {
+            setHeight(parsed);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem(STORAGE_KEY, String(Math.round(height)));
+    }, [height]);
 
     useEffect(() => {
         const doResize = (e: MouseEvent) => {

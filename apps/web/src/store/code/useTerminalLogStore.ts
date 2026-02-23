@@ -5,6 +5,7 @@
 
 import { Line } from '@/src/types/terminal_types';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface TerminalLogStore {
     logs: Line[];
@@ -17,19 +18,36 @@ interface TerminalLogStore {
     clearLogs: () => void;
 }
 
-export const useTerminalLogStore = create<TerminalLogStore>((set, get) => ({
-    logs: [],
-    isCommandRunning: false,
-    terminalLoader: false,
-    setTerminalLoader(value) {
-        return set({
-            terminalLoader: value,
-        });
-    },
-    setIsCommandRunning: (value: boolean) => set({ isCommandRunning: value }),
-    addLog: (log: Line) => set({ logs: [...get().logs, log] }),
+const MAX_TERMINAL_LINES = 300;
 
-    setLogs: (logs: Line[]) => set({ logs }),
+export const useTerminalLogStore = create<TerminalLogStore>()(
+    persist(
+        (set, get) => ({
+            logs: [],
+            isCommandRunning: false,
+            terminalLoader: false,
+            setTerminalLoader(value) {
+                return set({
+                    terminalLoader: value,
+                });
+            },
+            setIsCommandRunning: (value: boolean) => set({ isCommandRunning: value }),
+            addLog: (log: Line) =>
+                set({
+                    logs: [...get().logs, log].slice(-MAX_TERMINAL_LINES),
+                }),
 
-    clearLogs: () => set({ logs: [] }),
-}));
+            setLogs: (logs: Line[]) =>
+                set({
+                    logs: logs.slice(-MAX_TERMINAL_LINES),
+                }),
+
+            clearLogs: () => set({ logs: [] }),
+        }),
+        {
+            name: 'blackin.terminal.logs.v1',
+            storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({ logs: state.logs.slice(-MAX_TERMINAL_LINES) }),
+        },
+    ),
+);

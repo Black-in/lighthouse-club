@@ -18,6 +18,7 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { DAILY_LIMIT } from '@lighthouse/types';
+import { shouldSkipAuthClient } from '../auth-bypass';
 
 export default class GenerateContract {
     static async start_planner_executor(
@@ -30,7 +31,8 @@ export default class GenerateContract {
     }> {
         const { setMessage } = useBuilderChatStore.getState();
         try {
-            if (!token || !contract_id || !instruction) {
+            const skipAuth = shouldSkipAuthClient();
+            if ((!token && !skipAuth) || !contract_id || !instruction) {
                 return {
                     data: null,
                     message: 'some data is not provided',
@@ -44,9 +46,11 @@ export default class GenerateContract {
                     instruction,
                 },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: token
+                        ? {
+                              Authorization: `Bearer ${token}`,
+                          }
+                        : undefined,
                 },
             );
             setMessage(data.data);
@@ -82,7 +86,7 @@ export default class GenerateContract {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({
                     contract_id: contractId,
@@ -233,7 +237,8 @@ export default class GenerateContract {
         try {
             setLoading(true);
 
-            if (!token || !contractId || !message.trim()) {
+            const skipAuth = shouldSkipAuthClient();
+            if ((!token && !skipAuth) || !contractId || !message.trim()) {
                 throw new Error('Missing required parameters');
             }
 
@@ -241,7 +246,7 @@ export default class GenerateContract {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({
                     contract_id: contractId,

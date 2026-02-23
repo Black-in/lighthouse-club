@@ -61,8 +61,8 @@ export const CommandResponse: Record<COMMAND_WRITER, string> = {
     [COMMAND_WRITER.HOT_KEYS]: hotKeysResponse,
     [COMMAND_WRITER.PLATFORM]: platformResponse,
     [COMMAND_WRITER.COMMANDS]: commandsResponse,
-    [COMMAND_WRITER.lighthouse_BUILD]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_TEST]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]: `this feature is forging in the BlackIn labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.lighthouse_BUILD]: `queued: running build in your workspace...`,
+    [COMMAND_WRITER.lighthouse_TEST]: `queued: running tests in your workspace...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]: `queued: deploying to devnet...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]: `queued: deploying to mainnet...`,
 };

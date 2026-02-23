@@ -28,6 +28,7 @@ import FileTree from '../code/Filetree';
 import PlanPanel from '../code/PlanPanel';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 import { cn } from '@/src/lib/utils';
+import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
 
 const PROJECT_PANEL_WIDTH_STORAGE_KEY = 'blackin.playground.projectPanelWidth';
 const DEFAULT_PROJECT_PANEL_WIDTH = 296;
@@ -90,19 +91,39 @@ export default function BuilderDashboard(): JSX.Element {
             timeout = setTimeout(() => {
                 setTerminalLoader(true);
             }, 5000);
-            setIsCommandRunning(true);
-            if (message.type === TerminalSocketData.COMPLETED) setIsCommandRunning(false);
-            const { line } = message.payload;
+
+            if (message.type === TerminalSocketData.EXECUTING_COMMAND) {
+                setIsCommandRunning(true);
+            }
+            if (
+                [
+                    TerminalSocketData.COMPLETED,
+                    TerminalSocketData.ERROR_MESSAGE,
+                    TerminalSocketData.BUILD_ERROR,
+                    TerminalSocketData.VALIDATION_ERROR,
+                ].includes(message.type)
+            ) {
+                setIsCommandRunning(false);
+            }
+
+            const payload = message.payload as IncomingPayload | string;
+            const line = typeof payload === 'string' ? payload : payload?.line;
+            if (!line) return;
             addLog({
                 type: message.type,
                 text: line,
             });
         }
 
+        let unsubscribe: (() => void) | undefined;
         if (isConnected) {
-            subscribeToHandler(handleIncomingTerminalLogs);
+            unsubscribe = subscribeToHandler(handleIncomingTerminalLogs);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        return () => {
+            if (timeout) clearTimeout(timeout);
+            unsubscribe?.();
+        };
     }, [isConnected]);
 
     return (
@@ -153,10 +174,10 @@ function Editing() {
     const splitContainerRef = useRef<HTMLDivElement | null>(null);
     const [projectPanelWidth, setProjectPanelWidth] = useState<number>(DEFAULT_PROJECT_PANEL_WIDTH);
     const [isResizingPanels, setIsResizingPanels] = useState<boolean>(false);
-    const showDevFileStructure = process.env.NODE_ENV !== 'production';
+    const showDevFileStructure = shouldEnableDevAccessClient();
 
     useEffect(() => {
-        if (process.env.NODE_ENV === 'production') return;
+        if (!showDevFileStructure) return;
         if (fileTree.length > 0) return;
 
         const root = parseFileStructure(DEV_SAMPLE_FILES);
@@ -164,7 +185,7 @@ function Editing() {
         if (firstFile) {
             selectFile(firstFile);
         }
-    }, [fileTree.length, parseFileStructure, selectFile]);
+    }, [fileTree.length, parseFileStructure, selectFile, showDevFileStructure]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;

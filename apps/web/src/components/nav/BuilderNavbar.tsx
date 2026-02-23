@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import BuilderNavbarSearchComponent from './BuilderNavbarSearchComponent';
 import BuilderNavbarRightSection from './BuilderNavbarRightSection';
+import DevelopmentModeBadge from '../utility/DevelopmentModeBadge';
 
 interface BuilderNavbarProps {
     leftRailVisible?: boolean;
@@ -39,8 +40,9 @@ export default function BuilderNavbar({ leftRailVisible, onToggleLeftRail }: Bui
                     style={{ transform: `rotate(${shouldRotate ? 180 : 0}deg)` }}
                 />
             </button>
-            <div className="ml-5">
+            <div className="ml-5 flex items-center gap-2">
                 <BuilderNavbarSearchComponent />
+                <DevelopmentModeBadge />
             </div>
             <div className="ml-auto">
                 <BuilderNavbarRightSection />

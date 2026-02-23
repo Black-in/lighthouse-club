@@ -5,22 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { shouldEnableDevAccessServer } from './src/lib/runtime-mode';
 
 export async function middleware(request: NextRequest) {
-    const host = request.nextUrl.hostname;
-    const isLocalHost =
-        host === 'localhost' ||
-        host === '127.0.0.1' ||
-        host === '::1' ||
-        host.endsWith('.local');
-    const skipAuth =
-        process.env.NODE_ENV !== 'production' ||
-        process.env.NEXT_PUBLIC_SKIP_AUTH === 'true' ||
-        isLocalHost;
-    const isPlaygroundRoute = request.nextUrl.pathname.startsWith('/playground');
+    const skipAuth = shouldEnableDevAccessServer(request.nextUrl.hostname);
 
-    // Allow unauthenticated playground access in local/dev environments.
-    if (skipAuth && isPlaygroundRoute) {
+    // In dev access mode, allow all matched routes without auth.
+    if (skipAuth) {
         return NextResponse.next();
     }
 
