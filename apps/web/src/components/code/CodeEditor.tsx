@@ -6,10 +6,17 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { FiCheck, FiCopy } from 'react-icons/fi';
 import { cn } from '@/src/lib/utils';
 import LighthouseMark from '../ui/svg/LighthouseMark';
+import { LuFile } from 'react-icons/lu';
 
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } =
-        useCodeEditor();
+    const {
+        currentCode,
+        currentFile,
+        collapseFileTree,
+        setCurrentCursorPosition,
+        collapseChat,
+        setCollapsechat,
+    } = useCodeEditor();
     const [isCopied, setIsCopied] = useState<boolean>(false);
     const [copyCooldown, setCopyCooldown] = useState<boolean>(false);
 
@@ -146,30 +153,34 @@ export default function CodeEditor(): JSX.Element {
                     <>
                         <div className="w-full flex items-center justify-between px-4 py-1 bg-[#070708] text-gray-300 text-sm ">
                             <span>{filePathModifier(currentFile?.id)}</span>
-                            <div
-                                onClick={handleCopyFileContent}
-                                className={cn(
-                                    'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
-                                    'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1 group overflow-hidden',
-                                    'w-6 hover:w-[4.5rem]',
-                                    isCopied ? 'text-[#5483B3]' : 'text-light',
-                                )}
-                            >
-                                <span
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setCollapsechat(!collapseChat)}
+                                    aria-label="Toggle files and chat layout"
                                     className={cn(
-                                        'text-[10px] whitespace-nowrap overflow-hidden w-0 transition-all duration-200 ease-out',
-                                        'group-hover:w-[2.5rem] group-hover:mr-1.5',
-                                        isCopied ? 'text-[#5483B3]/90' : 'text-light/70',
+                                        'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
+                                        'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1',
+                                        collapseChat ? 'text-[#5483B3]' : 'text-light',
                                     )}
                                 >
-                                    {isCopied ? 'copied' : 'copy'}
-                                </span>
+                                    <LuFile className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
+                                </button>
 
-                                {isCopied ? (
-                                    <FiCheck className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
-                                ) : (
-                                    <FiCopy className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
-                                )}
+                                <div
+                                    onClick={handleCopyFileContent}
+                                    className={cn(
+                                        'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
+                                        'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1',
+                                        isCopied ? 'text-[#5483B3]' : 'text-light',
+                                    )}
+                                >
+                                    {isCopied ? (
+                                        <FiCheck className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
+                                    ) : (
+                                        <FiCopy className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <Editor

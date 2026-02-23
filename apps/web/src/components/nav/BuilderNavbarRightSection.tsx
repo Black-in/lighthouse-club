@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import ProfileMenu from '../utility/ProfileMenu';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
+import RightPanelActions from '../builder/RightPanelActions';
 
 export default function BuilderNavbarRightSection() {
     const [openProfileMenu, setOpenProfleMenu] = useState<boolean>(false);
@@ -15,6 +16,7 @@ export default function BuilderNavbarRightSection() {
 
     return (
         <div className="flex items-center justify-end gap-x-3 relative">
+            <RightPanelActions />
             {session?.user?.image && (
                 <Image
                     onClick={() => setOpenProfleMenu((prev) => !prev)}

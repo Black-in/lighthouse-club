@@ -18,13 +18,15 @@ import { AiFillFolder } from 'react-icons/ai';
 import { AiFillFolderOpen } from 'react-icons/ai';
 import FileIcon from '../tickers/FileIcon';
 import { cn } from '@/src/lib/utils';
+import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { MdChevronRight } from 'react-icons/md';
 
 interface TreeData {
     [key: string]: TreeItem;
 }
 
 export default function FileTree() {
-    const { fileTree, selectFile } = useCodeEditor();
+    const { fileTree, selectFile, setCollapsechat } = useCodeEditor();
 
     const treeData = useMemo(() => {
         const flattened: TreeData = {};
@@ -69,14 +71,48 @@ export default function FileTree() {
         data,
     }));
 
+    const projectName = useMemo(() => {
+        const rootNode = fileTree[0];
+        if (!rootNode) return 'BlackIn';
+        if (rootNode.name && rootNode.name.toLowerCase() !== 'root') return rootNode.name;
+
+        const packageJson = findNodeByFileName(rootNode, 'package.json');
+        if (packageJson?.content) {
+            const parsed = parsePackageJsonName(packageJson.content);
+            if (parsed) return parsed;
+        }
+
+        const cargoToml = findNodeByFileName(rootNode, 'Cargo.toml');
+        if (cargoToml?.content) {
+            const parsed = parseCargoTomlName(cargoToml.content);
+            if (parsed) return parsed;
+        }
+
+        const anchorToml = findNodeByFileName(rootNode, 'Anchor.toml');
+        if (anchorToml?.content) {
+            const parsed = parseAnchorTomlProgramName(anchorToml.content);
+            if (parsed) return parsed;
+        }
+
+        return 'BlackIn';
+    }, [fileTree]);
+
     return (
-        <div className="h-full bg-[#090a0b] flex flex-col w-full">
-            <div className="p-3 border-b border-neutral-800 shrink-0">
-                <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-                    Project Files
-                </h2>
+        <div className="h-full bg-black flex flex-col w-full">
+            <div className="shrink-0 px-4 pt-3 pb-1">
+                <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 flex items-center justify-center shrink-0">
+                        <AiFillFolder size={16} className="text-[#e45f5f]" />
+                    </div>
+                    <span className="truncate text-sm font-medium tracking-wide text-[#b6efc0]">
+                        {projectName}
+                    </span>
+                </div>
             </div>
-            <div data-lenis-prevent className="flex-1 h-full overflow-y-auto custom-scrollbar soft-scroll">
+            <div
+                data-lenis-prevent
+                className="flex-1 h-full overflow-y-auto custom-scrollbar soft-scroll"
+            >
                 <UncontrolledTreeEnvironment
                     dataProvider={dataProvider}
                     getItemTitle={(item) => item.data}
@@ -135,10 +171,73 @@ export default function FileTree() {
                     )}
                 >
                     <div className="h-full">
-                        <Tree treeId="file-tree" rootItem="root" treeLabel="Project Files" />
+                        <Tree treeId="file-tree" rootItem="root" treeLabel={projectName} />
                     </div>
                 </UncontrolledTreeEnvironment>
             </div>
+
+            <div className="shrink-0 flex justify-end px-3 pb-2 pt-1">
+                <HoverBorderGradient
+                    as="button"
+                    onClick={() => setCollapsechat(false)}
+                    containerClassName="rounded-full"
+                    className="flex items-center gap-x-1.5 rounded-full bg-[#05070a] px-3 py-1.5 text-[12px] font-semibold tracking-wide text-white"
+                    gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+                    duration={5}
+                    speed={0.14}
+                    noiseIntensity={0.18}
+                    backdropBlur
+                >
+                    <span>Chat</span>
+                    <MdChevronRight className="text-white" />
+                </HoverBorderGradient>
+            </div>
         </div>
     );
+}
+
+function findNodeByFileName(node: FileNode, fileName: string): FileNode | null {
+    if (node.type === NODE.FILE && node.name === fileName) return node;
+    if (!node.children || node.children.length === 0) return null;
+
+    for (const child of node.children) {
+        const found = findNodeByFileName(child, fileName);
+        if (found) return found;
+    }
+
+    return null;
+}
+
+function parsePackageJsonName(content: string) {
+    try {
+        const parsed = JSON.parse(content) as { name?: string };
+        if (parsed.name && parsed.name.trim()) return parsed.name.trim();
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+function parseCargoTomlName(content: string) {
+    const packageSectionMatch = content.match(/\[package\][\s\S]*?(?:\n\[|$)/);
+    const section = packageSectionMatch ? packageSectionMatch[0] : content;
+    const nameMatch = section.match(/^\s*name\s*=\s*["']([^"']+)["']/m);
+    return nameMatch?.[1]?.trim() || null;
+}
+
+function parseAnchorTomlProgramName(content: string) {
+    const programSections = [
+        /\[programs\.localnet\][\s\S]*?(?:\n\[|$)/,
+        /\[programs\.devnet\][\s\S]*?(?:\n\[|$)/,
+        /\[programs\.mainnet\][\s\S]*?(?:\n\[|$)/,
+    ];
+
+    for (const pattern of programSections) {
+        const sectionMatch = content.match(pattern);
+        if (!sectionMatch) continue;
+        const keyMatch = sectionMatch[0].match(/^\s*([a-zA-Z0-9_]+)\s*=/m);
+        if (keyMatch?.[1]) return keyMatch[1].trim();
+    }
+
+    return null;
 }

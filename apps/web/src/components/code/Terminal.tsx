@@ -14,7 +14,6 @@ import { Button } from '../ui/button';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { useTerminalResize } from '@/src/hooks/useTerminalResize';
 import { cn } from '@/src/lib/utils';
-import { useWebSocket } from '@/src/hooks/useWebSocket';
 import { TerminalSocketData } from '@lighthouse/types';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { Line } from '@/src/types/terminal_types';
@@ -31,7 +30,6 @@ export default function Terminal() {
     const inputRef = useRef<HTMLInputElement>(null);
     const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
     const { logs, addLog, clearLogs, isCommandRunning, terminalLoader } = useTerminalLogStore();
-    const { isConnected } = useWebSocket();
     const { handleCommand } = useTerminal();
 
     const { height, startResize } = useTerminalResize({
@@ -302,34 +300,6 @@ export default function Terminal() {
                     </div>
                 </ToolTipComponent>
                 <div className="flex items-center space-x-4 text-light/60">
-                    <ToolTipComponent
-                        side="top"
-                        content={
-                            isConnected
-                                ? 'Connection is active.'
-                                : 'Connection is unavailable.'
-                        }
-                    >
-                        <div className="flex items-center gap-2 cursor-default">
-                            <span className="relative flex h-3 w-3 items-center justify-center">
-                                {isConnected && (
-                                    <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-50" />
-                                )}
-                                <span
-                                    className={cn(
-                                        'relative inline-flex rounded-full h-1.5 w-1.5',
-                                        isConnected
-                                            ? 'bg-green-500 shadow-md shadow-green-500/60'
-                                            : 'bg-red-500 shadow-md shadow-red-500/60',
-                                    )}
-                                />
-                            </span>
-                            <span className="font-semibold test-[13px] tracking-wide">
-                                {isConnected ? 'connected' : 'disconnected'}
-                            </span>
-                        </div>
-                    </ToolTipComponent>
-
                     <div className="hover:text-light/80 cursor-pointer tracking-wider">
                         {currentFile
                             ? 'Ln ' +

@@ -6,6 +6,7 @@ import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
 import { FaTelegramPlane } from 'react-icons/fa';
 import LighthouseChat from '../ui/svg/lighthouse-chat';
+import { MdHomeFilled } from 'react-icons/md';
 
 export enum SidePanelValues {
     FILE = 'FILE',
@@ -18,22 +19,34 @@ interface EditorSidePanelProps {
     className?: string;
     showShell?: boolean;
     onGithubClick?: () => void;
+    onHomeClick?: () => void;
 }
 
 export default function EditorSidePanel({
     className,
     showShell = true,
     onGithubClick,
+    onHomeClick,
 }: EditorSidePanelProps) {
     const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
         useCodeEditor();
     const { currentState, setCurrentState } = useSidePanelStore();
+    function toggleChatPanelForFileView() {
+        setCurrentState(SidePanelValues.FILE);
+        setCollapsechat(!collapseChat);
+    }
 
     const sidePanelData = [
         {
+            icon: <MdHomeFilled size={20} />,
+            value: undefined,
+            onClick: () => onHomeClick?.(),
+            tooltip: 'Home',
+        },
+        {
             icon: <LuFile size={20} />,
             value: SidePanelValues.FILE,
-            onClick: () => handleToggleSidebar(SidePanelValues.FILE),
+            onClick: () => toggleChatPanelForFileView(),
             tooltip: 'Files',
         },
         {
@@ -73,21 +86,36 @@ export default function EditorSidePanel({
     }
 
     function handleToggleSidebar(value: SidePanelValues) {
-        setCurrentState(value);
+        const isSamePanel = currentState === value;
+
         switch (value) {
             case SidePanelValues.PLAN: {
+                setCurrentState(value);
+                setCollapsechat(true);
                 setCollapseFileTree(false);
                 break;
             }
             case SidePanelValues.FILE: {
-                handleConditionalToggle(value);
+                if (isSamePanel && collapseChat) {
+                    setCollapseFileTree(false);
+                    setCollapsechat(false);
+                    setCurrentState(SidePanelValues.CHAT);
+                    break;
+                }
+
+                setCurrentState(value);
+                setCollapsechat(true);
+                setCollapseFileTree(true);
                 break;
             }
             case SidePanelValues.GITHUB: {
+                setCurrentState(value);
+                setCollapsechat(true);
                 handleConditionalToggle(value);
                 break;
             }
             default: {
+                setCurrentState(value);
                 setCollapseFileTree(true);
             }
         }

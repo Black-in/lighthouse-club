@@ -54,12 +54,12 @@ export default function BuilderMessage({
             {message.role === 'USER' && (
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[86%]">
-                        <div>
+                        <div className="group">
                             <div className="mt-3 ml-auto w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-left text-sm font-normal text-white whitespace-pre-wrap break-words">
                                 {message.content}
                             </div>
 
-                            <div className="flex justify-end items-center mt-1">
+                            <div className="flex justify-end items-center mt-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                                 <button
                                     type="button"
                                     className="text-xs cursor-pointer"
@@ -165,12 +165,12 @@ export default function BuilderMessage({
                         <div className="w-8 h-8 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
                             <AppLogo showLogoText={false} size={22} />
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col group">
                             <div className="mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
                                 {returnParsedData(message.content)}
                             </div>
 
-                            <div className="flex items-center mt-1">
+                            <div className="flex items-center mt-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                                 <button
                                     type="button"
                                     className="text-xs cursor-pointer"
