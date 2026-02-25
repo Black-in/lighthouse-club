@@ -19,7 +19,7 @@ import LoginModal from '../utility/LoginModal';
 import Image from 'next/image';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
-import { ArrowRight, ChevronDown, FileUp, Plus, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, FileUp, Loader2, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
@@ -62,6 +62,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
         'Auto Select',
     );
     const [isTextareaFocused, setIsTextareaFocused] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
     const plusMenuRef = useRef<HTMLDivElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -89,14 +90,16 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     }, []);
 
     function handleSubmit() {
+        if (isSubmitting) return;
         if (!session?.user.id && !skipAuth) {
             setOpenLoginModal(true);
             return;
         }
         if (showMessageLimit || showContractLimit) return;
 
+        setIsSubmitting(true);
         const contractId = uuid();
-        set_states(contractId, inputValue, undefined, undefined);
+        set_states(contractId, inputValue, undefined, undefined, { markLoading: true });
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -159,7 +162,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
         });
     }
 
-    const isDisabled = !inputValue.trim() && attachments.length === 0;
+    const isDisabled = isSubmitting || (!inputValue.trim() && attachments.length === 0);
 
     return (
         <>
@@ -239,11 +242,12 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             onKeyDown={handleKeyDown}
                             onWheel={handleTextareaWheel}
                             placeholder="Describe your agentic web project"
+                            disabled={isSubmitting}
                             className={cn(
                                 'w-full h-[3.2rem] md:h-[3.9rem] resize-none bg-transparent border-0 p-0 overflow-y-auto overscroll-contain custom-scrollbar',
                                 'text-[clamp(1.15rem,1.45vw,1.45rem)] leading-[1.15] tracking-[-0.01em] text-neutral-100',
                                 'placeholder:text-neutral-500',
-                                'focus:outline-none caret-neutral-300',
+                                'focus:outline-none caret-neutral-300 disabled:opacity-70 disabled:cursor-not-allowed',
                             )}
                             rows={2}
                         />
@@ -254,6 +258,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                 ref={plusButtonRef}
                                 type="button"
                                 onClick={() => setShowPlusMenu((prev) => !prev)}
+                                disabled={isSubmitting}
                                 className={cn(
                                     'inline-flex h-9 w-9 items-center justify-center rounded-full border',
                                     'border-neutral-700 bg-[#0a0a0a] text-neutral-200 transition-colors',
@@ -271,6 +276,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                     onValueChange={(val) =>
                                         setSelectedModel(val as (typeof modelOptions)[number])
                                     }
+                                    disabled={isSubmitting}
                                 >
                                     <SelectTrigger
                                         className={cn(
@@ -307,7 +313,11 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                             : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
                                     )}
                                 >
-                                    <ArrowRight className="h-4 w-4" />
+                                    {isSubmitting ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <ArrowRight className="h-4 w-4" />
+                                    )}
                                 </button>
                             </div>
                         </div>

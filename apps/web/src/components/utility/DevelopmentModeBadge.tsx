@@ -18,7 +18,7 @@ export default function DevelopmentModeBadge({ className }: DevelopmentModeBadge
     return (
         <div
             className={cn(
-                'inline-flex h-8 items-center rounded-full bg-[#0c0f12] px-4 text-xs tracking-wide text-light/80',
+                'playground-dev-badge inline-flex h-8 items-center rounded-full bg-[#0c0f12] px-4 text-xs tracking-wide text-light/80',
                 className,
             )}
         >

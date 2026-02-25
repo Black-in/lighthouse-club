@@ -21,6 +21,7 @@ import { Check } from 'lucide-react';
 
 import { CircleDotDashed } from '../ui/animated/circle-dot-dashed';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
 
 interface StageItem {
     stage: STAGE;
@@ -47,6 +48,7 @@ export default function SystemMessage({ message }: SystemMessageProps) {
     const initialStageRef = useRef<STAGE | null>(null);
     const lastReviewedContractRef = useRef<string | null>(null);
     const { show } = useReviewModalStore();
+    const { theme } = usePlaygroundThemeStore();
 
     useEffect(() => {
         if (initialStageRef.current === null && message?.stage) {
@@ -85,7 +87,16 @@ export default function SystemMessage({ message }: SystemMessageProps) {
     const completedStage = stages[stages.length - 1];
 
     return (
-        <div className="relative w-[80%] overflow-hidden rounded-[4px] border border-neutral-800 bg-linear-to-br from-[#0d0e0e] via-[#111212]  to-[#0d0e0e] text-neutral-300 select-none">
+        <div
+            className={cn(
+                'playground-system-message relative w-[80%] overflow-hidden rounded-[4px] border select-none',
+                theme === 'light'
+                    ? 'border-neutral-300 bg-linear-to-br from-[#f5f8fd] via-white to-[#f5f8fd] text-[#334155]'
+                    : theme === 'dark'
+                      ? 'border-[#302b2b] bg-linear-to-br from-[#171515] via-[#1b1818] to-[#171515] text-neutral-300'
+                      : 'border-neutral-800 bg-linear-to-br from-[#0d0e0e] via-[#111212] to-[#0d0e0e] text-neutral-300',
+            )}
+        >
             <div className="px-5 pt-4 flex items-center gap-x-1.5 text-light/90">
                 <FaListUl />
                 <div>Execution strategy</div>

@@ -46,7 +46,7 @@ export default function RightPanelActions() {
                         type="button"
                         onClick={() => setShowDiffPanel((prev) => !prev)}
                         aria-label="Toggle differences panel"
-                        className="inline-flex h-8 items-center justify-center text-light/75 transition-colors hover:text-light"
+                        className="playground-diff-trigger inline-flex h-8 items-center justify-center text-light/75 transition-colors hover:text-light"
                     >
                         <TbGitCompare
                             className={`size-5 transition-transform ${showDiffPanel ? 'scale-105 text-light' : ''}`}
@@ -55,7 +55,7 @@ export default function RightPanelActions() {
                 </ToolTipComponent>
 
                 {showDiffPanel && (
-                    <div className="absolute top-[calc(100%+0.7rem)] right-0 z-50 w-[14.5rem] rounded-xl border border-neutral-800 bg-black px-3 py-2.5 shadow-[0_24px_60px_-35px_rgba(0,0,0,1)]">
+                    <div className="playground-diff-popover absolute top-[calc(100%+0.7rem)] right-0 z-50 w-[14.5rem] rounded-xl border border-neutral-800 bg-black px-3 py-2.5 shadow-[0_24px_60px_-35px_rgba(0,0,0,1)]">
                         <div className="flex items-center gap-x-2">
                             <TbGitCompare className="size-4 text-light/70" />
                             <p className="text-xs font-medium text-light/90">Toggle difference</p>

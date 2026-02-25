@@ -26,8 +26,9 @@ export default function ContractTemplates() {
         }
 
         const contractId = uuid();
-        console.log('active template is  : ', activeTemplate);
-        set_states(contractId, null, activeTemplate?.id, activeTemplate ?? undefined);
+        set_states(contractId, null, activeTemplate?.id, activeTemplate ?? undefined, {
+            markLoading: true,
+        });
     }
 
     return (

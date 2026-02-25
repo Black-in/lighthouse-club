@@ -4,10 +4,8 @@
  */
 
 'use client';
-import { motion, AnimatePresence } from 'framer-motion';
 import BuilderChats from './BuilderChats';
 import CodeEditor from '../code/CodeEditor';
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import BuilderLoader from './BuilderLoader';
 import { JSX, useEffect, useRef, useState } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
@@ -31,9 +29,12 @@ import { cn } from '@/src/lib/utils';
 import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
 
 const PROJECT_PANEL_WIDTH_STORAGE_KEY = 'blackin.playground.projectPanelWidth';
+const CHAT_PANEL_WIDTH_STORAGE_KEY = 'blackin.playground.chatPanelWidth';
 const DEFAULT_PROJECT_PANEL_WIDTH = 296;
+const DEFAULT_CHAT_PANEL_WIDTH = 520;
 const MIN_PROJECT_PANEL_WIDTH = 220;
 const MIN_CODE_PANEL_WIDTH = 420;
+const MIN_CHAT_PANEL_WIDTH = 360;
 const DEV_SAMPLE_FILES: FileContent[] = [
     {
         path: 'src/main.rs',
@@ -82,6 +83,9 @@ export default function BuilderDashboard(): JSX.Element {
     const { collapseChat } = useCodeEditor();
     const { isConnected, subscribeToHandler } = useWebSocket();
     const { addLog, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();
+    const chatSplitContainerRef = useRef<HTMLDivElement | null>(null);
+    const [chatPanelWidth, setChatPanelWidth] = useState<number>(DEFAULT_CHAT_PANEL_WIDTH);
+    const [isResizingChatPanels, setIsResizingChatPanels] = useState<boolean>(false);
 
     useEffect(() => {
         let timeout: NodeJS.Timeout | null = null;
@@ -126,44 +130,97 @@ export default function BuilderDashboard(): JSX.Element {
         };
     }, [isConnected]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const savedWidth = window.localStorage.getItem(CHAT_PANEL_WIDTH_STORAGE_KEY);
+        if (!savedWidth) return;
+        const parsedWidth = Number(savedWidth);
+        if (Number.isNaN(parsedWidth)) return;
+        setChatPanelWidth(parsedWidth);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem(CHAT_PANEL_WIDTH_STORAGE_KEY, String(Math.round(chatPanelWidth)));
+    }, [chatPanelWidth]);
+
+    useEffect(() => {
+        if (collapseChat) return;
+
+        function syncWidthWithinBounds() {
+            if (!chatSplitContainerRef.current) return;
+            const rect = chatSplitContainerRef.current.getBoundingClientRect();
+            setChatPanelWidth((prev) => clampChatPanelWidth(prev, rect.width));
+        }
+
+        syncWidthWithinBounds();
+        window.addEventListener('resize', syncWidthWithinBounds);
+        return () => window.removeEventListener('resize', syncWidthWithinBounds);
+    }, [collapseChat]);
+
+    useEffect(() => {
+        function handleResizeMove(event: MouseEvent) {
+            if (!isResizingChatPanels || !chatSplitContainerRef.current) return;
+            const rect = chatSplitContainerRef.current.getBoundingClientRect();
+            const rawWidth = event.clientX - rect.left;
+            setChatPanelWidth(clampChatPanelWidth(rawWidth, rect.width));
+        }
+
+        function handleResizeStop() {
+            setIsResizingChatPanels(false);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+
+        if (isResizingChatPanels) {
+            window.addEventListener('mousemove', handleResizeMove);
+            window.addEventListener('mouseup', handleResizeStop);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleResizeMove);
+            window.removeEventListener('mouseup', handleResizeStop);
+        };
+    }, [isResizingChatPanels]);
+
+    function handleChatResizeStart(event: React.MouseEvent) {
+        event.preventDefault();
+        setIsResizingChatPanels(true);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    }
+
     return (
-        <div className="w-full h-full flex flex-row bg-black z-0 overflow-hidden">
-            <AnimatePresence mode="wait">
-                {!collapseChat && (
-                    <motion.div
-                        key="builder-chats"
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: 'auto', opacity: 1 }}
-                        exit={{ width: 0, opacity: 0 }}
-                        transition={{
-                            duration: 0.3,
-                            ease: [0.4, 0, 0.2, 1],
-                        }}
-                        className="overflow-hidden"
-                    >
+        <div className="playground-builder-dashboard w-full h-full flex flex-row bg-black z-0 overflow-hidden">
+            {!collapseChat && (
+                <>
+                    <div className="w-full h-full min-h-0 sm:hidden">
                         <BuilderChats />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-            <motion.div
-                layout
-                transition={{
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1],
-                }}
-                className="hidden sm:flex sm:flex-1 pt-0 pb-4 px-4 h-full min-h-0 min-w-0"
-            >
-                <div
-                    className={cn(
-                        'w-full h-full min-h-0 z-10 relative',
-                        collapseChat
-                            ? 'border-0 rounded-none overflow-visible bg-transparent'
-                            : 'border border-neutral-800/90 rounded-[16px] overflow-hidden bg-[#08090a]',
-                    )}
-                >
-                    {loading ? <BuilderLoader /> : <Editing />}
+                    </div>
+                    <div
+                        ref={chatSplitContainerRef}
+                        className="hidden sm:flex sm:flex-1 h-full min-h-0 min-w-0"
+                    >
+                        <div className="relative h-full min-h-0" style={{ width: `${chatPanelWidth}px` }}>
+                            <BuilderChats />
+                            <EdgeResizeHandle side="right" onMouseDown={handleChatResizeStart} />
+                        </div>
+                        <div className="flex flex-1 pt-0 pb-4 pr-4 pl-0 h-full min-h-0 min-w-0">
+                            <div className="playground-main-panel w-full h-full min-h-0 z-10 relative border border-neutral-800/90 rounded-[16px] overflow-hidden bg-[#08090a]">
+                                {loading ? <BuilderLoader /> : <Editing />}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {collapseChat && (
+                <div className="hidden sm:flex sm:flex-1 pt-0 pb-4 px-4 h-full min-h-0 min-w-0">
+                    <div className="playground-main-panel w-full h-full min-h-0 z-10 relative border-0 rounded-none overflow-visible bg-transparent">
+                        {loading ? <BuilderLoader /> : <Editing />}
+                    </div>
                 </div>
-            </motion.div>
+            )}
         </div>
     );
 }
@@ -266,14 +323,14 @@ function Editing() {
         return (
             <div ref={splitContainerRef} className="flex h-full min-h-0 gap-3">
                 <div
-                    className="relative h-full min-h-0 rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden"
+                    className="playground-split-panel relative h-full min-h-0 rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden"
                     style={{ width: `${projectPanelWidth}px` }}
                 >
                     <FileTree />
                     <EdgeResizeHandle side="right" onMouseDown={handleResizeStart} />
                 </div>
 
-                <div className="relative min-w-0 flex-1 h-full rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden">
+                <div className="playground-split-panel relative min-w-0 flex-1 h-full rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden">
                     <EdgeResizeHandle side="left" onMouseDown={handleResizeStart} />
                     {renderEditorPanels()}
                     <Terminal />
@@ -284,7 +341,7 @@ function Editing() {
 
     if (collapseChat) {
         return (
-            <div className="flex h-full min-h-0 rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden">
+            <div className="playground-split-panel flex h-full min-h-0 rounded-[16px] border border-neutral-800/90 bg-[#08090a] overflow-hidden">
                 {renderEditorPanels()}
                 <Terminal />
             </div>
@@ -323,6 +380,11 @@ function EdgeResizeHandle({ side, onMouseDown }: EdgeResizeHandleProps) {
 function clampProjectPanelWidth(width: number, totalWidth: number) {
     const maxProjectWidth = Math.max(MIN_PROJECT_PANEL_WIDTH, totalWidth - MIN_CODE_PANEL_WIDTH);
     return Math.min(Math.max(width, MIN_PROJECT_PANEL_WIDTH), maxProjectWidth);
+}
+
+function clampChatPanelWidth(width: number, totalWidth: number) {
+    const maxChatWidth = Math.max(MIN_CHAT_PANEL_WIDTH, totalWidth - MIN_CODE_PANEL_WIDTH);
+    return Math.min(Math.max(width, MIN_CHAT_PANEL_WIDTH), maxChatWidth);
 }
 
 function findFirstFile(node: FileNode): FileNode | null {

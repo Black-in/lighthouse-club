@@ -10,16 +10,16 @@ import BuilderNavbar from '@/src/components/nav/BuilderNavbar';
 import { cleanWebSocketClient } from '@/src/lib/singletonWebSocket';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useChatStore } from '@/src/store/user/useChatStore';
-import React, { useEffect, use, useState } from 'react';
+import React, { useEffect, use, useLayoutEffect, useState } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
-import Playground from '@/src/lib/server/playground';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
-import { ChatRole } from '@lighthouse/types';
+import { ChatRole, STAGE } from '@lighthouse/types';
 import Marketplace from '@/src/lib/server/marketplace-server';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
+import { cn } from '@/src/lib/utils';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
     const { setLoading, setCurrentContractId, cleanContract } = useBuilderChatStore();
@@ -27,11 +27,12 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
-    const { session } = useUserSessionStore();
     const { open, hide } = useReviewModalStore();
     const { setTemplates } = useTemplateStore();
     const contract = useCurrentContract();
-    const [showLeftRail, setShowLeftRail] = useState(false);
+    const { messages } = contract;
+    const { theme } = usePlaygroundThemeStore();
+    const [showLeftRail, setShowLeftRail] = useState(true);
 
     useEffect(() => {
         const get_templates = async () => {
@@ -65,22 +66,52 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         return () => document.removeEventListener('keydown', handleHideContractReviewCard);
     });
 
+    useLayoutEffect(() => {
+        document.body.classList.add('playground-theme');
+        document.body.classList.toggle('playground-theme-light', theme === 'light');
+        document.body.classList.toggle('playground-theme-dark', theme === 'dark');
+        document.body.classList.toggle('playground-theme-legacy', theme === 'legacy');
+
+        return () => {
+            document.body.classList.remove(
+                'playground-theme',
+                'playground-theme-light',
+                'playground-theme-dark',
+                'playground-theme-legacy',
+            );
+        };
+    }, [theme]);
+
     useEffect(() => {
         if (contractId) setCurrentContractId(contractId);
     }, [contractId, setCurrentContractId]);
 
     useEffect(() => {
-        if (!session || !session.user) return;
+        if (messages.length === 0) {
+            setLoading(false);
+            return;
+        }
 
-        const { messages } = contract;
-        if (messages.length === 0) return;
+        let lastUserIndex = -1;
+        for (let i = messages.length - 1; i >= 0; i -= 1) {
+            if (messages[i].role === ChatRole.USER) {
+                lastUserIndex = i;
+                break;
+            }
+        }
 
-        const last = messages[messages.length - 1];
+        if (lastUserIndex === -1) {
+            setLoading(false);
+            return;
+        }
 
-        if (last.role === ChatRole.SYSTEM || last.role === ChatRole.USER) setLoading(true);
+        const hasCompletionAfterLastUser = messages.slice(lastUserIndex + 1).some((message) => {
+            if (message.role === ChatRole.AI) return true;
+            return message.role === ChatRole.SYSTEM && message.stage === STAGE.END;
+        });
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [contractId, session]);
+        setLoading(!hasCompletionAfterLastUser);
+    }, [messages, setLoading]);
 
     useEffect(() => {
         return () => {
@@ -93,20 +124,19 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId]);
 
     return (
-        <div className="h-screen w-screen flex flex-col overflow-hidden tracking-wider bg-black">
-            <BuilderNavbar
-                leftRailVisible={showLeftRail}
-                onToggleLeftRail={() => setShowLeftRail((prev) => !prev)}
-            />
-            <div className="relative flex-1 min-h-0 flex flex-col">
-                <div
-                    className={`h-full w-full min-h-0 transition-[padding] duration-300 ease-out ${
-                        showLeftRail ? 'pl-20' : 'pl-0'
-                    }`}
-                >
+        <div className="playground-theme-scope relative h-screen w-screen overflow-hidden tracking-wider bg-black">
+            <PlaygroundLeftRail visible={showLeftRail} onToggle={() => setShowLeftRail((prev) => !prev)} />
+
+            <div
+                className={cn(
+                    'h-full w-full flex flex-col transition-[padding-left] duration-300 ease-out',
+                    showLeftRail ? 'pl-16' : 'pl-0',
+                )}
+            >
+                <BuilderNavbar leftRailVisible={showLeftRail} />
+                <div className="relative flex-1 min-h-0 flex flex-col">
                     <BuilderDashboard />
                 </div>
-                <PlaygroundLeftRail visible={showLeftRail} />
             </div>
             <ContractReviewCard
                 contractId={use(params).contractId}

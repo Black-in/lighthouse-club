@@ -117,8 +117,8 @@ export default function ContractReviewCard({
     }
 
     return (
-        <OpacityBackground className="bg-darkest/30">
-            <Card className="bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-sm overflow-hidden px-6 py-4 absolute bottom-20 right-20">
+        <OpacityBackground className="playground-contract-review-overlay bg-darkest/30">
+            <Card className="playground-contract-review-card bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-sm overflow-hidden px-6 py-4 absolute bottom-20 right-20">
                 <div className="flex flex-col gap-4">
                     <h3 className="text-center text-2xl font-medium">How was your experience?</h3>
                     <div className="flex gap-x-5 justify-center">
@@ -150,7 +150,7 @@ export default function ContractReviewCard({
                             <Button
                                 variant={'ghost'}
                                 onClick={() => updateForm({ showLiked: !form.showLiked })}
-                                className="w-full px-4 py-2 bg-darkest hover:bg-darkest border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
+                                className="playground-contract-review-field w-full px-4 py-2 bg-darkest hover:bg-darkest border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
                             >
                                 <span>{form.liked || 'My experience was good'}</span>
                                 <PiCaretDownThin
@@ -174,7 +174,7 @@ export default function ContractReviewCard({
                             <Button
                                 variant={'ghost'}
                                 onClick={() => updateForm({ showDisliked: !form.showDisliked })}
-                                className="w-full px-4 py-2 bg-darkest hover:bg-darkest border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
+                                className="playground-contract-review-field w-full px-4 py-2 bg-darkest hover:bg-darkest border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
                             >
                                 <span>{form.disliked || 'What could be improved'}</span>
                                 <PiCaretDownThin
@@ -200,14 +200,14 @@ export default function ContractReviewCard({
                             variant="ghost"
                             onClick={handleCancel}
                             disabled={isSubmitting}
-                            className="flex-1 bg-dark hover:bg-dark hover:text-light"
+                            className="playground-contract-review-cancel flex-1 bg-dark hover:bg-dark hover:text-light"
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSubmit}
                             disabled={form.rating === 0 || isSubmitting}
-                            className="flex-1 bg-light hover:bg-light hover:text-darkest text-darkest"
+                            className="playground-contract-review-submit flex-1 bg-light hover:bg-light hover:text-darkest text-darkest"
                         >
                             {isSubmitting ? 'Submitting...' : 'Submit'}
                         </Button>

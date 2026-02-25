@@ -34,7 +34,7 @@ export default function OpacityBackground({
     const backgroundElement = (
         <div
             className={cn(
-                'fixed w-screen h-screen inset-0 flex items-center justify-center z-10 bg-dark/70',
+                'playground-overlay fixed w-screen h-screen inset-0 flex items-center justify-center z-10 bg-dark/70',
                 className,
             )}
             onClick={handleBackgroundClick}

@@ -21,7 +21,7 @@ interface GithubConnectModalProps {
 
 function GithubConnectLeftContent() {
     return (
-        <div className="absolute inset-0 flex items-end p-4 md:p-8">
+        <div className="playground-github-left absolute inset-0 flex items-end p-4 md:p-8">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
@@ -31,7 +31,7 @@ function GithubConnectLeftContent() {
                 }}
             />
             <div
-                className="relative z-10 max-w-[420px] text-left [text-shadow:0_3px_14px_rgba(0,0,0,0.96)]"
+                className="playground-github-left-copy relative z-10 max-w-[420px] text-left [text-shadow:0_3px_14px_rgba(0,0,0,0.96)]"
                 style={{
                     fontFamily:
                         '"Canela", "Ivar Display", "Noe Display", "Baskerville", "Times New Roman", "Georgia", serif',
@@ -55,10 +55,11 @@ function GithubConnectRightContent({
     hasGithub: boolean;
 }) {
     return (
-        <div className="relative z-10 w-full flex flex-col items-center justify-center space-y-3 md:space-y-5">
+        <div className="playground-github-right relative z-10 w-full flex flex-col items-center justify-center space-y-3 md:space-y-5">
             <div className="text-center space-y-1">
                 <h2
                     className={cn(
+                        'playground-github-title',
                         'text-base md:text-xl',
                         'font-bold tracking-widest',
                         'bg-gradient-to-br from-[#e9e9e9] to-[#575757]',
@@ -67,7 +68,7 @@ function GithubConnectRightContent({
                 >
                     Connect Git Repository
                 </h2>
-                <p className="text-[10px] md:text-[13px] text-light/80 tracking-wide">
+                <p className="playground-github-subtitle text-[10px] md:text-[13px] text-light/80 tracking-wide">
                     Link GitHub to export and sync your project.
                 </p>
             </div>
@@ -76,6 +77,7 @@ function GithubConnectRightContent({
                 onClick={onConnect}
                 disabled={isConnecting || hasGithub}
                 className={cn(
+                    'playground-github-connect-btn',
                     'w-full flex items-center justify-center gap-2 md:gap-3',
                     'px-2 md:px-6 py-1 md:py-5',
                     'text-sm font-medium',
@@ -84,8 +86,8 @@ function GithubConnectRightContent({
                     'transition-all disabled:opacity-60 disabled:cursor-not-allowed',
                 )}
             >
-                <FaGithub className="text-[#d4d8de] size-4 md:size-5" />
-                <span className="text-[#d4d8de] text-[10px] md:text-sm tracking-wide">
+                <FaGithub className="playground-github-connect-icon text-[#d4d8de] size-4 md:size-5" />
+                <span className="playground-github-connect-text text-[#d4d8de] text-[10px] md:text-sm tracking-wide">
                     {hasGithub
                         ? 'GitHub connected'
                         : isConnecting
@@ -124,10 +126,14 @@ export default function GithubConnectModal({
 
     return (
         <OpacityBackground
-            className="bg-darkest/70"
+            className="playground-github-overlay bg-darkest/70"
             onBackgroundClick={() => setOpenGithubModal(false)}
         >
-            <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+            <div
+                className="playground-github-modal"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
                 <ShaderSplitPanel
                     imageSrc="/github connect.png"
                     leftChildren={<GithubConnectLeftContent />}

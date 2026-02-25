@@ -10,7 +10,6 @@ import AppLogo from '../tickers/AppLogo';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import Image from 'next/image';
 import { TextShimmer } from '../ui/shimmer-text';
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
@@ -20,6 +19,7 @@ import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
 import { FiCopy, FiCheck } from 'react-icons/fi';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
 
 interface BuilderMessageProps {
     message: Message;
@@ -40,6 +40,7 @@ export default function BuilderMessage({
     const { setCollapseFileTree } = useCodeEditor();
     const { setCurrentState } = useSidePanelStore();
     const { setMessage } = useEditPlanStore();
+    const { theme } = usePlaygroundThemeStore();
 
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -55,7 +56,7 @@ export default function BuilderMessage({
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[86%]">
                         <div className="group">
-                            <div className="mt-3 ml-auto w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-left text-sm font-normal text-white whitespace-pre-wrap break-words">
+                            <div className="playground-user-message-bubble mt-3 ml-auto w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-left text-sm font-normal text-white whitespace-pre-wrap break-words">
                                 {message.content}
                             </div>
 
@@ -68,7 +69,10 @@ export default function BuilderMessage({
                                     {copiedId === message.id ? (
                                         <FiCheck strokeWidth={2.5} size={12} color="#5483B3" />
                                     ) : (
-                                        <FiCopy size={12} color="#ffffff" />
+                                        <FiCopy
+                                            size={12}
+                                            color={theme === 'light' ? '#334155' : '#ffffff'}
+                                        />
                                     )}
                                 </button>
                             </div>
@@ -138,7 +142,7 @@ export default function BuilderMessage({
                     collapse={collapsePanel}
                     expanded={false}
                     hidePlanSvg={true}
-                    className="border border-neutral-800 rounded-[8px] bg-[#1b1d20]"
+                    className="playground-plan-message-card border border-neutral-800 rounded-[8px] bg-[#1b1d20]"
                 />
             )}
 
@@ -146,7 +150,7 @@ export default function BuilderMessage({
                 <div className="flex justify-start w-full mt-2 ">
                     <div className="flex items-start gap-x-2 max-w-[86%]">
                         <AppLogo showLogoText={false} size={22} />
-                        <div className="px-4 py-2 rounded-2xl border border-neutral-800 text-sm font-normal bg-[#08090a] text-white text-left tracking-wider text-[13px] italic">
+                        <div className="playground-ai-loading-bubble px-4 py-2 rounded-2xl border border-neutral-800 text-sm font-normal bg-[#08090a] text-white text-left tracking-wider text-[13px] italic">
                             <div className="flex items-center gap-x-1">
                                 <div className="flex space-x-1">
                                     <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -162,11 +166,11 @@ export default function BuilderMessage({
             {message.role === 'AI' && (
                 <div className="flex justify-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[86%]">
-                        <div className="w-8 h-8 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
+                        <div className="playground-ai-message-avatar w-8 h-8 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
                             <AppLogo showLogoText={false} size={22} />
                         </div>
                         <div className="flex flex-col group">
-                            <div className="mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
+                            <div className="playground-ai-message-bubble mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
                                 {returnParsedData(message.content)}
                             </div>
 
@@ -179,7 +183,10 @@ export default function BuilderMessage({
                                     {copiedId === message.id ? (
                                         <FiCheck size={12} color="#5483B3" />
                                     ) : (
-                                        <FiCopy size={12} color="#ffffff" />
+                                        <FiCopy
+                                            size={12}
+                                            color={theme === 'light' ? '#334155' : '#ffffff'}
+                                        />
                                     )}
                                 </button>
                             </div>

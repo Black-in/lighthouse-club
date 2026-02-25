@@ -124,7 +124,7 @@ export default function EditorSidePanel({
     return (
         <div
             className={cn(
-                'h-full min-w-14',
+                'playground-editor-side-shell h-full min-w-14',
                 showShell && 'bg-[#090a0b] border-neutral-800 border-r',
                 className,
             )}
@@ -135,7 +135,7 @@ export default function EditorSidePanel({
                         <div
                             onClick={item.onClick}
                             className={cn(
-                                'cursor-pointer text-light/70 hover:text-primary/70 transition-colors',
+                                'playground-editor-side-item cursor-pointer text-light/70 hover:text-primary/70 transition-colors',
                                 currentState && currentState === item.value
                                     ? 'text-primary/70'
                                     : 'text-light/70',

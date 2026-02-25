@@ -26,8 +26,8 @@ export default function ShortcutMenu() {
 
     return (
         <OpacityBackground onBackgroundClick={() => setOpen((prev) => !prev)}>
-            <div className="bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-md overflow-hidden px-6 py-4">
-                <h1 className="text-xl font-semibold text-white text-left mb-3">
+            <div className="playground-shortcut-modal bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-md overflow-hidden px-6 py-4">
+                <h1 className="playground-shortcut-modal-title text-xl font-semibold text-white text-left mb-3">
                     Keyboard shortcuts
                 </h1>
                 <div>
@@ -49,16 +49,16 @@ function ShortcutItem({ desc, keys, isLast }: { desc: string; keys: string[]; is
     return (
         <div
             className={cn(
-                'flex justify-between items-center py-2.5 px-2 transition-colors',
+                'playground-shortcut-modal-item flex justify-between items-center py-2.5 px-2 transition-colors',
                 !isLast && 'border-b border-neutral-800',
             )}
         >
-            <span className="text-sm text-neutral-200">{desc}</span>
+            <span className="playground-shortcut-modal-desc text-sm text-neutral-200">{desc}</span>
             <div className="flex items-center gap-1.5">
                 {keys.map((key, index) => (
                     <kbd
                         key={index}
-                        className="min-w-7 h-7 flex items-center justify-center bg-dark rounded-[4px] text-sm font-medium text-neutral-100 border border-neutral-800"
+                        className="playground-shortcut-modal-key min-w-7 h-7 flex items-center justify-center bg-dark rounded-[4px] text-sm font-medium text-neutral-100 border border-neutral-800"
                     >
                         {key}
                     </kbd>

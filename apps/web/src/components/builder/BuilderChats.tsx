@@ -31,6 +31,7 @@ export default function BuilderChats() {
     const { messages, loading } = contract;
     const { activeTemplate } = contract;
     const { resetTemplate } = useBuilderChatStore();
+    const hasLocalMessages = messages.some((message) => message.contractId === contractId);
 
     useEffect(() => {
         if (messageEndRef.current && shouldAutoScrollRef.current) {
@@ -47,14 +48,14 @@ export default function BuilderChats() {
 
     useEffect(() => {
         async function fetchChats() {
-            if (contract.loading || !session || !session.user || !session.user.token) return;
+            if (contract.loading || hasLocalMessages || !session || !session.user || !session.user.token)
+                return;
             setChatLoading(true);
             await Playground.get_chat(session.user.token, contractId);
             setChatLoading(false);
         }
         fetchChats();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [contractId, session]);
+    }, [contractId, session, contract.loading, hasLocalMessages]);
 
     useEffect(() => {
         if (hasInitialized.current) {
@@ -84,10 +85,7 @@ export default function BuilderChats() {
     }
 
     return (
-        <div
-            className="w-screen sm:w-full sm:max-w-md sm:min-w-md flex flex-col pt-4"
-            style={{ height: 'calc(100vh - 3.5rem)' }}
-        >
+        <div className="w-full h-full min-h-0 flex flex-col pt-4">
             <div
                 ref={chatContainerRef}
                 data-lenis-prevent

@@ -8,8 +8,13 @@ import { getServerSession } from 'next-auth';
 import SessionSetter from '@/src/lib/SessionSeter';
 import { authOption } from '@/app/api/auth/[...nextauth]/options';
 import ShortcutMenu from '@/src/components/utility/ShortcutMenuModal';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { shouldEnableDevAccessServer } from '@/src/lib/runtime-mode';
+import {
+    getPlaygroundThemeBackgroundClass,
+    getPlaygroundThemeRootClass,
+    sanitizePlaygroundTheme,
+} from '@/src/lib/playground-theme';
 
 interface Props {
     children: React.ReactNode;
@@ -22,13 +27,20 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Props) {
     const headerStore = await headers();
+    const cookieStore = await cookies();
     const host = headerStore.get('host') ?? '';
     const hostname = host.split(':')[0];
     const skipAuth = shouldEnableDevAccessServer(hostname);
     const session = skipAuth ? null : await getServerSession(authOption);
+    const cookieTheme = cookieStore.get('blackin_playground_theme')?.value;
+    const initialTheme = sanitizePlaygroundTheme(cookieTheme);
+    const initialThemeClass = getPlaygroundThemeRootClass(initialTheme);
+    const initialBgClass = getPlaygroundThemeBackgroundClass(initialTheme);
 
     return (
-        <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <div
+            className={`playground-theme ${initialThemeClass} flex h-screen w-screen items-center justify-center ${initialBgClass}`}
+        >
             {children}
             <ShortcutMenu />
             <SessionSetter session={session} />

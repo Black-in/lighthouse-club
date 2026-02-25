@@ -123,12 +123,12 @@ export default function BuilderNavbarSearchComponent() {
     }
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="playground-nav-search relative" ref={dropdownRef}>
             {!isExpanded ? (
                 <button
                     type="button"
                     onClick={expandSearch}
-                    className="inline-flex h-8 items-center gap-2 rounded-full bg-[#0c0f12] px-4 text-xs tracking-wide text-light/80 transition-colors hover:bg-[#141920] hover:text-light"
+                    className="playground-nav-search-trigger inline-flex h-8 items-center gap-2 rounded-full bg-[#0c0f12] px-4 text-xs tracking-wide text-light/80 transition-colors hover:bg-[#141920] hover:text-light"
                 >
                     <Search className="size-3.5" />
                     Search
@@ -145,7 +145,7 @@ export default function BuilderNavbarSearchComponent() {
                         onKeyDown={handleKeyDown}
                         onFocus={() => inputValue && setShowDropdown(true)}
                         className={cn(
-                            'rounded-full border border-neutral-700 pl-4 p-0 px-4 h-8 !text-xs tracking-wide min-w-[18rem] text-light/80',
+                            'playground-nav-search-input rounded-full border border-neutral-700 pl-4 p-0 px-4 h-8 !text-xs tracking-wide min-w-[18rem] text-light/80',
                             'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[0px]',
                             'tracking-wider',
                         )}
@@ -163,18 +163,20 @@ export default function BuilderNavbarSearchComponent() {
             )}
 
             {isExpanded && showDropdown && searchResults.length > 0 && (
-                <div className="absolute top-full mt-1 bg-darkest border border-neutral-800 rounded-[4px] shadow-lg max-h-[300px] w-full min-w-[18rem] overflow-y-auto z-50">
+                <div className="playground-nav-search-dropdown absolute top-full mt-1 bg-darkest border border-neutral-800 rounded-[4px] shadow-lg max-h-[300px] w-full min-w-[18rem] overflow-y-auto z-50">
                     {searchResults.map((file, index) => (
                         <div
                             key={file.id}
                             onClick={() => handleFileSelect(file)}
                             className={cn(
-                                'px-3 py-2 cursor-pointer text-xs hover:bg-dark transition-colors flex items-center justify-between',
+                                'playground-nav-search-item px-3 py-2 cursor-pointer text-xs hover:bg-dark transition-colors flex items-center justify-between',
                                 index === selectedIndex && 'bg-dark',
                             )}
                         >
-                            <div className="font-medium text-light">{file.name}</div>
-                            <div className="text-light/50 text-[10px] mt-0.5 text-right">
+                            <div className="playground-nav-search-item-name font-medium text-light">
+                                {file.name}
+                            </div>
+                            <div className="playground-nav-search-item-path text-light/50 text-[10px] mt-0.5 text-right">
                                 {file.path}
                             </div>
                         </div>

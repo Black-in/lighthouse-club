@@ -1,5 +1,5 @@
 'use client';
-import { JSX, useCallback, useState } from 'react';
+import { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import { Editor, Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
@@ -7,6 +7,13 @@ import { FiCheck, FiCopy } from 'react-icons/fi';
 import { cn } from '@/src/lib/utils';
 import LighthouseMark from '../ui/svg/LighthouseMark';
 import { LuFile } from 'react-icons/lu';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
+
+function getEditorTheme(theme: 'dark' | 'light' | 'legacy') {
+    if (theme === 'light') return 'clean-light';
+    if (theme === 'legacy') return 'clean-dark';
+    return 'clean-dark-modern';
+}
 
 export default function CodeEditor(): JSX.Element {
     const {
@@ -19,6 +26,13 @@ export default function CodeEditor(): JSX.Element {
     } = useCodeEditor();
     const [isCopied, setIsCopied] = useState<boolean>(false);
     const [copyCooldown, setCopyCooldown] = useState<boolean>(false);
+    const { theme } = usePlaygroundThemeStore();
+    const editorInstanceRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const monacoInstanceRef = useRef<Monaco | null>(null);
+
+    const applyEditorTheme = useCallback((monaco: Monaco, currentTheme: 'dark' | 'light' | 'legacy') => {
+        monaco.editor.setTheme(getEditorTheme(currentTheme));
+    }, []);
 
     function handleCopyFileContent() {
         if (!currentCode || copyCooldown) return;
@@ -125,22 +139,91 @@ export default function CodeEditor(): JSX.Element {
                 'scrollbarSlider.activeBackground': '#2b303a',
             },
         });
+        monaco.editor.defineTheme('clean-dark-modern', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: '', foreground: 'D6D6D6', background: '141212' },
+                { token: 'identifier', foreground: 'D6D6D6' },
+                { token: 'comment', foreground: '7D7D7D', fontStyle: 'italic' },
+                { token: 'keyword', foreground: '79A7FF', fontStyle: 'bold' },
+                { token: 'string', foreground: '9CD67D' },
+                { token: 'number', foreground: 'E0A37A' },
+                { token: 'type', foreground: '9BBCE6' },
+                { token: 'function', foreground: '86D9E6' },
+            ],
+            colors: {
+                'editor.background': '#141212',
+                'editor.foreground': '#D6D6D6',
+                'editorCursor.foreground': '#E5E5E5',
+                'editor.lineHighlightBackground': '#1D1A1A',
+                'editorLineNumber.foreground': '#666666',
+                'editorLineNumber.activeForeground': '#9D9D9D',
+                'editor.selectionBackground': '#2D2727',
+                'editor.inactiveSelectionBackground': '#231F1F',
+                'editorIndentGuide.background': '#292323',
+                'editorIndentGuide.activeBackground': '#3A3333',
+                'editorGutter.background': '#141212',
+                'editorWhitespace.foreground': '#2F2929',
+                'scrollbarSlider.background': '#2D2727',
+                'scrollbarSlider.hoverBackground': '#3D3636',
+                'scrollbarSlider.activeBackground': '#4D4646',
+            },
+        });
+        monaco.editor.defineTheme('clean-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+                { token: '', foreground: '1F2937', background: 'F7F9FD' },
+                { token: 'comment', foreground: '94A3B8', fontStyle: 'italic' },
+                { token: 'keyword', foreground: '1E40AF', fontStyle: 'bold' },
+                { token: 'string', foreground: '047857' },
+                { token: 'number', foreground: 'B45309' },
+                { token: 'function', foreground: '075985' },
+                { token: 'type', foreground: '7C3AED' },
+            ],
+            colors: {
+                'editor.background': '#F7F9FD',
+                'editor.foreground': '#1F2937',
+                'editorCursor.foreground': '#1F2937',
+                'editor.lineHighlightBackground': '#ECF1F8',
+                'editorLineNumber.foreground': '#94A3B8',
+                'editorLineNumber.activeForeground': '#475569',
+                'editor.selectionBackground': '#D6E4FA',
+                'editor.inactiveSelectionBackground': '#E2E8F5',
+                'editorIndentGuide.background': '#DFE6F2',
+                'editorIndentGuide.activeBackground': '#B7C4D9',
+                'editorGutter.background': '#F7F9FD',
+                'editorWhitespace.foreground': '#D1D9E7',
+                'scrollbarSlider.background': '#CBD5E1',
+                'scrollbarSlider.hoverBackground': '#94A3B8',
+                'scrollbarSlider.activeBackground': '#64748B',
+            },
+        });
     }, []);
 
     const handleEditorDidMount = useCallback(
-        (editorInstance: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-            editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP, () => {
+        (mountedEditor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+            editorInstanceRef.current = mountedEditor;
+            monacoInstanceRef.current = monaco;
+            applyEditorTheme(monaco, theme);
+
+            mountedEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP, () => {
                 const event = new CustomEvent('open-search-bar');
                 window.dispatchEvent(event);
             });
-            editorInstance.onDidChangeCursorPosition((e) => {
+            mountedEditor.onDidChangeCursorPosition((e) => {
                 const { lineNumber, column } = e.position;
                 setCurrentCursorPosition({ ln: lineNumber, col: column });
             });
-            // eslint-disable-next-line react-hooks/exhaustive-deps
         },
-        [],
+        [applyEditorTheme, setCurrentCursorPosition, theme],
     );
+
+    useEffect(() => {
+        if (!monacoInstanceRef.current) return;
+        applyEditorTheme(monacoInstanceRef.current, theme);
+    }, [applyEditorTheme, theme]);
 
     function filePathModifier(filePath: string | undefined) {
         return filePath ? filePath.replaceAll('/', ' / ') : '';
@@ -151,7 +234,7 @@ export default function CodeEditor(): JSX.Element {
             <div className="flex-1 min-w-0 h-full">
                 {currentFile ? (
                     <>
-                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#070708] text-gray-300 text-sm ">
+                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#070708] text-gray-300 text-sm playground-editor-topbar">
                             <span>{filePathModifier(currentFile?.id)}</span>
                             <div className="flex items-center gap-2">
                                 <button
@@ -159,7 +242,7 @@ export default function CodeEditor(): JSX.Element {
                                     onClick={() => setCollapsechat(!collapseChat)}
                                     aria-label="Toggle files and chat layout"
                                     className={cn(
-                                        'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
+                                        'playground-editor-action-btn cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
                                         'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1',
                                         collapseChat ? 'text-[#5483B3]' : 'text-light',
                                     )}
@@ -170,7 +253,7 @@ export default function CodeEditor(): JSX.Element {
                                 <div
                                     onClick={handleCopyFileContent}
                                     className={cn(
-                                        'cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
+                                        'playground-editor-action-btn cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10',
                                         'hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1',
                                         isCopied ? 'text-[#5483B3]' : 'text-light',
                                     )}
@@ -189,7 +272,7 @@ export default function CodeEditor(): JSX.Element {
                             language="rust"
                             beforeMount={handleEditorWillMount}
                             onMount={handleEditorDidMount}
-                            theme="clean-dark"
+                            theme={getEditorTheme(theme)}
                             options={{
                                 readOnly: true,
                                 readOnlyMessage: {
@@ -201,8 +284,16 @@ export default function CodeEditor(): JSX.Element {
                         />
                     </>
                 ) : (
-                    <div className="w-full h-full flex justify-center items-center bg-[#070708]">
-                        <LighthouseMark size={188} className="text-neutral-800" />
+                    <div className="w-full h-full flex flex-col gap-y-5 justify-center items-center bg-[#070708] playground-editor-empty">
+                        <LighthouseMark size={152} className="text-neutral-800" />
+                        <div className="text-sm tracking-wider text-neutral-500 flex items-center gap-x-2">
+                            <span>Processing</span>
+                            <div className="flex space-x-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce [animation-delay:-0.3s]"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce [animation-delay:-0.15s]"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce"></div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

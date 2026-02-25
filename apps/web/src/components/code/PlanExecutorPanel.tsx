@@ -17,6 +17,7 @@ import { AiFillEdit } from 'react-icons/ai';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { FaPlus } from 'react-icons/fa';
 import { PlanMessage } from '@lighthouse/types';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
 
 export interface PlanExecutorPanelProps {
     className?: string;
@@ -58,6 +59,7 @@ export default function PlanExecutorPanel({
             description: ins.short_description,
         })),
     );
+    const { theme } = usePlaygroundThemeStore();
 
     // Refresh when new plan arrives
     useEffect(() => {
@@ -105,7 +107,7 @@ export default function PlanExecutorPanel({
         <div
             data-lenis-prevent
             className={cn(
-                'max-w-170 px-4 py-5 pb-28 text-left relative transition-all duration-300 overflow-x-hidden overflow-y-auto mt-1 custom-scrollbar soft-scroll scroll-pb-16',
+                'playground-plan-executor max-w-170 px-4 py-5 pb-28 text-left relative transition-all duration-300 overflow-x-hidden overflow-y-auto mt-1 custom-scrollbar soft-scroll scroll-pb-16',
                 collapse ? 'max-h-48 min-h-48' : expanded ? 'h-full min-h-0' : 'min-h-fit',
                 className,
             )}
@@ -115,7 +117,9 @@ export default function PlanExecutorPanel({
                     className="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none"
                     style={{
                         background:
-                            'linear-gradient(to top, rgb(17, 17, 17), rgb(18, 18, 18), rgba(14, 14, 14, 0.389), transparent)',
+                            theme === 'light'
+                                ? 'linear-gradient(to top, rgb(239, 244, 251), rgb(244, 247, 252), rgba(248, 250, 254, 0.52), transparent)'
+                                : 'linear-gradient(to top, rgb(17, 17, 17), rgb(18, 18, 18), rgba(14, 14, 14, 0.389), transparent)',
                     }}
                 />
             )}
@@ -124,7 +128,7 @@ export default function PlanExecutorPanel({
                 <ToolTipComponent content="edit your planning context">
                     <div
                         onClick={onEdit}
-                        className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none"
+                        className="playground-plan-executor-action size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none"
                     >
                         <span className="text-[12px] tex-light/90">edit</span>
                         <AiFillEdit />
@@ -135,7 +139,7 @@ export default function PlanExecutorPanel({
                     <ToolTipComponent content="expand">
                         <IoMdExpand
                             onClick={onExpand}
-                            className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1"
+                            className="playground-plan-executor-action size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1"
                         />
                     </ToolTipComponent>
                 )}
@@ -145,7 +149,7 @@ export default function PlanExecutorPanel({
                         <MdKeyboardArrowDown
                             onClick={onCollapse}
                             className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1',
+                                'playground-plan-executor-action size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1',
                                 collapse && 'rotate-180',
                             )}
                         />
@@ -161,11 +165,11 @@ export default function PlanExecutorPanel({
                 </span>
             </div>
 
-            <h1 className="text-2xl font-bold text-left mt-3 text-light/90 select-none">
+            <h1 className="playground-plan-executor-title text-2xl font-bold text-left mt-3 text-light/90 select-none">
                 {plan.contract_title}
             </h1>
 
-            <p className="text-left text-[13px] text-light/70 mt-1">{plan.short_description}</p>
+            <p className="playground-plan-executor-desc text-left text-[13px] text-light/70 mt-1">{plan.short_description}</p>
 
             <div
                 onClick={() => setShowDetailedPlan(true)}
@@ -199,6 +203,7 @@ export default function PlanExecutorPanel({
 
             <div
                 className={cn(
+                    'playground-plan-executor-card',
                     'w-full border rounded-[6px] px-3 pb-3 pt-2 mt-1 relative',
                     editExeutorPlanPanel
                         ? 'border-[#80a1c260] bg-[#80a1c210]'
@@ -260,10 +265,10 @@ export default function PlanExecutorPanel({
                             onClick={() => !editExeutorPlanPanel && toggleSelected(index)}
                         >
                             <span
-                                className={cn(
-                                    'h-3 w-3 aspect-square border border-neutral-800 rounded-full bg-dark',
-                                    ins.selected && 'bg-light',
-                                )}
+                            className={cn(
+                                'playground-plan-executor-dot h-3 w-3 aspect-square border border-neutral-800 rounded-full bg-dark',
+                                ins.selected && 'bg-light',
+                            )}
                             />
 
                             <div className="flex flex-col -mt-1 flex-1">

@@ -1,14 +1,30 @@
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { TextShimmer } from '../ui/shimmer-text';
 import LighthouseMark from '../ui/svg/LighthouseMark';
 import { FILE_STRUCTURE_TYPES, PHASE_TYPES, STAGE } from '@/src/types/stream_event_types';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FileIcon from '../tickers/FileIcon';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderLoader() {
     const contract = useCurrentContract();
-    const { currentFileEditing, phase } = contract;
+    const { currentFileEditing, phase, loadingStartedAt } = contract;
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+    useEffect(() => {
+        if (!loadingStartedAt) {
+            setElapsedSeconds(0);
+            return;
+        }
+
+        const updateElapsed = () => {
+            const seconds = Math.max(0, Math.floor((Date.now() - loadingStartedAt) / 1000));
+            setElapsedSeconds(seconds);
+        };
+
+        updateElapsed();
+        const intervalId = window.setInterval(updateElapsed, 1000);
+        return () => window.clearInterval(intervalId);
+    }, [loadingStartedAt]);
 
     const phaseInfo = useMemo(() => {
         switch (phase) {
@@ -58,9 +74,13 @@ export default function BuilderLoader() {
 
     const fileName = currentFileEditing ? currentFileEditing.split('/').pop() : '';
     const filePath = currentFileEditing ? currentFileEditing.split('/').slice(0, -1).join('/') : '';
+    const elapsedLabel =
+        elapsedSeconds < 60
+            ? `${elapsedSeconds}s`
+            : `${Math.floor(elapsedSeconds / 60)}m ${String(elapsedSeconds % 60).padStart(2, '0')}s`;
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-[#070708]">
+        <div className="playground-builder-loader w-full h-full flex items-center justify-center bg-[#070708]">
             <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-md">
                 <LighthouseMark className="text-neutral-600 h-20 w-20 animate-pulse" />
 
@@ -72,7 +92,7 @@ export default function BuilderLoader() {
                 </div>
 
                 {currentFileEditing && (
-                    <div className="w-80 h-16 bg-[#0c0d0e] backdrop-blur-sm rounded border border-neutral-800/50 px-4 flex items-center gap-3 overflow-hidden">
+                    <div className="playground-builder-loader-file w-80 h-16 bg-[#0c0d0e] backdrop-blur-sm rounded border border-neutral-800/50 px-4 flex items-center gap-3 overflow-hidden">
                         <div className="flex-shrink-0">
                             <FileIcon filename={fileName || ''} size={20} />
                         </div>
@@ -99,7 +119,7 @@ export default function BuilderLoader() {
                         <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce"></div>
                     </div>
                     <span className="text-xs text-neutral-600">
-                        {phase === PHASE_TYPES.COMPLETE ? 'Done' : 'In progress'}
+                        {phase === PHASE_TYPES.COMPLETE ? 'Done' : `In progress · ${elapsedLabel}`}
                     </span>
                 </div>
             </div>

@@ -11,6 +11,10 @@ import GenerateContract from '../lib/server/generate_contract';
 import { ChatRole, STAGE, Template } from '@lighthouse/types';
 import { shouldSkipAuthClient } from '../lib/auth-bypass';
 
+interface SetStatesOptions {
+    markLoading?: boolean;
+}
+
 export default function useGenerate() {
     const { session } = useUserSessionStore();
     const router = useRouter();
@@ -20,10 +24,14 @@ export default function useGenerate() {
         instruction: string | null,
         templateId?: string,
         template?: Template,
+        options?: SetStatesOptions,
     ) {
-        const { setCurrentContractId, setMessage, setActiveTemplate } =
+        const { setCurrentContractId, setMessage, setActiveTemplate, setLoading } =
             useBuilderChatStore.getState();
         setCurrentContractId(contractId);
+        if (options?.markLoading) {
+            setLoading(true);
+        }
 
         if (template) {
             setActiveTemplate(template);

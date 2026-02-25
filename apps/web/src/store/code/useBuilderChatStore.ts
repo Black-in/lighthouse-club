@@ -10,6 +10,7 @@ interface ContractState {
     messages: Message[];
     phase: string;
     loading: boolean;
+    loadingStartedAt: number | null;
     currentFileEditing: string | null;
     activeTemplate: Template | null; // Move template state here too
 }
@@ -33,6 +34,7 @@ const getDefaultContractState = (): ContractState => ({
     messages: [],
     phase: '',
     loading: false,
+    loadingStartedAt: null,
     currentFileEditing: null,
     activeTemplate: null,
 });
@@ -81,13 +83,18 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setLoading: (loading) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
+        const currentContract = contracts[currentContractId] || getDefaultContractState();
+        const nextLoadingStartedAt = loading
+            ? currentContract.loadingStartedAt ?? Date.now()
+            : null;
 
         set({
             contracts: {
                 ...contracts,
                 [currentContractId]: {
-                    ...contracts[currentContractId],
+                    ...currentContract,
                     loading,
+                    loadingStartedAt: nextLoadingStartedAt,
                 },
             },
         });

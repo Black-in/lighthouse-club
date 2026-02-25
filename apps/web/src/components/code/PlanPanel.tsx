@@ -8,14 +8,11 @@ import PlanExecutorPanel from './PlanExecutorPanel';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { SidePanelValues } from './EditorSidePanel';
-import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
-import AppLogo from '../tickers/AppLogo';
 
 export default function PlanPanel(): JSX.Element {
     const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
     const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore();
     const { setCurrentState } = useSidePanelStore();
-    const { message } = useEditPlanStore();
     // if (!message)
     //     return (
     //         <div className="w-full h-full flex items-center justify-center text-light/50 bg-[#151617]">
@@ -23,7 +20,7 @@ export default function PlanPanel(): JSX.Element {
     //         </div>
     //     );
     return (
-        <div className="w-full h-full min-h-0 flex justify-center bg-[#070708] overflow-hidden">
+        <div className="playground-plan-panel w-full h-full min-h-0 flex justify-center bg-[#070708] overflow-hidden">
             <PlanExecutorPanel
                 plan={DUMMY_PLAN}
                 onCollapse={() => {

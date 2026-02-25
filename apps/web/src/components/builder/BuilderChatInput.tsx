@@ -11,7 +11,6 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import LoginModal from '../utility/LoginModal';
-import { ChatRole } from '@lighthouse/types';
 import { v4 as uuid } from 'uuid';
 import { TbExternalLink } from 'react-icons/tb';
 import Image from 'next/image';
@@ -23,6 +22,7 @@ import BuilderChatInputFeatures from './BuilderChatInputFeatures';
 import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { X } from 'lucide-react';
+import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
 
 interface AttachmentItem {
     id: string;
@@ -58,7 +58,18 @@ export default function BuilderChatInput() {
     const contractId = params.contractId as string;
     const { showMessageLimit, setShowMessageLimit, showContractLimit, showRegenerateTime } =
         useLimitStore();
+    const { theme } = usePlaygroundThemeStore();
     const skipAuth = shouldSkipAuthClient();
+
+    const borderGradientColors =
+        theme === 'light'
+            ? ['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']
+            : theme === 'dark'
+              ? ['rgb(170, 170, 170)', 'rgb(116, 116, 116)', 'rgb(46, 46, 46)', 'rgb(10, 10, 10)']
+              : ['rgb(164, 164, 164)', 'rgb(103, 103, 103)', 'rgb(36, 36, 36)', 'rgb(8, 8, 8)'];
+
+    const borderAnimationSpeed = theme === 'light' ? 0.34 : theme === 'dark' ? 0.42 : 0.4;
+    const borderNoiseIntensity = theme === 'light' ? 0.12 : theme === 'dark' ? 0.06 : 0.04;
 
     useEffect(() => {
         attachmentsRef.current = attachments;
@@ -97,6 +108,9 @@ export default function BuilderChatInput() {
     }
 
     async function handleSubmit() {
+        if (contract.loading) {
+            return;
+        }
         if (!inputValue.trim() && attachments.length === 0) {
             return;
         }
@@ -107,7 +121,9 @@ export default function BuilderChatInput() {
         if (showContractLimit || showMessageLimit) {
             return;
         }
-        set_states(contractId, inputValue, contract.activeTemplate?.id);
+        set_states(contractId, inputValue, contract.activeTemplate?.id, undefined, {
+            markLoading: true,
+        });
         handleGeneration(contractId, inputValue, contract.activeTemplate?.id);
         setInputValue('');
         setAttachments((prev) => {
@@ -119,8 +135,6 @@ export default function BuilderChatInput() {
             return [];
         });
     }
-
-    const userMessagesLength = contract.messages.filter((m) => m.role === ChatRole.USER).length;
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -187,7 +201,7 @@ export default function BuilderChatInput() {
 
     return (
         <>
-            <div className="relative group w-full flex flex-col">
+            <div className="playground-builder-chat-input relative group w-full flex flex-col">
                 {hasExistingMessages && (
                     <div className="flex gap-x-2 items-center w-full justify-center">
                         <Button
@@ -212,7 +226,7 @@ export default function BuilderChatInput() {
 
                 {showContractLimit && (
                     <div className="w-full px-1">
-                        <div className="flex flex-col text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
+                        <div className="playground-chat-limit-banner flex flex-col text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
                             <span>You have reached your daily limit, Try again at</span>
                             {formatPretty(showRegenerateTime!)}
                         </div>
@@ -221,11 +235,11 @@ export default function BuilderChatInput() {
 
                 {showMessageLimit && (
                     <div className="w-full px-1">
-                        <div className="flex gap-x-2 text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
+                        <div className="playground-chat-limit-banner flex gap-x-2 text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
                             <span>Message limit reached.</span>
                             <span
                                 onClick={handleContinueToNewChat}
-                                className="hover:underline cursor-pointer flex items-center gap-x-1"
+                                className="playground-chat-limit-action hover:underline cursor-pointer flex items-center gap-x-1"
                             >
                                 start new chat
                                 <TbExternalLink />
@@ -239,16 +253,16 @@ export default function BuilderChatInput() {
                     roundedClassName="rounded-[34px]"
                     containerClassName="w-full rounded-[34px]"
                     className="w-full !rounded-[34px] !p-0"
-                    gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+                    gradientColors={borderGradientColors}
                     duration={5}
-                    speed={0.14}
-                    noiseIntensity={0.16}
+                    speed={borderAnimationSpeed}
+                    noiseIntensity={borderNoiseIntensity}
                     animating
-                    backdropBlur
+                    backdropBlur={theme === 'light'}
                 >
                     <div
                         className={cn(
-                            'relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm transition-all duration-200',
+                            'playground-chat-input-shell relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm transition-all duration-200',
                             isInputFocused && 'md:scale-[1.005]',
                         )}
                     >
@@ -263,7 +277,7 @@ export default function BuilderChatInput() {
                                     {attachments.map((attachment) => (
                                         <div
                                             key={attachment.id}
-                                            className="inline-flex max-w-[16.5rem] items-center gap-2 rounded-xl border border-neutral-700/90 bg-[#1a1a1d] p-2"
+                                            className="playground-chat-attachment inline-flex max-w-[16.5rem] items-center gap-2 rounded-xl border border-neutral-700/90 bg-[#1a1a1d] p-2"
                                         >
                                             {attachment.kind === 'image' && attachment.previewUrl ? (
                                                 <Image
@@ -290,7 +304,8 @@ export default function BuilderChatInput() {
                                             <button
                                                 type="button"
                                                 onClick={() => removeAttachment(attachment.id)}
-                                                className="rounded-full p-1 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-white"
+                                                disabled={contract.loading}
+                                                className="playground-chat-attachment-remove rounded-full p-1 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-white"
                                             >
                                                 <X className="h-3.5 w-3.5" />
                                             </button>
@@ -305,13 +320,14 @@ export default function BuilderChatInput() {
                                 onFocus={() => setIsInputFocused(true)}
                                 onBlur={() => setIsInputFocused(false)}
                                 placeholder="Prompt BlackIn to build your next web workflow"
-                                disabled={hasExistingMessages}
+                                disabled={hasExistingMessages || contract.loading}
                                 className={cn(
-                                    'w-full h-[3.1rem] md:h-[3.8rem] focus:h-[4.9rem] bg-transparent px-0 py-0 text-neutral-200 border-0 shadow-none',
+                                    'playground-chat-textarea w-full h-[3.1rem] md:h-[3.8rem] focus:h-[4.9rem] bg-transparent px-0 py-0 text-neutral-200 border-0 shadow-none',
                                     'placeholder:text-neutral-600 placeholder:text-sm resize-none',
                                     'focus:outline-none transition-all duration-200',
                                     'text-md tracking-wider caret-[#e6e0d4]',
-                                    hasExistingMessages && 'cursor-not-allowed opacity-50',
+                                    (hasExistingMessages || contract.loading) &&
+                                        'cursor-not-allowed opacity-50',
                                 )}
                                 rows={3}
                             />
@@ -347,6 +363,7 @@ export default function BuilderChatInput() {
                                 onFilesSelected={handleFilesSelected}
                                 canSubmit={attachments.length > 0}
                                 disabled={hasExistingMessages}
+                                submitting={contract.loading}
                             />
                         </div>
                     </div>

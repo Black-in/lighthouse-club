@@ -18,15 +18,13 @@ import { AiFillFolder } from 'react-icons/ai';
 import { AiFillFolderOpen } from 'react-icons/ai';
 import FileIcon from '../tickers/FileIcon';
 import { cn } from '@/src/lib/utils';
-import { HoverBorderGradient } from '../ui/hover-border-gradient';
-import { MdChevronRight } from 'react-icons/md';
 
 interface TreeData {
     [key: string]: TreeItem;
 }
 
 export default function FileTree() {
-    const { fileTree, selectFile, setCollapsechat } = useCodeEditor();
+    const { fileTree, selectFile } = useCodeEditor();
 
     const treeData = useMemo(() => {
         const flattened: TreeData = {};
@@ -98,13 +96,13 @@ export default function FileTree() {
     }, [fileTree]);
 
     return (
-        <div className="h-full bg-black flex flex-col w-full">
+        <div className="playground-file-tree h-full bg-black flex flex-col w-full">
             <div className="shrink-0 px-4 pt-3 pb-1">
                 <div className="flex items-center gap-2">
                     <div className="h-5 w-5 flex items-center justify-center shrink-0">
-                        <AiFillFolder size={16} className="text-[#e45f5f]" />
+                        <AiFillFolder size={16} className="playground-file-tree-project-icon text-[#e45f5f]" />
                     </div>
-                    <span className="truncate text-sm font-medium tracking-wide text-[#b6efc0]">
+                    <span className="playground-file-tree-project-name truncate text-sm font-medium tracking-wide text-[#b6efc0]">
                         {projectName}
                     </span>
                 </div>
@@ -146,22 +144,28 @@ export default function FileTree() {
                             <div className="h-5 w-5 flex items-center justify-center shrink-0 scale-100">
                                 {item.isFolder ? (
                                     context.isExpanded ? (
-                                        <AiFillFolderOpen size={16} className="text-[#317FFF]" />
+                                        <AiFillFolderOpen
+                                            size={16}
+                                            className="playground-file-tree-folder-icon text-[#317FFF]"
+                                        />
                                     ) : (
-                                        <AiFillFolder size={16} className="text-[#317FFF]" />
+                                        <AiFillFolder
+                                            size={16}
+                                            className="playground-file-tree-folder-icon text-[#317FFF]"
+                                        />
                                     )
                                 ) : (
                                     <FileIcon
                                         filename={item.data}
                                         size={14}
-                                        className="text-neutral-400"
+                                        className="playground-file-tree-file-icon text-neutral-400"
                                     />
                                 )}
                             </div>
 
                             <span
                                 className={cn(
-                                    'w-full text-sm tracking-wide truncate scale-100',
+                                    'playground-file-tree-item-name w-full text-sm tracking-wide truncate scale-100',
                                     item.isFolder ? 'text-[#ebcb8a]' : 'text-[#828282] ',
                                 )}
                             >
@@ -174,23 +178,6 @@ export default function FileTree() {
                         <Tree treeId="file-tree" rootItem="root" treeLabel={projectName} />
                     </div>
                 </UncontrolledTreeEnvironment>
-            </div>
-
-            <div className="shrink-0 flex justify-end px-3 pb-2 pt-1">
-                <HoverBorderGradient
-                    as="button"
-                    onClick={() => setCollapsechat(false)}
-                    containerClassName="rounded-full"
-                    className="flex items-center gap-x-1.5 rounded-full bg-[#05070a] px-3 py-1.5 text-[12px] font-semibold tracking-wide text-white"
-                    gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
-                    duration={5}
-                    speed={0.14}
-                    noiseIntensity={0.18}
-                    backdropBlur
-                >
-                    <span>Chat</span>
-                    <MdChevronRight className="text-white" />
-                </HoverBorderGradient>
             </div>
         </div>
     );
