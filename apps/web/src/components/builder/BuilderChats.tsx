@@ -90,7 +90,7 @@ export default function BuilderChats() {
                 ref={chatContainerRef}
                 data-lenis-prevent
                 onScroll={handleChatScroll}
-                className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar soft-scroll"
+                className="flex-1 flex flex-col gap-y-3 text-light text-sm px-4 overflow-y-auto min-h-0 custom-scrollbar soft-scroll"
             >
                 {chatLoading ? (
                     <BuilderChatSkeletons loading={chatLoading} />
