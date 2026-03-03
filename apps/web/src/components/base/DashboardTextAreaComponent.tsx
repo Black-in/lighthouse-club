@@ -71,6 +71,15 @@ const formatFileSize = (bytes: number) => {
     return `${(kb / 1024).toFixed(1)} MB`;
 };
 
+const borderGradientColors = [
+    'rgb(164, 164, 164)',
+    'rgb(103, 103, 103)',
+    'rgb(36, 36, 36)',
+    'rgb(8, 8, 8)',
+];
+const borderAnimationSpeed = 0.4;
+const borderNoiseIntensity = 0.04;
+
 export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAreaComponentProps) {
     const [inputValue, setInputValue] = useState<string>('');
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
@@ -198,19 +207,24 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                     roundedClassName="rounded-[34px]"
                     containerClassName="w-full rounded-[34px]"
                     className="w-full !rounded-[34px] !p-0"
-                    gradientColors={
-                        isTextareaFocused
-                            ? ['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']
-                            : ['rgb(38, 38, 38)', 'rgb(38, 38, 38)', 'rgb(38, 38, 38)']
-                    }
+                    gradientColors={borderGradientColors}
                     duration={5}
-                    speed={0.14}
-                    noiseIntensity={isTextareaFocused ? 0.18 : 0}
-                    animating={isTextareaFocused}
-                    backdropBlur
+                    speed={borderAnimationSpeed}
+                    noiseIntensity={borderNoiseIntensity}
+                    animating
                 >
-                    <div className="relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)]">
-                        <div className="px-5 pb-14 pt-3.5 md:px-6 md:pb-15 md:pt-4">
+                    <div
+                        className={cn(
+                            'relative overflow-hidden rounded-[34px] bg-[#050505] shadow-[0_24px_64px_-34px_rgba(0,0,0,0.98)] backdrop-blur-sm transition-all duration-200',
+                            isTextareaFocused && 'md:scale-[1.005]',
+                        )}
+                    >
+                        <div
+                            className={cn(
+                                'px-5 pt-3.5 pb-[3.3rem] md:px-6 md:pt-4 transition-all duration-200',
+                                isTextareaFocused ? 'md:pb-[3.7rem]' : 'md:pb-[3.3rem]',
+                            )}
+                        >
                         {attachments.length > 0 && (
                             <div className="mb-3 flex flex-wrap gap-2">
                                 {attachments.map((attachment) => (
@@ -357,10 +371,10 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                     disabled={isDisabled}
                                     onClick={handleSubmit}
                                     className={cn(
-                                        'inline-flex h-9 w-9 items-center justify-center rounded-full transition-all',
+                                        'inline-flex h-9 w-9 items-center justify-center rounded-full font-semibold tracking-wider exec-button-dark',
                                         isDisabled
-                                            ? 'cursor-not-allowed bg-neutral-700 text-neutral-500'
-                                            : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
+                                            ? 'cursor-not-allowed opacity-45 hover:translate-y-0 active:scale-100'
+                                            : 'bg-light text-darkest hover:bg-light hover:text-darkest cursor-pointer transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
                                     )}
                                 >
                                     {isSubmitting ? (

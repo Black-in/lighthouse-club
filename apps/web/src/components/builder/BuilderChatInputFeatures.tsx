@@ -173,10 +173,10 @@ export default function BuilderChatInputFeatures({
                     disabled={isDisabled}
                     onClick={onSubmit}
                     className={cn(
-                        'playground-chat-send-btn inline-flex h-9 w-9 items-center justify-center rounded-full transition-all',
+                        'playground-chat-send-btn inline-flex h-9 w-9 items-center justify-center rounded-full font-semibold tracking-wider exec-button-dark',
                         isDisabled
-                            ? 'cursor-not-allowed bg-neutral-700 text-neutral-500'
-                            : 'bg-neutral-400 text-neutral-900 hover:bg-neutral-300',
+                            ? 'cursor-not-allowed opacity-45 hover:translate-y-0 active:scale-100'
+                            : 'bg-light text-darkest hover:bg-light hover:text-darkest cursor-pointer transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
                     )}
                 >
                     {submitting ? (
