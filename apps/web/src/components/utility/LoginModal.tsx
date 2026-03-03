@@ -78,17 +78,20 @@ function LoginRightContent() {
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
     const [isCaptchaUnavailable, setIsCaptchaUnavailable] = useState(false);
     const { initOAuth, state } = useLoginWithOAuth();
+    const isCaptchaEnabled = process.env.NEXT_PUBLIC_ENABLE_CAPTCHA === 'true';
     const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? '';
     const hasConfiguredCaptcha =
         turnstileSiteKey.length > 0 && !turnstileSiteKey.includes('replace_with_turnstile_site_key');
 
     async function handleSignInWithGoogle() {
-        if (!turnstileToken) {
+        if (isCaptchaEnabled && !turnstileToken) {
             return;
         }
 
         try {
-            document.cookie = `turnstile_token=${turnstileToken}; path=/; max-age=300; SameSite=Lax; Secure`;
+            if (turnstileToken) {
+                document.cookie = `turnstile_token=${turnstileToken}; path=/; max-age=300; SameSite=Lax; Secure`;
+            }
             await initOAuth({
                 provider: 'google',
             });
@@ -117,7 +120,7 @@ function LoginRightContent() {
 
             <Button
                 onClick={handleSignInWithGoogle}
-                disabled={!turnstileToken || state.status === 'loading'}
+                disabled={state.status === 'loading' || (isCaptchaEnabled && !turnstileToken)}
                 className={cn(
                     'w-full flex items-center justify-center gap-2 md:gap-3',
                     'px-2 md:px-6 py-1 md:py-5 ',
@@ -134,7 +137,11 @@ function LoginRightContent() {
             </Button>
 
             <div className="w-full flex justify-center md:py-2">
-                {!hasConfiguredCaptcha || isCaptchaUnavailable ? (
+                {!isCaptchaEnabled ? (
+                    <span className="text-[10px] md:text-xs text-neutral-400 tracking-wide">
+                        Captcha disabled.
+                    </span>
+                ) : !hasConfiguredCaptcha || isCaptchaUnavailable ? (
                     <span className="text-[10px] md:text-xs text-amber-300/90 tracking-wide">
                         Captcha is not configured for this domain.
                     </span>

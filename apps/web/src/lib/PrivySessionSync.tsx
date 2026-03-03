@@ -73,6 +73,7 @@ function buildSessionFromUser({
 export default function PrivySessionSync() {
     const { ready, authenticated, user } = usePrivy();
     const { session, setSession, clearSession } = useUserSessionStore();
+    const isCaptchaEnabled = process.env.NEXT_PUBLIC_ENABLE_CAPTCHA === 'true';
     const isSyncingRef = useRef(false);
     const oauthAccessTokensRef = useRef<Partial<Record<'google' | 'github', string>>>({});
 
@@ -120,7 +121,7 @@ export default function PrivySessionSync() {
             (provider === 'github' && session?.user?.id ? session.user.id : null);
         const isLinkingFlow = Boolean(linkingUserId && provider === 'github');
 
-        if (!turnstileToken && !isLinkingFlow) {
+        if (isCaptchaEnabled && !turnstileToken && !isLinkingFlow) {
             return;
         }
 
@@ -143,7 +144,7 @@ export default function PrivySessionSync() {
                     image: null,
                 },
                 account,
-                turnstileToken: isLinkingFlow ? null : turnstileToken,
+                turnstileToken: isLinkingFlow || !isCaptchaEnabled ? null : turnstileToken,
                 linkingUserId: isLinkingFlow ? linkingUserId : null,
             })
             .then((response) => {
@@ -168,7 +169,7 @@ export default function PrivySessionSync() {
             .finally(() => {
                 isSyncingRef.current = false;
             });
-    }, [ready, authenticated, user, session, setSession, clearSession]);
+    }, [ready, authenticated, user, session, setSession, clearSession, isCaptchaEnabled]);
 
     return null;
 }
