@@ -47,7 +47,7 @@ export default function PlaygroundLeftRail({ visible, onToggle }: PlaygroundLeft
     return (
         <>
             {visible ? (
-                <aside className="playground-left-rail absolute left-0 top-0 z-40 h-full w-16 border-r border-transparent bg-[#060709]">
+                <aside className="playground-left-rail absolute left-0 top-0 z-40 h-full w-16 bg-black">
                     <div className="flex h-full flex-col">
                         <div className="flex h-14 items-center justify-center px-2">
                             <ToolTipComponent side="right" content="Close sidebar">
@@ -138,7 +138,7 @@ export default function PlaygroundLeftRail({ visible, onToggle }: PlaygroundLeft
                             type="button"
                             onClick={onToggle}
                             aria-label="Open sidebar"
-                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#060709] transition hover:bg-[#16181d]"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-black transition hover:bg-[#16181d]"
                         >
                             <img
                                 src={

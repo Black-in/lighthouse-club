@@ -21,9 +21,11 @@ import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { ArrowRight, ChevronDown, FileUp, Loader2, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
+import { toast } from 'sonner';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -43,6 +45,22 @@ const modelOptions = [
     'Gemini 3.1 Pro',
     'Claude Opus 4.6',
 ] as const;
+
+const isProModel = (model: string) => model.includes('Claude') || model.includes('Gemini');
+const ProTag = () => (
+    <HoverBorderGradient
+        as="span"
+        roundedClassName="rounded-full"
+        containerClassName="rounded-full"
+        className="!px-2 !py-0.5 text-[9px] font-semibold leading-none tracking-[0.08em] text-white"
+        gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+        duration={5}
+        speed={0.14}
+        noiseIntensity={0.18}
+    >
+        PRO
+    </HoverBorderGradient>
+);
 
 const getFileUniqueKey = (file: File) => `${file.name}-${file.size}-${file.lastModified}`;
 
@@ -273,9 +291,13 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             <div className="flex items-center gap-1">
                                 <Select
                                     value={selectedModel}
-                                    onValueChange={(val) =>
-                                        setSelectedModel(val as (typeof modelOptions)[number])
-                                    }
+                                    onValueChange={(val) => {
+                                        if (isProModel(val)) {
+                                            toast.info('Upgrade to Pro to access this model');
+                                            return;
+                                        }
+                                        setSelectedModel(val as (typeof modelOptions)[number]);
+                                    }}
                                     disabled={isSubmitting}
                                 >
                                     <SelectTrigger
@@ -284,21 +306,49 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                             'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
                                         )}
                                     >
-                                        <span className="whitespace-nowrap text-neutral-300 text-[12px] leading-none">
+                                        <span className="flex items-center gap-1.5 whitespace-nowrap text-[12px] leading-none text-neutral-300">
                                             {selectedModel}
+                                            {isProModel(selectedModel) && <ProTag />}
                                         </span>
                                         <ChevronDown className="h-3 w-3 text-neutral-500" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
-                                        {modelOptions.map((model) => (
-                                            <SelectItem
-                                                key={model}
-                                                value={model}
-                                                className="data-[state=checked]:bg-white data-[state=checked]:text-black data-[highlighted]:bg-neutral-800 data-[highlighted]:text-white"
-                                            >
-                                                {model}
-                                            </SelectItem>
-                                        ))}
+                                        {modelOptions.map((model) => {
+                                            const isPro = isProModel(model);
+                                            const item = (
+                                                <SelectItem
+                                                    key={model}
+                                                    value={model}
+                                                    onSelect={
+                                                        isPro
+                                                            ? (e) => {
+                                                                  e.preventDefault();
+                                                                  toast.info(
+                                                                      'Upgrade to Pro to access this model',
+                                                                  );
+                                                              }
+                                                            : undefined
+                                                    }
+                                                    className="data-[state=checked]:bg-white data-[state=checked]:text-black data-[highlighted]:bg-neutral-800 data-[highlighted]:text-white"
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <span>{model}</span>
+                                                        {isPro && <ProTag />}
+                                                    </span>
+                                                </SelectItem>
+                                            );
+
+                                            if (!isPro) return item;
+
+                                            return (
+                                                <Tooltip key={model}>
+                                                    <TooltipTrigger asChild>{item}</TooltipTrigger>
+                                                    <TooltipContent side="right" sideOffset={8}>
+                                                        Upgrade to Pro to access this model
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            );
+                                        })}
                                     </SelectContent>
                                 </Select>
 

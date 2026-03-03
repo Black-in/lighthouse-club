@@ -5,9 +5,12 @@
 
 import { cn } from '@/src/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { ArrowRight, ChevronDown, FileUp, Loader2, Plus } from 'lucide-react';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
+import { toast } from 'sonner';
 
 const modelOptions = [
     'Auto Select',
@@ -16,6 +19,22 @@ const modelOptions = [
     'Gemini 3.1 Pro',
     'Claude Opus 4.6',
 ] as const;
+
+const isProModel = (model: string) => model.includes('Claude') || model.includes('Gemini');
+const ProTag = () => (
+    <HoverBorderGradient
+        as="span"
+        roundedClassName="rounded-full"
+        containerClassName="rounded-full"
+        className="!px-2 !py-0.5 text-[9px] font-semibold leading-none tracking-[0.08em] text-white"
+        gradientColors={['rgb(193, 232, 255)', 'rgb(125, 160, 202)', 'rgb(5, 38, 89)']}
+        duration={5}
+        speed={0.14}
+        noiseIntensity={0.18}
+    >
+        PRO
+    </HoverBorderGradient>
+);
 
 interface BuilderChatInputFeaturesProps {
     inputValue: string;
@@ -88,7 +107,13 @@ export default function BuilderChatInputFeatures({
             <div className="flex items-center gap-1">
                 <Select
                     value={selectedModel}
-                    onValueChange={(val) => setSelectedModel(val as (typeof modelOptions)[number])}
+                    onValueChange={(val) => {
+                        if (isProModel(val)) {
+                            toast.info('Upgrade to Pro to access this model');
+                            return;
+                        }
+                        setSelectedModel(val as (typeof modelOptions)[number]);
+                    }}
                     disabled={controlsDisabled}
                 >
                     <SelectTrigger
@@ -97,21 +122,49 @@ export default function BuilderChatInputFeatures({
                             'w-fit min-w-fit justify-between gap-1.5 shadow-none hover:bg-[#151515] hover:border-neutral-600 [&>svg]:hidden',
                         )}
                     >
-                        <span className="playground-chat-model-label whitespace-nowrap text-neutral-300 text-[12px] leading-none">
+                        <span className="playground-chat-model-label flex items-center gap-1.5 whitespace-nowrap text-[12px] leading-none text-neutral-300">
                             {selectedModel}
+                            {isProModel(selectedModel) && <ProTag />}
                         </span>
                         <ChevronDown className="playground-chat-model-chevron h-3 w-3 text-neutral-500" />
                     </SelectTrigger>
                     <SelectContent className="playground-chat-model-menu rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
-                        {modelOptions.map((model) => (
-                            <SelectItem
-                                key={model}
-                                value={model}
-                                className="playground-chat-model-option"
-                            >
-                                {model}
-                            </SelectItem>
-                        ))}
+                        {modelOptions.map((model) => {
+                            const isPro = isProModel(model);
+                            const item = (
+                                <SelectItem
+                                    key={model}
+                                    value={model}
+                                    onSelect={
+                                        isPro
+                                            ? (e) => {
+                                                  e.preventDefault();
+                                                  toast.info(
+                                                      'Upgrade to Pro to access this model',
+                                                  );
+                                              }
+                                            : undefined
+                                    }
+                                    className="playground-chat-model-option"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <span>{model}</span>
+                                        {isPro && <ProTag />}
+                                    </span>
+                                </SelectItem>
+                            );
+
+                            if (!isPro) return item;
+
+                            return (
+                                <Tooltip key={model}>
+                                    <TooltipTrigger asChild>{item}</TooltipTrigger>
+                                    <TooltipContent side="right" sideOffset={8}>
+                                        Upgrade to Pro to access this model
+                                    </TooltipContent>
+                                </Tooltip>
+                            );
+                        })}
                     </SelectContent>
                 </Select>
 

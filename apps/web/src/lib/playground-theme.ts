@@ -8,11 +8,11 @@ export type PlaygroundTheme = 'dark' | 'light' | 'legacy';
 export const PLAYGROUND_THEME_STORAGE_KEY = 'blackin.playground.theme';
 export const PLAYGROUND_THEME_COOKIE_KEY = 'blackin_playground_theme';
 
-// Keep this false for now: playground ships in dark-only mode.
-// Turn true later to re-enable light/legacy immediately across UI.
+// Keep this false for now: playground ships in a single locked theme.
+// Turn true later to re-enable multi-theme switching across UI.
 export const PLAYGROUND_MULTI_THEME_ENABLED = false;
 
-export const PLAYGROUND_DEFAULT_THEME: PlaygroundTheme = 'dark';
+export const PLAYGROUND_DEFAULT_THEME: PlaygroundTheme = 'legacy';
 
 export function sanitizePlaygroundTheme(
     theme: string | null | undefined,

@@ -230,11 +230,11 @@ export default function CodeEditor(): JSX.Element {
     }
 
     return (
-        <div className="flex flex-col w-full h-full grow-0 relative">
+        <div className="flex flex-col w-full h-full grow-0 relative bg-[#121318]">
             <div className="flex-1 min-w-0 h-full">
                 {currentFile ? (
                     <>
-                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#070708] text-gray-300 text-sm playground-editor-topbar">
+                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#121318] text-gray-300 text-sm playground-editor-topbar">
                             <span>{filePathModifier(currentFile?.id)}</span>
                             <div className="flex items-center gap-2">
                                 <button
@@ -284,7 +284,7 @@ export default function CodeEditor(): JSX.Element {
                         />
                     </>
                 ) : (
-                    <div className="w-full h-full flex flex-col gap-y-5 justify-center items-center bg-[#070708] playground-editor-empty">
+                    <div className="w-full h-full flex flex-col gap-y-5 justify-center items-center bg-[#121318] playground-editor-empty">
                         <LighthouseMark size={152} className="text-neutral-800" />
                         <div className="text-sm tracking-wider text-neutral-500 flex items-center gap-x-2">
                             <span>Processing</span>

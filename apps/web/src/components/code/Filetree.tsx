@@ -96,8 +96,8 @@ export default function FileTree() {
     }, [fileTree]);
 
     return (
-        <div className="playground-file-tree h-full bg-black flex flex-col w-full">
-            <div className="shrink-0 px-4 pt-3 pb-1">
+        <div className="playground-file-tree h-full bg-transparent flex flex-col w-full">
+            <div className="shrink-0 px-4 pt-3 pb-2">
                 <div className="flex items-center gap-2">
                     <div className="h-5 w-5 flex items-center justify-center shrink-0">
                         <AiFillFolder size={16} className="playground-file-tree-project-icon text-[#e45f5f]" />
@@ -109,7 +109,7 @@ export default function FileTree() {
             </div>
             <div
                 data-lenis-prevent
-                className="flex-1 h-full overflow-y-auto custom-scrollbar soft-scroll"
+                className="flex-1 h-full overflow-y-auto custom-scrollbar soft-scroll bg-transparent"
             >
                 <UncontrolledTreeEnvironment
                     dataProvider={dataProvider}

@@ -73,7 +73,7 @@ export default function RightPanelActions() {
                 )}
             </div>
 
-            <ToolTipComponent content="upcoming feature" side="bottom">
+            <ToolTipComponent content="Coming Soon.." side="bottom">
                 <Button
                     disabled={loading}
                     size="xs"
