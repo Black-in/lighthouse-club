@@ -6,11 +6,11 @@
 'use client';
 
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { Session } from 'next-auth';
 import { useEffect } from 'react';
+import { AppSession } from '@/src/types/auth-session';
 
 interface SessionSetterProps {
-    session: Session | null;
+    session: AppSession | null;
 }
 export default function SessionSetter({ session }: SessionSetterProps) {
     const { setSession } = useUserSessionStore();

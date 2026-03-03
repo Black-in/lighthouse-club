@@ -6,13 +6,13 @@
 'use client';
 
 import { Dispatch, SetStateAction, useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { FaGithub } from 'react-icons/fa';
 import { cn } from '@/src/lib/utils';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import OpacityBackground from '../utility/OpacityBackground';
 import ShaderSplitPanel from '../utility/ShaderSplitPanel';
 import { Button } from '../ui/button';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface GithubConnectModalProps {
     openGithubModal: boolean;
@@ -105,6 +105,7 @@ export default function GithubConnectModal({
 }: GithubConnectModalProps) {
     const [isConnecting, setIsConnecting] = useState(false);
     const { session } = useUserSessionStore();
+    const { linkGithub } = usePrivy();
     const hasGithub = Boolean(session?.user?.hasGithub || session?.user?.githubUsername);
 
     if (!openGithubModal) return null;
@@ -113,12 +114,9 @@ export default function GithubConnectModal({
         try {
             setIsConnecting(true);
             if (session?.user?.id) {
-                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300`;
+                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300; SameSite=Lax; Secure`;
             }
-            await signIn('github', {
-                callbackUrl: window.location.pathname,
-                redirect: true,
-            });
+            linkGithub();
         } finally {
             setIsConnecting(false);
         }

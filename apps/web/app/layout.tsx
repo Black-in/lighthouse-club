@@ -5,13 +5,8 @@
 
 import './globals.css';
 import type { Metadata } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOption } from './api/auth/[...nextauth]/options';
-import SessionSetter from '@/src/lib/SessionSeter';
 import WalletProviders from '@/src/providers/WalletProviders';
 import { Toaster } from 'sonner';
-import { headers } from 'next/headers';
-import { shouldEnableDevAccessServer } from '@/src/lib/runtime-mode';
 
 export const metadata: Metadata = {
     title: 'BlackIn',
@@ -49,12 +44,6 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const headerStore = await headers();
-    const host = headerStore.get('host') ?? '';
-    const hostname = host.split(':')[0];
-    const skipAuth = shouldEnableDevAccessServer(hostname);
-    const session = skipAuth ? null : await getServerSession(authOption);
-
     return (
         <html lang="en">
             <body className={`antialiased bg-darkest`} suppressHydrationWarning>
@@ -79,7 +68,6 @@ export default async function RootLayout({
                     }}
                 />
                 <WalletProviders>{children}</WalletProviders>
-                <SessionSetter session={session} />
             </body>
         </html>
     );

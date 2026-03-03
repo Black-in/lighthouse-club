@@ -5,15 +5,16 @@
 
 'use client';
 import { useEffect, useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { PiGithubLogoFill } from 'react-icons/pi';
 import { Button } from '../ui/button';
 import { FaGithub } from 'react-icons/fa';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function GithubPanel() {
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
     const { session } = useUserSessionStore();
+    const { linkGithub } = usePrivy();
     const hasGithub = Boolean(session?.user?.hasGithub || session?.user?.githubUsername);
 
     useEffect(() => {
@@ -27,12 +28,9 @@ export default function GithubPanel() {
         try {
             setIsConnecting(true);
             if (session?.user?.id) {
-                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300`;
+                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300; SameSite=Lax; Secure`;
             }
-            await signIn('github', {
-                callbackUrl: `${window.location.pathname}`,
-                redirect: true,
-            });
+            linkGithub();
         } finally {
             setIsConnecting(false);
         }

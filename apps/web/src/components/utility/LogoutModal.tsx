@@ -4,7 +4,6 @@
  */
 
 'use client';
-import { signOut } from 'next-auth/react';
 import { Dispatch, SetStateAction } from 'react';
 import { IoShieldCheckmark } from 'react-icons/io5';
 import { MdSecurity } from 'react-icons/md';
@@ -14,6 +13,8 @@ import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
 import ShaderSplitPanel from './ShaderSplitPanel';
 import { IoMdLogOut } from 'react-icons/io';
+import { usePrivy } from '@privy-io/react-auth';
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 
 interface LogoutModalProps {
     openLogoutModal: boolean;
@@ -62,11 +63,14 @@ function LogoutRightContent({
 }: {
     setOpenLogoutModal: Dispatch<SetStateAction<boolean>>;
 }) {
+    const { logout } = usePrivy();
+    const { clearSession } = useUserSessionStore();
+
     async function LogoutHandler() {
-        await signOut({
-            callbackUrl: '/',
-            redirect: true,
-        });
+        await logout();
+        clearSession();
+        document.cookie = 'blackin_token=; path=/; max-age=0; SameSite=Lax; Secure';
+        window.location.href = '/';
     }
 
     return (

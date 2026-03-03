@@ -6,12 +6,18 @@
 import type { NextConfig } from 'next';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+const envLocalPath = path.resolve(__dirname, '../../.env.local');
+const envPath = fs.existsSync(envLocalPath)
+    ? envLocalPath
+    : path.resolve(__dirname, '../../.env');
+
+dotenv.config({ path: envPath });
 
 const nextConfig: NextConfig = {
     reactStrictMode: false,

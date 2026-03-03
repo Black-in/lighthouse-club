@@ -4,10 +4,9 @@
  */
 
 'use client';
-import { signIn } from 'next-auth/react';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { Component, Dispatch, ErrorInfo, ReactNode, SetStateAction, useState } from 'react';
 import Turnstile from 'react-turnstile';
-import { FaGithub } from 'react-icons/fa';
 import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
@@ -17,6 +16,36 @@ import LighthouseMark from '../ui/svg/LighthouseMark';
 interface LoginModalProps {
     opensignInModal: boolean;
     setOpenSignInModal: Dispatch<SetStateAction<boolean>>;
+}
+
+interface UIErrorBoundaryProps {
+    children: ReactNode;
+    fallback: ReactNode;
+    onError?: (error: Error) => void;
+}
+
+interface UIErrorBoundaryState {
+    hasError: boolean;
+}
+
+class UIErrorBoundary extends Component<UIErrorBoundaryProps, UIErrorBoundaryState> {
+    public state: UIErrorBoundaryState = { hasError: false };
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
+        this.props.onError?.(error);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback;
+        }
+
+        return this.props.children;
+    }
 }
 
 function LoginLeftContent() {
@@ -47,25 +76,24 @@ function LoginLeftContent() {
 
 function LoginRightContent() {
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-    const [signingInProvider, setSigningInProvider] = useState<'GOOGLE' | 'GITHUB' | null>(null);
+    const [isCaptchaUnavailable, setIsCaptchaUnavailable] = useState(false);
+    const { initOAuth, state } = useLoginWithOAuth();
+    const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? '';
+    const hasConfiguredCaptcha =
+        turnstileSiteKey.length > 0 && !turnstileSiteKey.includes('replace_with_turnstile_site_key');
 
-    async function handleSignIn(type: 'GOOGLE' | 'GITHUB') {
+    async function handleSignInWithGoogle() {
         if (!turnstileToken) {
             return;
         }
 
-        setSigningInProvider(type);
-
         try {
             document.cookie = `turnstile_token=${turnstileToken}; path=/; max-age=300; SameSite=Lax; Secure`;
-            await signIn(type === 'GOOGLE' ? 'google' : 'github', {
-                redirect: false,
-                callbackUrl: '/',
+            await initOAuth({
+                provider: 'google',
             });
         } catch (error) {
             console.error('Sign in error:', error);
-        } finally {
-            setSigningInProvider(null);
         }
     }
 
@@ -88,8 +116,8 @@ function LoginRightContent() {
             </div>
 
             <Button
-                onClick={() => handleSignIn('GOOGLE')}
-                disabled={!turnstileToken || signingInProvider !== null}
+                onClick={handleSignInWithGoogle}
+                disabled={!turnstileToken || state.status === 'loading'}
                 className={cn(
                     'w-full flex items-center justify-center gap-2 md:gap-3',
                     'px-2 md:px-6 py-1 md:py-5 ',
@@ -101,37 +129,41 @@ function LoginRightContent() {
             >
                 <LighthouseMark size={16} className="text-[#d4d8de]" aria-hidden="true" />
                 <span className="text-[#d4d8de] text-[8px] text-[8px] md:text-sm tracking-wide">
-                    {signingInProvider === 'GOOGLE' ? 'Signing in...' : 'Continue with Google'}
-                </span>
-            </Button>
-
-            <Button
-                onClick={() => handleSignIn('GITHUB')}
-                disabled={!turnstileToken || signingInProvider !== null}
-                className={cn(
-                    'w-full flex items-center justify-center gap-2 md:gap-3',
-                    'px-2 md:px-6 py-1 md:py-5 ',
-                    'text-sm font-medium',
-                    'bg-[#0f0f0f] hover:bg-[#141414]',
-                    'border border-neutral-800 rounded-[8px]',
-                    'transition-all disabled:opacity-50 disabled:cursor-not-allowed',
-                )}
-            >
-                <FaGithub className="text-[#d4d8de] size-4 md:size-5" />
-                <span className="text-[#d4d8de] text-[8px] md:text-sm tracking-wide">
-                    {signingInProvider === 'GITHUB' ? 'Signing in...' : 'Continue with GitHub'}
+                    {state.status === 'loading' ? 'Signing in...' : 'Continue with Google'}
                 </span>
             </Button>
 
             <div className="w-full flex justify-center md:py-2">
-                <Turnstile
-                    className="bg-darkest border-0 rounded-full"
-                    sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                    onVerify={(token) => setTurnstileToken(token)}
-                    onError={() => setTurnstileToken(null)}
-                    onExpire={() => setTurnstileToken(null)}
-                    theme="dark"
-                />
+                {!hasConfiguredCaptcha || isCaptchaUnavailable ? (
+                    <span className="text-[10px] md:text-xs text-amber-300/90 tracking-wide">
+                        Captcha is not configured for this domain.
+                    </span>
+                ) : (
+                    <UIErrorBoundary
+                        fallback={
+                            <span className="text-[10px] md:text-xs text-amber-300/90 tracking-wide">
+                                Captcha is not available on this domain.
+                            </span>
+                        }
+                        onError={(error) => {
+                            setTurnstileToken(null);
+                            setIsCaptchaUnavailable(true);
+                            console.error('Turnstile render failed:', error);
+                        }}
+                    >
+                        <Turnstile
+                            className="bg-darkest border-0 rounded-full"
+                            sitekey={turnstileSiteKey}
+                            onVerify={(token) => setTurnstileToken(token)}
+                            onError={() => {
+                                setTurnstileToken(null);
+                                setIsCaptchaUnavailable(true);
+                            }}
+                            onExpire={() => setTurnstileToken(null)}
+                            theme="dark"
+                        />
+                    </UIErrorBoundary>
+                )}
             </div>
 
             <div className="flex md:flex-none">
@@ -162,7 +194,25 @@ export default function LoginModal({ opensignInModal, setOpenSignInModal }: Logi
             <ShaderSplitPanel
                 imageSrc="/signin.png"
                 leftChildren={<LoginLeftContent />}
-                rightChildren={<LoginRightContent />}
+                rightChildren={
+                    <UIErrorBoundary
+                        fallback={
+                            <div className="text-center px-4 space-y-2">
+                                <p className="text-sm text-amber-200">
+                                    Sign in is unavailable in this local runtime.
+                                </p>
+                                <p className="text-xs text-neutral-400">
+                                    Use your deployed domain for full auth flow.
+                                </p>
+                            </div>
+                        }
+                        onError={(error) => {
+                            console.error('Login modal initialization failed:', error);
+                        }}
+                    >
+                        <LoginRightContent />
+                    </UIErrorBoundary>
+                }
             />
         </OpacityBackground>
     );

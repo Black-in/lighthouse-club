@@ -45,9 +45,15 @@ export default class Marketplace {
     }
 
     public static async getTemplates(): Promise<Template[]> {
+        const isLocalHostname =
+            typeof window !== 'undefined' &&
+            ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim() ?? '';
+        const backendIsRemote = /^https?:\/\//i.test(backendUrl) && !/localhost|127\.0\.0\.1|::1/.test(backendUrl);
         const skipTemplatesFetch =
             process.env.NEXT_PUBLIC_SKIP_TEMPLATES_FETCH === 'true' ||
-            shouldEnableDevAccessClient();
+            shouldEnableDevAccessClient() ||
+            (isLocalHostname && backendIsRemote);
 
         if (skipTemplatesFetch) {
             return [];

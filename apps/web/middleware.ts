@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 import { shouldEnableDevAccessServer } from './src/lib/runtime-mode';
 
 export async function middleware(request: NextRequest) {
@@ -15,10 +14,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const token = await getToken({
-        req: request,
-        secret: process.env.NEXTAUTH_SECRET,
-    });
+    const token = request.cookies.get('blackin_token')?.value;
 
     if (!token) {
         return NextResponse.redirect(new URL('/', request.url));

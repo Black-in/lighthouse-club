@@ -11,15 +11,6 @@ function parseBooleanFlag(value: string | undefined): boolean | null {
     return null;
 }
 
-export function isLocalHostname(hostname: string) {
-    return (
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname === '::1' ||
-        hostname.endsWith('.local')
-    );
-}
-
 function resolveEnvDrivenDevAccessMode() {
     const explicitDevMode = parseBooleanFlag(process.env.NEXT_PUBLIC_DEV_ACCESS_MODE);
     if (explicitDevMode === true) return true;
@@ -30,16 +21,12 @@ function resolveEnvDrivenDevAccessMode() {
     return false;
 }
 
-export function shouldEnableDevAccessServer(hostname?: string) {
+export function shouldEnableDevAccessServer(_hostname?: string) {
     if (process.env.NODE_ENV !== 'production') return true;
-    if (hostname && isLocalHostname(hostname)) return true;
     return resolveEnvDrivenDevAccessMode();
 }
 
 export function shouldEnableDevAccessClient() {
-    if (typeof window !== 'undefined' && isLocalHostname(window.location.hostname)) {
-        return true;
-    }
     if (process.env.NODE_ENV !== 'production') return true;
     return resolveEnvDrivenDevAccessMode();
 }
