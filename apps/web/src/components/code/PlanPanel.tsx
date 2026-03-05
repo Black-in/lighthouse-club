@@ -45,36 +45,36 @@ export default function PlanPanel(): JSX.Element {
 }
 
 const DUMMY_PLAN = {
-    contract_name: 'solana_token_launch',
-    contract_title: 'Solana Token Launch Plan',
+    contract_name: 'base_app_launch',
+    contract_title: 'Base App Launch Plan',
     short_description:
-        'Step-by-step execution plan to deploy, verify, and launch a Solana SPL token.',
+        'Step-by-step execution plan to generate, deploy, and launch a Base-native application.',
     long_description:
-        'This plan walks through the complete lifecycle of launching a Solana SPL token, from mint creation to locking supply and preparing for public distribution.',
+        'This plan covers creating the frontend, authoring Solidity contracts, deploying on Base Sepolia, and preparing production rollout on Base Mainnet.',
     contract_instructions: [
         {
-            title: 'Create SPL Token',
-            short_description: 'Initialize a new SPL token on Solana.',
+            title: 'Scaffold App',
+            short_description: 'Generate Base-ready monorepo scaffold.',
             long_description:
-                'Use the Solana CLI and SPL Token program to create a new token mint. Configure decimals, authorities, and verify successful creation on-chain.',
+                'Create apps/web and contracts workspace structure with OnchainKit-ready frontend and Foundry-based Solidity contract project.',
         },
         {
-            title: 'Create Associated Token Account',
-            short_description: 'Create ATA for the wallet.',
+            title: 'Build Contract',
+            short_description: 'Implement Solidity contract logic.',
             long_description:
-                'Generate an associated token account (ATA) for the deployer wallet so tokens can be minted and transferred securely.',
+                'Define state, access control, and callable functions in Solidity, then validate behavior with generated Foundry tests.',
         },
         {
-            title: 'Mint Initial Supply',
-            short_description: 'Mint initial token supply.',
+            title: 'Deploy Sepolia',
+            short_description: 'Deploy to Base Sepolia.',
             long_description:
-                'Mint the desired initial supply of tokens into the associated token account. Ensure mint authority is correctly configured.',
+                'Run deployment scripts through queue-backed workflows and capture contract address, tx hash, and explorer links.',
         },
         {
-            title: 'Revoke Mint Authority',
-            short_description: 'Lock the token supply.',
+            title: 'Ship Frontend',
+            short_description: 'Wire UI with deployed contracts.',
             long_description:
-                'Revoke the mint authority to prevent further minting and ensure fixed supply for trust and transparency.',
+                'Connect generated frontend components to deployed contract methods and finalize production configuration.',
         },
     ],
 };

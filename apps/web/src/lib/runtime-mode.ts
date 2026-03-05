@@ -13,20 +13,22 @@ function parseBooleanFlag(value: string | undefined): boolean | null {
 
 function resolveEnvDrivenDevAccessMode() {
     const explicitDevMode = parseBooleanFlag(process.env.NEXT_PUBLIC_DEV_ACCESS_MODE);
-    if (explicitDevMode === true) return true;
+    if (explicitDevMode !== null) return explicitDevMode;
 
     const explicitSkipAuth = parseBooleanFlag(process.env.NEXT_PUBLIC_SKIP_AUTH);
-    if (explicitSkipAuth === true) return true;
+    if (explicitSkipAuth !== null) return explicitSkipAuth;
 
-    return false;
+    return null;
 }
 
 export function shouldEnableDevAccessServer(_hostname?: string) {
-    if (process.env.NODE_ENV !== 'production') return true;
-    return resolveEnvDrivenDevAccessMode();
+    const envDecision = resolveEnvDrivenDevAccessMode();
+    if (envDecision !== null) return envDecision;
+    return process.env.NODE_ENV !== 'production';
 }
 
 export function shouldEnableDevAccessClient() {
-    if (process.env.NODE_ENV !== 'production') return true;
-    return resolveEnvDrivenDevAccessMode();
+    const envDecision = resolveEnvDrivenDevAccessMode();
+    if (envDecision !== null) return envDecision;
+    return process.env.NODE_ENV !== 'production';
 }

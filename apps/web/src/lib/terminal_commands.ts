@@ -27,18 +27,18 @@ shell               winter
 
 const commandsResponse = `
 SHELL COMMANDS:
-winter build                to build the contract
-winter test                 to run the test file
+winter build                         build the workspace
+winter test                          run tests
 
 
 PREMIUM(+) SHELL COMMANDS:
-winter deploy --devnet      to deploy the contract on devnet
-winter deploy --mainnet     to deploy the contract on mainnet
+winter deploy --base-sepolia         deploy contracts to Base Sepolia
+winter deploy --base-mainnet         deploy contracts to Base Mainnet
 `;
 
 // instead of using winter deploy cmds like this use them like this
-// winter deploy --network devnet
-// winter deploy --network mainnet
+// winter deploy --network base-sepolia
+// winter deploy --network base-mainnet
 // winter deploy --network <custom-network>
 
 // const lighthouseBuildResponse = ``;
@@ -51,8 +51,12 @@ export enum COMMAND_WRITER {
     COMMANDS = '--commands',
     lighthouse_BUILD = 'winter build',
     lighthouse_TEST = 'winter test',
+    // DISABLED - Solana chain (see /chains/solana).
     lighthouse_DEPLOY_DEVNET = 'winter deploy --devnet',
+    // DISABLED - Solana chain (see /chains/solana).
     lighthouse_DEPLOY_MAINNET = 'winter deploy --mainnet',
+    lighthouse_DEPLOY_BASE_SEPOLIA = 'winter deploy --base-sepolia',
+    lighthouse_DEPLOY_BASE_MAINNET = 'winter deploy --base-mainnet',
 }
 
 export const CommandResponse: Record<COMMAND_WRITER, string> = {
@@ -63,6 +67,12 @@ export const CommandResponse: Record<COMMAND_WRITER, string> = {
     [COMMAND_WRITER.COMMANDS]: commandsResponse,
     [COMMAND_WRITER.lighthouse_BUILD]: `queued: running build in your workspace...`,
     [COMMAND_WRITER.lighthouse_TEST]: `queued: running tests in your workspace...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]: `queued: deploying to devnet...`,
-    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]: `queued: deploying to mainnet...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_DEVNET]:
+        `solana deploy commands are disabled for this release.`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_MAINNET]:
+        `solana deploy commands are disabled for this release.`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_BASE_SEPOLIA]:
+        `queued: deploying to Base Sepolia...`,
+    [COMMAND_WRITER.lighthouse_DEPLOY_BASE_MAINNET]:
+        `queued: deploying to Base Mainnet...`,
 };

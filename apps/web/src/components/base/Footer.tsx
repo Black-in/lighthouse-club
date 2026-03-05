@@ -9,10 +9,10 @@ const footerLinks = [
     {
         title: 'Product',
         links: [
-            'AI Contract Generator',
-            'Smart Contract Editor',
+            'AI App Generator',
+            'Code Workspace',
             'Deploy & Monitor',
-            'Client SDK Generator',
+            'Base SDK Generator',
             'Template Marketplace',
         ],
     },
@@ -20,7 +20,7 @@ const footerLinks = [
         title: 'Resources',
         links: [
             'Documentation',
-            'Anchor Guide',
+            'Base Guide',
             'API Reference',
             'Security Best Practices',
             'Community Forum',
@@ -38,7 +38,7 @@ export default function Footer() {
             <div className="md:h-[65%] w-full border-b border-neutral-700 md:pt-20 pt-12 px-4 flex flex-col md:flex-row">
                 <div className="md:w-[50%] w-full h-full md:border-r border-neutral-700 text-neutral-100 px-4 text-left mb-8 md:mb-0">
                     <div className="max-w-lg md:text-5xl text-3xl font-semibold tracking-wide leading-tight">
-                        Build Solana Smart Contracts in Minutes, Not Days.
+                        Build Base-Native Apps in Minutes, Not Days.
                     </div>
                     <PublicReviewCard />
                 </div>
@@ -62,7 +62,7 @@ export default function Footer() {
                                         className="cursor-pointer hover:text-primary transition-colors flex gap-x-1.5"
                                     >
                                         {link}
-                                        {(link === 'Smart Contract Editor' ||
+                                        {(link === 'Code Workspace' ||
                                             link === 'Deploy & Monitor') && (
                                             <div>
                                                 <VersionLockTicker
@@ -90,7 +90,7 @@ export default function Footer() {
                     <LighthouseMark className="text-primary md:h-52 md:w-52 h-12 w-12 transition-all duration-500" />
                 </div>
                 <p className="text-neutral-500 md:text-sm text-xs tracking-wider mt-4 text-center px-4">
-                    © 2025 BlackIn. Powered by AI + Solana.
+                    © 2025 BlackIn. Powered by AI + Base.
                 </p>
             </div>
         </motion.div>

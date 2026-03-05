@@ -4,25 +4,25 @@
  */
 
 enum Network {
-    DEVNET = 'DEVNET',
-    TESTNET = 'TESTNET',
-    MAINNET_BETA = 'MAINNET_BETA',
+    BASE_SEPOLIA = 'BASE_SEPOLIA',
+    BASE_MAINNET = 'BASE_MAINNET',
 }
 
 interface NetworkTickerProps {
     network?: Network;
 }
 
-export default function NetworkTicker({ network = Network.DEVNET }: NetworkTickerProps) {
+export default function NetworkTicker({ network = Network.BASE_SEPOLIA }: NetworkTickerProps) {
     const getTicker = () => {
         switch (network) {
-            case Network.DEVNET:
-                return { label: 'Devnet', className: 'bg-[#052659]/60 border border-[#5483B3]' };
-            case Network.TESTNET:
-                return { label: 'Testnet', className: 'bg-yellow-500/40 border border-yellow-500' };
-            case Network.MAINNET_BETA:
+            case Network.BASE_SEPOLIA:
                 return {
-                    label: 'Mainnet Beta',
+                    label: 'Base Sepolia',
+                    className: 'bg-[#052659]/60 border border-[#5483B3]',
+                };
+            case Network.BASE_MAINNET:
+                return {
+                    label: 'Base Mainnet',
                     className: 'bg-green-500/40 border border-green-500',
                 };
             default:

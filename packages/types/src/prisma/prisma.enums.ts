@@ -18,6 +18,8 @@ export enum Command {
   lighthouse_TEST = "lighthouse_TEST",
   lighthouse_DEPLOY_DEVNET = "lighthouse_DEPLOY_DEVNET",
   lighthouse_DEPLOY_MAINNET = "lighthouse_DEPLOY_MAINNET",
+  lighthouse_DEPLOY_BASE_SEPOLIA = "lighthouse_DEPLOY_BASE_SEPOLIA",
+  lighthouse_DEPLOY_BASE_MAINNET = "lighthouse_DEPLOY_BASE_MAINNET",
   lighthouse_VERIFY = "lighthouse_VERIFY",
 }
 
@@ -44,6 +46,11 @@ export enum ContractType {
   DEFI = "DEFI",
   MARKETPLACE = "MARKETPLACE",
   CUSTOM = "CUSTOM",
+}
+
+export enum Chain {
+  BASE = "BASE",
+  SOLANA = "SOLANA",
 }
 
 export enum Network {

@@ -69,7 +69,8 @@ function LogoutRightContent({
     async function LogoutHandler() {
         await logout();
         clearSession();
-        document.cookie = 'blackin_token=; path=/; max-age=0; SameSite=Lax; Secure';
+        const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `blackin_token=; path=/; max-age=0; SameSite=Lax${secureAttr}`;
         window.location.href = '/';
     }
 

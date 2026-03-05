@@ -69,6 +69,7 @@ function SettingsRightContent({ profileImageSrc }: { profileImageSrc?: string })
                     Connected Account
                 </p>
                 <div className="mt-2 flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={profileImageSrc || '/icons/blackin-mark-dark.svg'}
                         alt={session?.user?.name || 'Profile'}

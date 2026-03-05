@@ -11,14 +11,38 @@ import {
     STAGE,
     FILE_STRUCTURE_TYPES,
     FileContent,
-    MODEL,
 } from '@/src/types/stream_event_types';
-import { Message } from '@lighthouse/types';
+import { Chain, Message, MODEL } from '@lighthouse/types';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { DAILY_LIMIT } from '@lighthouse/types';
 import { shouldSkipAuthClient } from '../auth-bypass';
+import { shouldEnableDevAccessClient } from '../runtime-mode';
+import { toast } from 'sonner';
+
+const inFlightGenerationContracts = new Set<string>();
+
+function getStreamErrorMessage(data: unknown, fallback: string): string {
+    if (!data || typeof data !== 'object') return fallback;
+    const dataRecord = data as { message?: unknown; error?: unknown };
+    if (typeof dataRecord.error === 'string' && dataRecord.error.trim().length > 0) {
+        return dataRecord.error;
+    }
+    if (typeof dataRecord.message === 'string' && dataRecord.message.trim().length > 0) {
+        return dataRecord.message;
+    }
+    return fallback;
+}
+
+function hasStreamErrorDetails(data: unknown): boolean {
+    if (!data || typeof data !== 'object') return false;
+    const dataRecord = data as { message?: unknown; error?: unknown };
+    return (
+        (typeof dataRecord.error === 'string' && dataRecord.error.trim().length > 0) ||
+        (typeof dataRecord.message === 'string' && dataRecord.message.trim().length > 0)
+    );
+}
 
 export default class GenerateContract {
     static async start_planner_executor(
@@ -44,6 +68,7 @@ export default class GenerateContract {
                 {
                     contract_id,
                     instruction,
+                    chain: Chain.BASE,
                 },
                 {
                     headers: token
@@ -72,6 +97,7 @@ export default class GenerateContract {
         contractId: string,
         instruction?: string,
         template_id?: string,
+        model: MODEL = MODEL.GEMINI,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
@@ -80,6 +106,10 @@ export default class GenerateContract {
             useLimitStore.getState();
 
         try {
+            if (inFlightGenerationContracts.has(contractId)) {
+                return;
+            }
+            inFlightGenerationContracts.add(contractId);
             setLoading(true);
 
             const response = await fetch(GENERATE_CONTRACT, {
@@ -92,20 +122,23 @@ export default class GenerateContract {
                     contract_id: contractId,
                     instruction: instruction,
                     template_id: template_id,
-                    model: MODEL.GEMINI,
+                    chain: Chain.BASE,
+                    model,
                 }),
             });
 
             if (response.status === 429) {
                 const data = await response.json();
                 const limit_type = data.meta?.error_code;
-                if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
-                    setShowMessageLimit(true);
-                }
-                if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
-                    setShowContractLimit(true);
-                    if (data.meta?.next_allowed_time) {
-                        setShowRegenerateTime(data.meta.next_allowed_time);
+                if (!shouldEnableDevAccessClient()) {
+                    if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
+                        setShowMessageLimit(true);
+                    }
+                    if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
+                        setShowContractLimit(true);
+                        if (data.meta?.next_allowed_time) {
+                            setShowRegenerateTime(data.meta.next_allowed_time);
+                        }
                     }
                 }
                 setLoading(false);
@@ -113,7 +146,16 @@ export default class GenerateContract {
             }
 
             if (!response.ok) {
-                throw new Error('Failed to start chat');
+                let serverMessage = 'Failed to start generation';
+                try {
+                    const payload = (await response.json()) as { message?: string };
+                    if (payload?.message) {
+                        serverMessage = payload.message;
+                    }
+                } catch (parseError) {
+                    console.warn('Failed to parse generation error payload', parseError);
+                }
+                throw new Error(serverMessage);
             }
 
             const reader = response.body?.getReader();
@@ -188,7 +230,22 @@ export default class GenerateContract {
                                 break;
 
                             case PHASE_TYPES.ERROR:
-                                console.error('LLM Error:', event.data);
+                                if (hasStreamErrorDetails(event.data)) {
+                                    console.warn('LLM stream warning:', event.data);
+                                }
+                                setPhase(PHASE_TYPES.ERROR);
+                                setLoading(false);
+                                toast.error(
+                                    getStreamErrorMessage(event.data, 'Generation failed at runtime'),
+                                );
+                                break;
+
+                            case STAGE.ERROR:
+                                setPhase(STAGE.ERROR);
+                                setLoading(false);
+                                toast.error(
+                                    getStreamErrorMessage(event.data, 'Generation failed at runtime'),
+                                );
                                 break;
 
                             case STAGE.END:
@@ -217,7 +274,9 @@ export default class GenerateContract {
             setCollapseFileTree(true);
         } catch (error) {
             console.error('Chat stream error:', error);
+            toast.error(error instanceof Error ? error.message : 'Generation request failed');
         } finally {
+            inFlightGenerationContracts.delete(contractId);
             setLoading(false);
         }
     }
@@ -226,6 +285,7 @@ export default class GenerateContract {
         token: string,
         contractId: string,
         message: string,
+        model: MODEL = MODEL.GEMINI,
         onError?: (error: Error) => void,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
@@ -235,6 +295,10 @@ export default class GenerateContract {
             useLimitStore.getState();
 
         try {
+            if (inFlightGenerationContracts.has(contractId)) {
+                return;
+            }
+            inFlightGenerationContracts.add(contractId);
             setLoading(true);
 
             const skipAuth = shouldSkipAuthClient();
@@ -251,7 +315,8 @@ export default class GenerateContract {
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: message,
-                    model: MODEL.GEMINI,
+                    chain: Chain.BASE,
+                    model,
                 }),
             });
 
@@ -260,14 +325,16 @@ export default class GenerateContract {
                 const data = await response.json();
                 const limit_type = data.meta?.error_code;
 
-                if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
-                    setShowMessageLimit(true);
-                }
+                if (!shouldEnableDevAccessClient()) {
+                    if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
+                        setShowMessageLimit(true);
+                    }
 
-                if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
-                    setShowContractLimit(true);
-                    if (data.meta?.next_allowed_time) {
-                        setShowRegenerateTime(data.meta.next_allowed_time);
+                    if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
+                        setShowContractLimit(true);
+                        if (data.meta?.next_allowed_time) {
+                            setShowRegenerateTime(data.meta.next_allowed_time);
+                        }
                     }
                 }
                 setLoading(false);
@@ -290,7 +357,16 @@ export default class GenerateContract {
             }
 
             if (!response.ok) {
-                throw new Error('Failed to continue chat');
+                let serverMessage = 'Failed to continue generation';
+                try {
+                    const payload = (await response.json()) as { message?: string };
+                    if (payload?.message) {
+                        serverMessage = payload.message;
+                    }
+                } catch (parseError) {
+                    console.warn('Failed to parse continue-chat error payload', parseError);
+                }
+                throw new Error(serverMessage);
             }
 
             const reader = response.body?.getReader();
@@ -364,9 +440,27 @@ export default class GenerateContract {
                                 break;
 
                             case PHASE_TYPES.ERROR:
-                                console.error('LLM Error:', event.data);
+                                if (hasStreamErrorDetails(event.data)) {
+                                    console.warn('LLM stream warning:', event.data);
+                                }
+                                setPhase(PHASE_TYPES.ERROR);
+                                setLoading(false);
+                                toast.error(
+                                    getStreamErrorMessage(event.data, 'Generation failed at runtime'),
+                                );
                                 if (onError && 'message' in event.data) {
                                     onError(new Error(event.data.message as string));
+                                }
+                                break;
+
+                            case STAGE.ERROR:
+                                setPhase(STAGE.ERROR);
+                                setLoading(false);
+                                toast.error(
+                                    getStreamErrorMessage(event.data, 'Generation failed at runtime'),
+                                );
+                                if (onError) {
+                                    onError(new Error('Generation failed'));
                                 }
                                 break;
 
@@ -393,10 +487,12 @@ export default class GenerateContract {
             setCollapseFileTree(true);
         } catch (error) {
             console.error('Chat stream error:', error);
+            toast.error(error instanceof Error ? error.message : 'Generation request failed');
             if (onError) {
                 onError(error as Error);
             }
         } finally {
+            inFlightGenerationContracts.delete(contractId);
             setLoading(false);
         }
     }

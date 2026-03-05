@@ -11,7 +11,6 @@ import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
 import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { HiMiniRectangleStack } from 'react-icons/hi2';
 import { Template } from '@lighthouse/types';
 

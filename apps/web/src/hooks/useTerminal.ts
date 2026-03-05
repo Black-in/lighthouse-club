@@ -58,12 +58,22 @@ export function useTerminal() {
 
                 case COMMAND_WRITER.lighthouse_DEPLOY_DEVNET:
                     addLog({ type: 'client', text: CommandResponse[cmd] });
-                    sendSocketMessage(COMMAND.lighthouse_DEPLOY_DEVNET, cmd);
+                    // DISABLED - Solana chain (see /chains/solana).
                     return;
 
                 case COMMAND_WRITER.lighthouse_DEPLOY_MAINNET:
                     addLog({ type: 'client', text: CommandResponse[cmd] });
-                    sendSocketMessage(COMMAND.lighthouse_DEPLOY_MAINNET, cmd);
+                    // DISABLED - Solana chain (see /chains/solana).
+                    return;
+
+                case COMMAND_WRITER.lighthouse_DEPLOY_BASE_SEPOLIA:
+                    addLog({ type: 'client', text: CommandResponse[cmd] });
+                    sendSocketMessage(COMMAND.lighthouse_DEPLOY_BASE_SEPOLIA, cmd);
+                    return;
+
+                case COMMAND_WRITER.lighthouse_DEPLOY_BASE_MAINNET:
+                    addLog({ type: 'client', text: CommandResponse[cmd] });
+                    sendSocketMessage(COMMAND.lighthouse_DEPLOY_BASE_MAINNET, cmd);
                     return;
 
                 default:

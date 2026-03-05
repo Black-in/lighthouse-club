@@ -11,16 +11,7 @@ import { ArrowRight, ChevronDown, FileUp, Loader2, Plus } from 'lucide-react';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { toast } from 'sonner';
-
-const modelOptions = [
-    'Auto Select',
-    'OpenAI GPT 5.3 Codex',
-    'Claude Sonnet 4.6',
-    'Gemini 3.1 Pro',
-    'Claude Opus 4.6',
-] as const;
-
-const isProModel = (model: string) => model.includes('Claude') || model.includes('Gemini');
+import { isProModelOption, MODEL_OPTIONS, type ModelOption } from '@/src/lib/model-options';
 const ProTag = () => (
     <HoverBorderGradient
         as="span"
@@ -38,6 +29,8 @@ const ProTag = () => (
 
 interface BuilderChatInputFeaturesProps {
     inputValue: string;
+    selectedModel: ModelOption;
+    onModelChange: (model: ModelOption) => void;
     onSubmit: () => void;
     onFilesSelected?: (files: File[]) => void;
     canSubmit?: boolean;
@@ -47,13 +40,14 @@ interface BuilderChatInputFeaturesProps {
 
 export default function BuilderChatInputFeatures({
     inputValue,
+    selectedModel,
+    onModelChange,
     onSubmit,
     onFilesSelected,
     canSubmit = false,
     disabled = false,
     submitting = false,
 }: BuilderChatInputFeaturesProps) {
-    const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number]>('Auto Select');
     const [showPlusMenu, setShowPlusMenu] = useState<boolean>(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
     const plusMenuRef = useRef<HTMLDivElement | null>(null);
@@ -108,11 +102,11 @@ export default function BuilderChatInputFeatures({
                 <Select
                     value={selectedModel}
                     onValueChange={(val) => {
-                        if (isProModel(val)) {
+                        if (isProModelOption(val)) {
                             toast.info('Upgrade to Pro to access this model');
                             return;
                         }
-                        setSelectedModel(val as (typeof modelOptions)[number]);
+                        onModelChange(val as ModelOption);
                     }}
                     disabled={controlsDisabled}
                 >
@@ -124,13 +118,13 @@ export default function BuilderChatInputFeatures({
                     >
                         <span className="playground-chat-model-label flex items-center gap-1.5 whitespace-nowrap text-[12px] leading-none text-neutral-300">
                             {selectedModel}
-                            {isProModel(selectedModel) && <ProTag />}
+                            {isProModelOption(selectedModel) && <ProTag />}
                         </span>
                         <ChevronDown className="playground-chat-model-chevron h-3 w-3 text-neutral-500" />
                     </SelectTrigger>
                     <SelectContent className="playground-chat-model-menu rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
-                        {modelOptions.map((model) => {
-                            const isPro = isProModel(model);
+                        {MODEL_OPTIONS.map((model) => {
+                            const isPro = isProModelOption(model);
                             const item = (
                                 <SelectItem
                                     key={model}

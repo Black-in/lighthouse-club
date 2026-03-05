@@ -184,11 +184,16 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                 });
             }
 
+            const activeFile =
+                (state.currentFile && findFileById([existingTree], state.currentFile.id)) ||
+                findFirstFile(existingTree) ||
+                null;
+
             set({
                 fileTree: [existingTree],
                 originalFileContents: nextOriginalFileContents,
-                currentFile: null,
-                currentCode: '',
+                currentFile: activeFile,
+                currentCode: activeFile?.content ?? '',
             });
             return existingTree;
         },
@@ -230,5 +235,17 @@ function findFileById(nodes: FileNode[], id: string): FileNode | null {
             if (found) return found;
         }
     }
+    return null;
+}
+
+function findFirstFile(node: FileNode): FileNode | null {
+    if (node.type === NODE.FILE) return node;
+    if (!node.children || node.children.length === 0) return null;
+
+    for (const child of node.children) {
+        const found = findFirstFile(child);
+        if (found) return found;
+    }
+
     return null;
 }

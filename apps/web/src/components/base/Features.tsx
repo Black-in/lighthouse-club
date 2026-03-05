@@ -2,27 +2,25 @@
 import React from 'react';
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from 'framer-motion';
 import LighthouseMark from '../ui/svg/LighthouseMark';
-import { FaBolt, FaShieldAlt } from 'react-icons/fa';
-import { FaRust } from 'react-icons/fa6';
-import { TbAnchor } from 'react-icons/tb';
+import { FaBolt, FaCode, FaShieldAlt } from 'react-icons/fa';
 import { Highlighter } from '@/src/components/ui/highlighter';
 import { cn } from '@/src/lib/utils';
 
 const featureData = [
     {
         topTitle: 'AI-POWERED',
-        centerTitle: 'Smart Contracts',
-        bottomTitle: 'Rust & Anchor',
-        description: 'Generate production-ready contracts from natural language',
-        icon: FaRust,
-        color: '#CE422B',
-        gradient: 'from-red-500/20 to-orange-500/20',
+        centerTitle: 'Base Apps',
+        bottomTitle: 'Single Prompt',
+        description: 'Generate production-ready Base applications from natural language',
+        icon: FaCode,
+        color: '#106DE1',
+        gradient: 'from-blue-500/20 to-cyan-500/20',
     },
     {
         topTitle: 'INSTANT',
         centerTitle: 'Deploy',
         bottomTitle: 'One-Click',
-        description: 'Deploy to Devnet, Testnet, or Mainnet instantly',
+        description: 'Deploy to Base Sepolia or Base Mainnet instantly',
         icon: FaBolt,
         color: '#FFC400',
         gradient: 'from-yellow-500/20 to-amber-500/20',
@@ -37,11 +35,11 @@ const featureData = [
         gradient: 'from-[#052659]/30 to-[#5483B3]/30',
     },
     {
-        topTitle: 'ANCHOR',
-        centerTitle: 'Framework',
-        bottomTitle: 'Best Practices',
-        description: 'Built-in security checks and Anchor conventions',
-        icon: TbAnchor,
+        topTitle: 'ONCHAINKIT',
+        centerTitle: 'Frontend',
+        bottomTitle: 'Base Ready',
+        description: 'Generated UIs are wired for Base-native wallet and contract flows',
+        icon: LighthouseMark,
         color: '#106DE1',
         gradient: 'from-blue-500/20 to-cyan-500/20',
     },
@@ -99,7 +97,7 @@ export default function Features() {
                         <Highlighter action="underline" color="#5483B3">
                             production-ready
                         </Highlighter>
-                        &nbsp;contracts seamlessly.
+                        &nbsp;Base-native apps seamlessly.
                     </div>
                 </motion.div>
 

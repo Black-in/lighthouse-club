@@ -72,23 +72,23 @@ export default function Faq() {
     const faqs: FaqData[] = [
         {
             question: 'What is BlackIn?',
-            answer: 'BlackIn is an AI-powered platform for building, editing, deploying, and interacting with Rust-based smart contracts on Solana using Anchor. It simplifies the entire smart contract workflow from generation to frontend integration.',
+            answer: 'BlackIn is an AI-powered platform for generating, editing, and deploying Base-native applications from a single prompt using agentic workflows.',
         },
         {
             question: 'Do I need to know Rust to use this platform?',
-            answer: 'No! Our AI can generate Anchor contracts from natural language descriptions. However, understanding Rust and Solana concepts will help you customize and optimize your contracts more effectively.',
+            answer: 'No. The platform generates Solidity contracts, frontend scaffolds, and deployment workflows from natural language with Base as the default chain.',
         },
         {
             question: 'What types of contracts can I build?',
-            answer: 'You can build various Solana programs including token contracts, NFT contracts, DeFi programs, escrow systems, and payment programs. We provide templates for common use cases and support custom contract generation.',
+            answer: 'You can build Base-native contracts for payments, DeFi, marketplaces, and utility apps, plus generated frontend and deployment scripts.',
         },
         {
             question: 'Can I deploy to mainnet?',
-            answer: 'Yes! BlackIn supports one-click deployment to Solana Devnet, Testnet, and Mainnet. We also provide CLI commands and track deployed program IDs for easy management.',
+            answer: 'Yes. BlackIn supports Base Sepolia by default and Base Mainnet deployment through explicit deploy commands.',
         },
         {
             question: 'Does it generate client code for my contract?',
-            answer: 'Absolutely! The platform automatically generates TypeScript/JavaScript client SDKs with typed functions for each instruction, wallet integration, and helper functions for PDAs and transactions.',
+            answer: 'Yes. The platform generates TypeScript integrations and OnchainKit-ready frontend scaffolds for Base apps.',
         },
         {
             question: 'What about security?',
@@ -96,7 +96,7 @@ export default function Faq() {
         },
         {
             question: 'How do I test my contracts?',
-            answer: 'The platform auto-generates Anchor test scripts and allows you to simulate transactions in-browser or on devnet before deployment. You can also test frontend integrations with our interactive sandbox.',
+            answer: 'The platform generates Foundry tests and lets you iterate with Base Sepolia-first workflows before production deployment.',
         },
     ];
 

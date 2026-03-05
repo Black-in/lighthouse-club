@@ -5,7 +5,8 @@
 
 'use client';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
-import { Component, Dispatch, ErrorInfo, ReactNode, SetStateAction, useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { Component, Dispatch, ErrorInfo, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import Turnstile from 'react-turnstile';
 import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
@@ -77,26 +78,52 @@ function LoginLeftContent() {
 function LoginRightContent() {
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
     const [isCaptchaUnavailable, setIsCaptchaUnavailable] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
     const { initOAuth, state } = useLoginWithOAuth();
+    const { login } = usePrivy();
     const isCaptchaEnabled = process.env.NEXT_PUBLIC_ENABLE_CAPTCHA === 'true';
     const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? '';
     const hasConfiguredCaptcha =
         turnstileSiteKey.length > 0 && !turnstileSiteKey.includes('replace_with_turnstile_site_key');
 
+    useEffect(() => {
+        if (state.status === 'error') {
+            setAuthError(
+                state.error?.message ||
+                    'Google sign-in failed. Ensure localhost:3000 is allowed in Privy app settings.',
+            );
+            return;
+        }
+        if (state.status === 'initial' || state.status === 'done') {
+            setAuthError(null);
+        }
+    }, [state]);
+
     async function handleSignInWithGoogle() {
         if (isCaptchaEnabled && !turnstileToken) {
             return;
         }
+        setAuthError(null);
 
         try {
             if (turnstileToken) {
-                document.cookie = `turnstile_token=${turnstileToken}; path=/; max-age=300; SameSite=Lax; Secure`;
+                const isSecureOrigin = window.location.protocol === 'https:';
+                const secureAttr = isSecureOrigin ? '; Secure' : '';
+                document.cookie = `turnstile_token=${turnstileToken}; path=/; max-age=300; SameSite=Lax${secureAttr}`;
             }
             await initOAuth({
                 provider: 'google',
             });
         } catch (error) {
             console.error('Sign in error:', error);
+            setAuthError(
+                error instanceof Error
+                    ? error.message
+                    : 'Google OAuth redirect failed. Trying embedded login fallback.',
+            );
+            login({
+                loginMethods: ['google'],
+            });
         }
     }
 
@@ -135,6 +162,11 @@ function LoginRightContent() {
                     {state.status === 'loading' ? 'Signing in...' : 'Continue with Google'}
                 </span>
             </Button>
+            {authError ? (
+                <div className="w-full rounded-md border border-amber-500/30 bg-amber-900/20 px-3 py-2">
+                    <p className="text-[10px] md:text-xs text-amber-200">{authError}</p>
+                </div>
+            ) : null}
 
             <div className="w-full flex justify-center md:py-2">
                 {!isCaptchaEnabled ? (

@@ -26,6 +26,14 @@ import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 import { toast } from 'sonner';
+import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
+import {
+    DEFAULT_MODEL_OPTION,
+    isProModelOption,
+    mapModelOptionToEnum,
+    MODEL_OPTIONS,
+    type ModelOption,
+} from '@/src/lib/model-options';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -38,15 +46,6 @@ interface AttachmentItem {
     previewUrl?: string;
 }
 
-const modelOptions = [
-    'Auto Select',
-    'OpenAI GPT 5.3 Codex',
-    'Claude Sonnet 4.6',
-    'Gemini 3.1 Pro',
-    'Claude Opus 4.6',
-] as const;
-
-const isProModel = (model: string) => model.includes('Claude') || model.includes('Gemini');
 const ProTag = () => (
     <HoverBorderGradient
         as="span"
@@ -85,9 +84,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const [showPlusMenu, setShowPlusMenu] = useState<boolean>(false);
-    const [selectedModel, setSelectedModel] = useState<(typeof modelOptions)[number]>(
-        'Auto Select',
-    );
+    const [selectedModel, setSelectedModel] = useState<ModelOption>(DEFAULT_MODEL_OPTION);
     const [isTextareaFocused, setIsTextareaFocused] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -99,6 +96,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
     const skipAuth = shouldSkipAuthClient();
+    const shouldEnforceLimits = !shouldEnableDevAccessClient();
 
     useHandleClickOutside([plusButtonRef, plusMenuRef], setShowPlusMenu);
 
@@ -122,11 +120,13 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
             setOpenLoginModal(true);
             return;
         }
-        if (showMessageLimit || showContractLimit) return;
+        if (shouldEnforceLimits && (showMessageLimit || showContractLimit)) return;
 
         setIsSubmitting(true);
         const contractId = uuid();
-        set_states(contractId, inputValue, undefined, undefined, { markLoading: true });
+        set_states(contractId, inputValue, undefined, undefined, { markLoading: true }, {
+            model: mapModelOptionToEnum(selectedModel),
+        });
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -306,11 +306,11 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                 <Select
                                     value={selectedModel}
                                     onValueChange={(val) => {
-                                        if (isProModel(val)) {
+                                        if (isProModelOption(val)) {
                                             toast.info('Upgrade to Pro to access this model');
                                             return;
                                         }
-                                        setSelectedModel(val as (typeof modelOptions)[number]);
+                                        setSelectedModel(val as ModelOption);
                                     }}
                                     disabled={isSubmitting}
                                 >
@@ -322,13 +322,13 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                     >
                                         <span className="flex items-center gap-1.5 whitespace-nowrap text-[12px] leading-none text-neutral-300">
                                             {selectedModel}
-                                            {isProModel(selectedModel) && <ProTag />}
+                                            {isProModelOption(selectedModel) && <ProTag />}
                                         </span>
                                         <ChevronDown className="h-3 w-3 text-neutral-500" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-2xl border-neutral-800 bg-[#050505] text-neutral-100">
-                                        {modelOptions.map((model) => {
-                                            const isPro = isProModel(model);
+                                        {MODEL_OPTIONS.map((model) => {
+                                            const isPro = isProModelOption(model);
                                             const item = (
                                                 <SelectItem
                                                     key={model}

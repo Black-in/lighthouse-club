@@ -32,10 +32,10 @@ const executorData = {
 };
 
 export default function BuilderMoreOptionsPanel({
-    close,
+    close: _close,
     className,
 }: BuilderMoreOptionsPanelProps) {
-    const { executor, setExecutor } = useExecutorStore();
+    const { executor } = useExecutorStore();
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
 
     const meta = executorData[executor];
@@ -86,7 +86,7 @@ export default function BuilderMoreOptionsPanel({
             {showTemplatePanel && (
                 <BuilderTemplatesPanel
                     closePanel={() => setShowTemplatePanel(false)}
-                    setHasExistingMessages={(x) => {}}
+                    setHasExistingMessages={(_x) => {}}
                 />
             )}
         </>

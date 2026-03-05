@@ -143,7 +143,7 @@ export const plans: Plan[] = [
         plan: 'FREE',
         priceMonthly: '₹0',
         priceYearly: '₹0',
-        features: ['1 Contract / Week', '30 AI Messages', 'Devnet Only', 'Basic Support'],
+        features: ['1 App / Week', '30 AI Messages', 'Base Sepolia', 'Basic Support'],
     },
     {
         plan: 'PREMIUM_PLUS',
@@ -152,7 +152,7 @@ export const plans: Plan[] = [
         features: [
             'Unlimited Contracts',
             'Unlimited AI Chat',
-            'Mainnet Access',
+            'Base Mainnet Access',
             '10+ Deployments',
             'Fast Build Priority',
             'Priority Support',
@@ -166,7 +166,7 @@ export const plans: Plan[] = [
         features: [
             '10 Contracts / Month',
             '300 AI Messages',
-            'Devnet + Testnet',
+            'Base Sepolia + Base Mainnet',
             'Standard Support',
         ],
     },

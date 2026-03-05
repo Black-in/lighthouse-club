@@ -4,15 +4,14 @@
  */
 
 'use client';
+
 import { Component, ErrorInfo, ReactNode, useMemo } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { clusterApiUrl } from '@solana/web3.js';
 import { PrivyProvider } from '@privy-io/react-auth';
-import {
-    PhantomWalletAdapter,
-    SolflareWalletAdapter,
-    AlphaWalletAdapter,
-} from '@solana/wallet-adapter-wallets';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { base, baseSepolia } from 'wagmi/chains';
+import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
 import PrivySessionSync from '@/src/lib/PrivySessionSync';
 
 interface ProviderBoundaryProps {
@@ -32,7 +31,7 @@ class ProviderBoundary extends Component<ProviderBoundaryProps, ProviderBoundary
     }
 
     componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
-        console.error('Privy provider failed to initialize:', error);
+        console.error('provider failed to initialize:', error);
     }
 
     render() {
@@ -45,36 +44,77 @@ class ProviderBoundary extends Component<ProviderBoundaryProps, ProviderBoundary
 }
 
 export default function WalletProviders({ children }: { children: ReactNode }) {
-    const endpoint = clusterApiUrl('devnet');
-    const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
+    const privyAppId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '').trim();
+    const hasPrivyAppId = privyAppId.length > 0;
     const disablePrivy = process.env.NEXT_PUBLIC_DISABLE_PRIVY === 'true';
+    const baseEnabled = process.env.NEXT_PUBLIC_CHAIN_BASE_ENABLED !== 'false';
+    const walletConnectProjectId =
+        (process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '').trim();
 
-    const wallets = useMemo(
-        () => [new PhantomWalletAdapter(), new SolflareWalletAdapter(), new AlphaWalletAdapter()],
-        [],
+    const queryClient = useMemo(() => new QueryClient(), []);
+    const wagmiConfig = useMemo(
+        () =>
+            createConfig({
+                chains: [baseSepolia, base],
+                connectors: [
+                    injected(),
+                    coinbaseWallet({
+                        appName: 'BlackIn',
+                    }),
+                    ...(walletConnectProjectId
+                        ? [
+                              walletConnect({
+                                  projectId: walletConnectProjectId,
+                                  showQrModal: true,
+                              }),
+                          ]
+                        : []),
+                ],
+                transports: {
+                    [baseSepolia.id]: http(
+                        process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
+                    ),
+                    [base.id]: http(
+                        process.env.NEXT_PUBLIC_BASE_MAINNET_RPC_URL || 'https://mainnet.base.org',
+                    ),
+                },
+            }),
+        [walletConnectProjectId],
     );
 
-    const walletTree = (
-        <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect>
-                {children}
-            </WalletProvider>
-        </ConnectionProvider>
+    type OnchainKitProviderProps = {
+        children: ReactNode;
+        apiKey?: string;
+        chain?: unknown;
+    };
+    const OnchainKitProviderAny = OnchainKitProvider as unknown as React.ComponentType<OnchainKitProviderProps>;
+
+    const providerTree = (
+        <WagmiProvider config={wagmiConfig}>
+            <QueryClientProvider client={queryClient}>
+                <OnchainKitProviderAny
+                    apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+                    chain={baseSepolia}
+                >
+                    {children}
+                </OnchainKitProviderAny>
+            </QueryClientProvider>
+        </WagmiProvider>
     );
 
-    if (disablePrivy) {
-        return walletTree;
+    if (!baseEnabled) {
+        return <>{children}</>;
+    }
+
+    if (disablePrivy || !hasPrivyAppId) {
+        return providerTree;
     }
 
     return (
-        <ProviderBoundary fallback={walletTree}>
+        <ProviderBoundary fallback={providerTree}>
             <PrivyProvider appId={privyAppId}>
-                <ConnectionProvider endpoint={endpoint}>
-                    <WalletProvider wallets={wallets} autoConnect>
-                        {children}
-                        <PrivySessionSync />
-                    </WalletProvider>
-                </ConnectionProvider>
+                {providerTree}
+                <PrivySessionSync />
             </PrivyProvider>
         </ProviderBoundary>
     );

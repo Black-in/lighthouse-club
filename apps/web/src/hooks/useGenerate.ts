@@ -8,11 +8,15 @@ import { useBuilderChatStore } from '../store/code/useBuilderChatStore';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
 import GenerateContract from '../lib/server/generate_contract';
-import { ChatRole, STAGE, Template } from '@lighthouse/types';
+import { ChatRole, MODEL, STAGE, Template } from '@lighthouse/types';
 import { shouldSkipAuthClient } from '../lib/auth-bypass';
 
 interface SetStatesOptions {
     markLoading?: boolean;
+}
+
+interface GenerationOptions {
+    model?: MODEL;
 }
 
 export default function useGenerate() {
@@ -25,10 +29,12 @@ export default function useGenerate() {
         templateId?: string,
         template?: Template,
         options?: SetStatesOptions,
+        generationOptions?: GenerationOptions,
     ) {
-        const { setCurrentContractId, setMessage, setActiveTemplate, setLoading } =
+        const { setCurrentContractId, setMessage, setActiveTemplate, setLoading, setSelectedModel } =
             useBuilderChatStore.getState();
         setCurrentContractId(contractId);
+        setSelectedModel(generationOptions?.model || MODEL.GEMINI, contractId);
         if (options?.markLoading) {
             setLoading(true);
         }
@@ -77,16 +83,24 @@ export default function useGenerate() {
         router.push(`/playground/${contractId}`);
     }
 
-    function handleGeneration(contractId: string, instruction?: string, templateId?: string) {
+    function handleGeneration(
+        contractId: string,
+        instruction?: string,
+        templateId?: string,
+        model?: MODEL,
+    ) {
         const skipAuth = shouldSkipAuthClient();
         if (!session?.user.token && !skipAuth) return;
         const { setLoading } = useBuilderChatStore.getState();
+        const selectedModel =
+            model || useBuilderChatStore.getState().contracts[contractId]?.selectedModel || MODEL.GEMINI;
         setLoading(true);
         GenerateContract.start_agentic_executor(
             session?.user?.token ?? '',
             contractId,
             instruction,
             templateId,
+            selectedModel,
         );
     }
 

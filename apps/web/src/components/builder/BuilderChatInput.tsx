@@ -23,6 +23,13 @@ import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { X } from 'lucide-react';
 import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
+import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
+import {
+    DEFAULT_MODEL_OPTION,
+    mapEnumToModelOption,
+    mapModelOptionToEnum,
+    type ModelOption,
+} from '@/src/lib/model-options';
 
 interface AttachmentItem {
     id: string;
@@ -47,19 +54,27 @@ export default function BuilderChatInput() {
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const { session } = useUserSessionStore();
     const attachmentsRef = useRef<AttachmentItem[]>([]);
+    const [selectedModel, setSelectedModel] = useState<ModelOption>(DEFAULT_MODEL_OPTION);
 
     // Get contract-specific data
     const contract = useCurrentContract();
     const resetTemplate = useBuilderChatStore((state) => state.resetTemplate);
+    const setSelectedContractModel = useBuilderChatStore((state) => state.setSelectedModel);
 
     const { set_states, handleGeneration } = useGenerate();
     const [hasExistingMessages, setHasExistingMessages] = useState<boolean>(false);
     const params = useParams();
     const contractId = params.contractId as string;
-    const { showMessageLimit, setShowMessageLimit, showContractLimit, showRegenerateTime } =
-        useLimitStore();
+    const {
+        showMessageLimit,
+        setShowMessageLimit,
+        showContractLimit,
+        setShowContractLimit,
+        showRegenerateTime,
+    } = useLimitStore();
     const { theme } = usePlaygroundThemeStore();
     const skipAuth = shouldSkipAuthClient();
+    const shouldEnforceLimits = !shouldEnableDevAccessClient();
 
     const borderGradientColors =
         theme === 'light'
@@ -76,6 +91,26 @@ export default function BuilderChatInput() {
     }, [attachments]);
 
     useEffect(() => {
+        if (shouldEnforceLimits) return;
+        if (showMessageLimit) {
+            setShowMessageLimit(false);
+        }
+        if (showContractLimit) {
+            setShowContractLimit(false);
+        }
+    }, [
+        shouldEnforceLimits,
+        showMessageLimit,
+        showContractLimit,
+        setShowMessageLimit,
+        setShowContractLimit,
+    ]);
+
+    useEffect(() => {
+        setSelectedModel(mapEnumToModelOption(contract.selectedModel));
+    }, [contract.selectedModel]);
+
+    useEffect(() => {
         return () => {
             attachmentsRef.current.forEach((attachment) => {
                 if (attachment.previewUrl) {
@@ -85,8 +120,10 @@ export default function BuilderChatInput() {
         };
     }, []);
 
-    function formatPretty(isoString: string) {
+    function formatPretty(isoString: string | null | undefined) {
+        if (!isoString) return 'Time unavailable';
         const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return 'Time unavailable';
         const day = date.getDate();
         const month = date.toLocaleString('en-US', { month: 'short' });
         const suffix =
@@ -118,13 +155,16 @@ export default function BuilderChatInput() {
             setOpenLoginModal(true);
             return;
         }
-        if (showContractLimit || showMessageLimit) {
+        if (shouldEnforceLimits && (showContractLimit || showMessageLimit)) {
             return;
         }
+        const selectedModelEnum = mapModelOptionToEnum(selectedModel);
         set_states(contractId, inputValue, contract.activeTemplate?.id, undefined, {
             markLoading: true,
+        }, {
+            model: selectedModelEnum,
         });
-        handleGeneration(contractId, inputValue, contract.activeTemplate?.id);
+        handleGeneration(contractId, inputValue, contract.activeTemplate?.id, selectedModelEnum);
         setInputValue('');
         setAttachments((prev) => {
             prev.forEach((attachment) => {
@@ -153,6 +193,10 @@ export default function BuilderChatInput() {
                 inputValue,
                 contract.activeTemplate.id,
                 contract.activeTemplate,
+                undefined,
+                {
+                    model: mapModelOptionToEnum(selectedModel),
+                },
             );
         }
         if (showMessageLimit) {
@@ -224,16 +268,18 @@ export default function BuilderChatInput() {
                     </div>
                 )}
 
-                {showContractLimit && (
+                {shouldEnforceLimits && showContractLimit && (
                     <div className="w-full px-1">
-                        <div className="playground-chat-limit-banner flex flex-col text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
+                        <div className="playground-chat-limit-banner flex flex-col text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1 text-center">
                             <span>You have reached your daily limit, Try again at</span>
-                            {formatPretty(showRegenerateTime!)}
+                            <span className="font-medium text-light">
+                                {formatPretty(showRegenerateTime)}
+                            </span>
                         </div>
                     </div>
                 )}
 
-                {showMessageLimit && (
+                {shouldEnforceLimits && showMessageLimit && (
                     <div className="w-full px-1">
                         <div className="playground-chat-limit-banner flex gap-x-2 text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
                             <span>Message limit reached.</span>
@@ -359,6 +405,14 @@ export default function BuilderChatInput() {
                         <div className="absolute inset-x-0 bottom-0">
                             <BuilderChatInputFeatures
                                 inputValue={inputValue}
+                                selectedModel={selectedModel}
+                                onModelChange={(model) => {
+                                    setSelectedModel(model);
+                                    setSelectedContractModel(
+                                        mapModelOptionToEnum(model),
+                                        contractId,
+                                    );
+                                }}
                                 onSubmit={handleSubmit}
                                 onFilesSelected={handleFilesSelected}
                                 canSubmit={attachments.length > 0}

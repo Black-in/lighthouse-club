@@ -3,7 +3,7 @@
  * © 2026 ayushshrivastv
  */
 
-import { Message, Template } from '@lighthouse/types';
+import { Message, MODEL, Template } from '@lighthouse/types';
 import { create } from 'zustand';
 
 interface ContractState {
@@ -12,6 +12,7 @@ interface ContractState {
     loading: boolean;
     loadingStartedAt: number | null;
     currentFileEditing: string | null;
+    selectedModel: MODEL;
     activeTemplate: Template | null; // Move template state here too
 }
 
@@ -21,6 +22,7 @@ interface BuilderChatState {
     setCurrentContractId: (contractId: string) => void;
     getCurrentContract: () => ContractState;
     setCurrentFileEditing: (file: string | null) => void;
+    setSelectedModel: (model: MODEL, contractId?: string) => void;
     setLoading: (loading: boolean) => void;
     setPhase: (phase: string) => void;
     setMessage: (message: Message) => void;
@@ -36,6 +38,7 @@ const getDefaultContractState = (): ContractState => ({
     loading: false,
     loadingStartedAt: null,
     currentFileEditing: null,
+    selectedModel: MODEL.GEMINI,
     activeTemplate: null,
 });
 
@@ -75,6 +78,23 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
                 [currentContractId]: {
                     ...contracts[currentContractId],
                     currentFileEditing: file,
+                },
+            },
+        });
+    },
+
+    setSelectedModel: (model, contractId) => {
+        const { contracts, currentContractId } = get();
+        const targetContractId = contractId || currentContractId;
+        if (!targetContractId) return;
+
+        const currentContract = contracts[targetContractId] || getDefaultContractState();
+        set({
+            contracts: {
+                ...contracts,
+                [targetContractId]: {
+                    ...currentContract,
+                    selectedModel: model,
                 },
             },
         });

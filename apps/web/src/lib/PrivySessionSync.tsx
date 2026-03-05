@@ -21,12 +21,14 @@ function readCookie(name: string) {
 
 function writeCookie(name: string, value: string, maxAgeSeconds: number) {
     if (typeof document === 'undefined') return;
-    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax; Secure`;
+    const securePart = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax${securePart}`;
 }
 
 function clearCookie(name: string) {
     if (typeof document === 'undefined') return;
-    document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax; Secure`;
+    const securePart = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax${securePart}`;
 }
 
 function resolveProvider(user: User): 'google' | 'github' | null {
@@ -89,6 +91,11 @@ export default function PrivySessionSync() {
         if (!ready) return;
 
         if (!authenticated || !user) {
+            const persistedToken = session?.user?.token ?? null;
+            if (persistedToken) {
+                writeCookie('blackin_token', persistedToken, 60 * 60 * 24 * 30);
+                return;
+            }
             clearSession();
             clearCookie('blackin_token');
             clearCookie('linking_user_id');
@@ -102,13 +109,6 @@ export default function PrivySessionSync() {
 
         if (samePrivyUser && existingToken && !shouldSyncGithubLink) {
             writeCookie('blackin_token', existingToken, 60 * 60 * 24 * 30);
-            setSession(
-                buildSessionFromUser({
-                    privyUser: user,
-                    token: existingToken,
-                    backendUser: session?.user,
-                }),
-            );
             return;
         }
 

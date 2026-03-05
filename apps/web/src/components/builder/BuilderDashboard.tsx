@@ -27,6 +27,7 @@ import PlanPanel from '../code/PlanPanel';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 import { cn } from '@/src/lib/utils';
 import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
+import { useParams } from 'next/navigation';
 
 const PROJECT_PANEL_WIDTH_STORAGE_KEY = 'blackin.playground.projectPanelWidth';
 const CHAT_PANEL_WIDTH_STORAGE_KEY = 'blackin.playground.chatPanelWidth';
@@ -37,52 +38,55 @@ const MIN_CODE_PANEL_WIDTH = 420;
 const MIN_CHAT_PANEL_WIDTH = 360;
 const DEV_SAMPLE_FILES: FileContent[] = [
     {
-        path: 'src/main.rs',
+        path: 'apps/web/app/page.tsx',
         content:
-            "use anchor_lang::prelude::*;\n\nmod state;\nmod instructions;\n\nuse instructions::*;\n\ndeclare_id!(\"9CHN8A5pN7blackinx3yq8fWmR9z8QwT2s6uQfJx7LJ\");\n\n#[program]\npub mod blackin_demo {\n    use super::*;\n\n    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {\n        initialize::handler(ctx)\n    }\n\n    pub fn update_counter(ctx: Context<UpdateCounter>, value: u64) -> Result<()> {\n        update_counter::handler(ctx, value)\n    }\n}\n",
+            "export default function HomePage() {\n  return (\n    <main>\n      <h1>BlackIn Base App</h1>\n      <p>Generated Base-native app scaffold.</p>\n    </main>\n  );\n}\n",
     },
     {
-        path: 'src/state/counter.rs',
+        path: 'apps/web/app/layout.tsx',
         content:
-            "use anchor_lang::prelude::*;\n\n#[account]\npub struct Counter {\n    pub authority: Pubkey,\n    pub value: u64,\n}\n\nimpl Counter {\n    pub const LEN: usize = 8 + 32 + 8;\n}\n",
+            "export default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
     },
     {
-        path: 'src/instructions/mod.rs',
-        content: 'pub mod initialize;\npub mod update_counter;\n\npub use initialize::*;\npub use update_counter::*;\n',
+        path: 'contracts/src/BaseApp.sol',
+        content:
+            "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\ncontract BaseApp {\n    string public appName = \"BlackIn Base App\";\n}\n",
     },
     {
-        path: 'src/instructions/initialize.rs',
+        path: 'contracts/script/DeployBaseApp.s.sol',
         content:
-            "use anchor_lang::prelude::*;\nuse crate::state::counter::Counter;\n\n#[derive(Accounts)]\npub struct Initialize<'info> {\n    #[account(mut)]\n    pub payer: Signer<'info>,\n    #[account(\n        init,\n        payer = payer,\n        space = Counter::LEN,\n        seeds = [b\"counter\", payer.key().as_ref()],\n        bump\n    )]\n    pub counter: Account<'info, Counter>,\n    pub system_program: Program<'info, System>,\n}\n\npub fn handler(ctx: Context<Initialize>) -> Result<()> {\n    let counter = &mut ctx.accounts.counter;\n    counter.authority = ctx.accounts.payer.key();\n    counter.value = 0;\n    Ok(())\n}\n",
+            "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\nimport {Script} from \"forge-std/Script.sol\";\nimport {BaseApp} from \"../src/BaseApp.sol\";\n\ncontract DeployBaseApp is Script {\n    function run() external {\n        vm.startBroadcast();\n        new BaseApp();\n        vm.stopBroadcast();\n    }\n}\n",
     },
     {
-        path: 'src/instructions/update_counter.rs',
+        path: 'contracts/test/BaseApp.t.sol',
         content:
-            "use anchor_lang::prelude::*;\nuse crate::state::counter::Counter;\n\n#[derive(Accounts)]\npub struct UpdateCounter<'info> {\n    #[account(mut)]\n    pub authority: Signer<'info>,\n    #[account(\n        mut,\n        seeds = [b\"counter\", authority.key().as_ref()],\n        bump,\n        has_one = authority\n    )]\n    pub counter: Account<'info, Counter>,\n}\n\npub fn handler(ctx: Context<UpdateCounter>, value: u64) -> Result<()> {\n    ctx.accounts.counter.value = value;\n    Ok(())\n}\n",
+            "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\nimport {Test} from \"forge-std/Test.sol\";\nimport {BaseApp} from \"../src/BaseApp.sol\";\n\ncontract BaseAppTest is Test {\n    function test_AppName() public {\n        BaseApp appContract = new BaseApp();\n        assertEq(appContract.appName(), \"BlackIn Base App\");\n    }\n}\n",
     },
     {
-        path: 'tests/blackin_demo.ts',
+        path: 'contracts/foundry.toml',
         content:
-            "import * as anchor from '@coral-xyz/anchor';\n\ndescribe('blackin_demo', () => {\n  const provider = anchor.AnchorProvider.env();\n  anchor.setProvider(provider);\n\n  it('initializes counter', async () => {\n    // test placeholder\n  });\n});\n",
+            "[profile.default]\nsrc = \"src\"\nout = \"out\"\nlibs = [\"lib\"]\nsolc_version = \"0.8.24\"\n",
     },
     {
-        path: 'Anchor.toml',
+        path: '.env.example',
         content:
-            "[features]\nresolution = true\nskip-lint = false\n\n[programs.localnet]\nblackin_demo = \"9CHN8A5pN7blackinx3yq8fWmR9z8QwT2s6uQfJx7LJ\"\n\n[provider]\ncluster = \"Localnet\"\nwallet = \"~/.config/solana/id.json\"\n",
+            "NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL=https://sepolia.base.org\nNEXT_PUBLIC_BASE_MAINNET_RPC_URL=https://mainnet.base.org\nNEXT_PUBLIC_ONCHAINKIT_API_KEY=\n",
     },
     {
         path: 'README.md',
         content:
-            '# BlackIn Demo Workspace\\n\\nThis is a local dev preview file tree used to visualize the playground UI before generation runs.\\n',
+            '# BlackIn Base Demo Workspace\\n\\nThis local preview demonstrates a Base-first app and Solidity workspace.\\n',
     },
 ];
 
 export default function BuilderDashboard(): JSX.Element {
     const contract = useCurrentContract();
+    const params = useParams();
+    const contractId = params?.contractId as string | undefined;
     const { loading } = contract;
     const { collapseChat } = useCodeEditor();
     const { isConnected, subscribeToHandler } = useWebSocket();
-    const { addLog, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();
+    const { addLog, setLogs, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();
     const chatSplitContainerRef = useRef<HTMLDivElement | null>(null);
     const [chatPanelWidth, setChatPanelWidth] = useState<number>(DEFAULT_CHAT_PANEL_WIDTH);
     const [isResizingChatPanels, setIsResizingChatPanels] = useState<boolean>(false);
@@ -90,6 +94,16 @@ export default function BuilderDashboard(): JSX.Element {
     useEffect(() => {
         let timeout: NodeJS.Timeout | null = null;
         function handleIncomingTerminalLogs(message: WSServerIncomingPayload<IncomingPayload>) {
+            const payload = message.payload as IncomingPayload | string;
+            if (
+                typeof payload !== 'string' &&
+                payload?.contractId &&
+                contractId &&
+                payload.contractId !== contractId
+            ) {
+                return;
+            }
+
             setTerminalLoader(false);
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(() => {
@@ -110,9 +124,20 @@ export default function BuilderDashboard(): JSX.Element {
                 setIsCommandRunning(false);
             }
 
-            const payload = message.payload as IncomingPayload | string;
             const line = typeof payload === 'string' ? payload : payload?.line;
             if (!line) return;
+
+            if (message.type === TerminalSocketData.CONNECTED) {
+                setLogs([
+                    {
+                        type: message.type,
+                        text: line,
+                    },
+                ]);
+                setIsCommandRunning(false);
+                return;
+            }
+
             addLog({
                 type: message.type,
                 text: line,
@@ -128,7 +153,15 @@ export default function BuilderDashboard(): JSX.Element {
             if (timeout) clearTimeout(timeout);
             unsubscribe?.();
         };
-    }, [isConnected]);
+    }, [
+        addLog,
+        contractId,
+        isConnected,
+        setIsCommandRunning,
+        setLogs,
+        setTerminalLoader,
+        subscribeToHandler,
+    ]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -232,6 +265,7 @@ function Editing() {
     const [projectPanelWidth, setProjectPanelWidth] = useState<number>(DEFAULT_PROJECT_PANEL_WIDTH);
     const [isResizingPanels, setIsResizingPanels] = useState<boolean>(false);
     const showDevFileStructure = shouldEnableDevAccessClient();
+    const showWorkspaceFileTree = showDevFileStructure || fileTree.length > 0;
 
     useEffect(() => {
         if (!showDevFileStructure) return;
@@ -319,7 +353,7 @@ function Editing() {
         }
     }
 
-    if (collapseChat && showDevFileStructure) {
+    if (collapseChat && showWorkspaceFileTree) {
         return (
             <div ref={splitContainerRef} className="flex h-full min-h-0 gap-3">
                 <div

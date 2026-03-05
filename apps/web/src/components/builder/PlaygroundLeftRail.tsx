@@ -14,6 +14,7 @@ import GithubConnectModal from '../nav/GithubConnectModal';
 import { useRouter } from 'next/navigation';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
+import Image from 'next/image';
 
 interface PlaygroundLeftRailProps {
     visible: boolean;
@@ -57,7 +58,7 @@ export default function PlaygroundLeftRail({ visible, onToggle }: PlaygroundLeft
                                     aria-label="Close sidebar"
                                     className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[#16181d]"
                                 >
-                                    <img
+                                    <Image
                                         src={
                                             theme === 'light'
                                                 ? '/icons/blackin-mark-light.svg'
@@ -90,6 +91,7 @@ export default function PlaygroundLeftRail({ visible, onToggle }: PlaygroundLeft
                                     aria-label="Open settings"
                                     className="playground-left-rail-profile flex items-center justify-center rounded-full p-[2px] ring-1 ring-neutral-700/80 transition hover:ring-neutral-500"
                                 >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={profileImageSrc}
                                         alt={session?.user?.name || 'Profile'}
@@ -140,7 +142,7 @@ export default function PlaygroundLeftRail({ visible, onToggle }: PlaygroundLeft
                             aria-label="Open sidebar"
                             className="flex h-10 w-10 items-center justify-center rounded-xl bg-black transition hover:bg-[#16181d]"
                         >
-                            <img
+                            <Image
                                 src={
                                     theme === 'light'
                                         ? '/icons/blackin-mark-light.svg'

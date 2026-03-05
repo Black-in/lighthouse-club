@@ -45,7 +45,7 @@ export const useTerminalLogStore = create<TerminalLogStore>()(
             clearLogs: () => set({ logs: [] }),
         }),
         {
-            name: 'blackin.terminal.logs.v1',
+            name: 'blackin.terminal.logs.v2',
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({ logs: state.logs.slice(-MAX_TERMINAL_LINES) }),
         },

@@ -11,12 +11,12 @@ import { Toaster } from 'sonner';
 export const metadata: Metadata = {
     title: 'BlackIn',
     description:
-        'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+        'BlackIn is an AI-powered platform for generating and deploying Base-native applications end-to-end.',
     metadataBase: new URL('https://blackin.dev'),
     openGraph: {
         title: 'BlackIn',
         description:
-            'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+            'BlackIn is an AI-powered platform for generating and deploying Base-native applications end-to-end.',
         url: 'https://blackin.dev',
         siteName: 'BlackIn',
         images: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'BlackIn | Smart Contract Generator',
         description:
-            'BlackIn is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+            'BlackIn is an AI-powered platform for generating and deploying Base-native applications end-to-end.',
         images: ['/icons/blackin-mark-dark.svg'],
     },
 };

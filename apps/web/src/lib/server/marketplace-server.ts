@@ -4,14 +4,39 @@
  */
 
 import {
+    COMPILE_WALLET_DEPLOY,
     DELETE_CONTRACT,
     GET_ALL_CONTRACTS,
     GET_ALL_TEMPLATES,
     GET_USER_CONTRACTS,
+    REGISTER_SELF_DEPLOY,
 } from '@/routes/api_routes';
 import { Contract, Template } from '@lighthouse/types';
 import axios from 'axios';
 import { shouldEnableDevAccessClient } from '../runtime-mode';
+
+type CompileWalletArtifactPayload = {
+    files?: Array<{
+        path: string;
+        content: string;
+    }>;
+    entryFile?: string;
+    contractName?: string;
+    optimizerRuns?: number;
+};
+
+type CompileWalletArtifactResponse = {
+    success: boolean;
+    message?: string;
+    data?: {
+        entryFile: string;
+        contractName: string;
+        abi: unknown[];
+        bytecode: `0x${string}`;
+        warnings?: string[];
+        compilerVersion?: string;
+    };
+};
 
 export default class Marketplace {
     public static async getUserContracts(token: string): Promise<Contract[]> {
@@ -95,6 +120,76 @@ export default class Marketplace {
             return {
                 success: false,
                 contractId,
+            };
+        }
+    }
+
+    public static async registerSelfDeploy(
+        token: string,
+        contractId: string,
+        payload: {
+            network: 'base-sepolia' | 'base-mainnet';
+            contractAddress: string;
+            txHash: string;
+            explorerUrl?: string;
+            walletAddress?: string;
+        },
+    ): Promise<{
+        success: boolean;
+        message?: string;
+    }> {
+        try {
+            const { data } = await axios.post(`${REGISTER_SELF_DEPLOY}/${contractId}/self-deploy`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return {
+                success: !!data?.success,
+                message: data?.message || 'Self deployment recorded',
+            };
+        } catch (error) {
+            console.error('Failed to register self deployment', error);
+            return {
+                success: false,
+                message: 'Failed to record self deployment',
+            };
+        }
+    }
+
+    public static async compileWalletDeployArtifact(
+        token: string,
+        contractId: string,
+        payload: CompileWalletArtifactPayload,
+    ): Promise<CompileWalletArtifactResponse> {
+        try {
+            const { data } = await axios.post(
+                `${COMPILE_WALLET_DEPLOY}/${contractId}/compile-wallet-deploy`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+            return {
+                success: !!data?.success,
+                message: data?.message,
+                data: data?.data,
+            };
+        } catch (error) {
+            console.error('Failed to compile wallet deploy artifact', error);
+            if (axios.isAxiosError(error)) {
+                return {
+                    success: false,
+                    message:
+                        (error.response?.data as { message?: string } | undefined)?.message ||
+                        'Failed to compile deployment artifact',
+                };
+            }
+            return {
+                success: false,
+                message: 'Failed to compile deployment artifact',
             };
         }
     }

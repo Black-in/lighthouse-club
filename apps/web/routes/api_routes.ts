@@ -37,6 +37,8 @@ export const GET_REVIEWS = API_URL + '/get-reviews';
 export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';
 export const GET_ALL_CONTRACTS = API_URL + '/contracts/get-all-contracts';
 export const DELETE_CONTRACT = API_URL + '/contracts';
+export const REGISTER_SELF_DEPLOY = API_URL + '/contracts';
+export const COMPILE_WALLET_DEPLOY = API_URL + '/contracts';
 export const GET_CURRENT_CONTRACT_DATA_URL = API_URL + '/get-contract-messages';
 
 // templates

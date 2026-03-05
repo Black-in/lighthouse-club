@@ -18,8 +18,12 @@ export interface BuildCacheCheck {
 export enum COMMAND {
   lighthouse_BUILD = "lighthouse_BUILD",
   lighthouse_TEST = "lighthouse_TEST",
+  // DISABLED - Solana chain (see /chains/solana).
   lighthouse_DEPLOY_DEVNET = "lighthouse_DEPLOY_DEVNET",
+  // DISABLED - Solana chain (see /chains/solana).
   lighthouse_DEPLOY_MAINNET = "lighthouse_DEPLOY_MAINNET",
+  lighthouse_DEPLOY_BASE_SEPOLIA = "lighthouse_DEPLOY_BASE_SEPOLIA",
+  lighthouse_DEPLOY_BASE_MAINNET = "lighthouse_DEPLOY_BASE_MAINNET",
   lighthouse_VERIFY = "lighthouse_VERIFY",
 }
 
