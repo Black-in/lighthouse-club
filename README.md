@@ -1,77 +1,51 @@
-# Lighthouse Club (Frontend)
+# BlackIn Frontend
 
-`lighthouse-club` is the frontend for BlackIn, a Base-first AI code editor that connects to `lighthouse-main` for prompt generation, workspace updates, socket terminal streaming, and deployment status.
+## Project Description
 
-## Product Scope
+BlackIn is an agentic AI powered code editor built for smart contract development on Base. It brings writing, auditing, and deploying smart contracts into a single browser based environment, designed for developers who want to ship on Base without the overhead of manual tooling and configuration.
 
-The active runtime path is Base-only. The UI sends generation requests with `chain=BASE`, exposes Base deployment commands, and routes terminal events through the socket service.
+## BlackIn - Agentic Smart Contract Auditor
 
-## Local Development
+BlackIn is an agentic AI powered code editor built specifically for smart contracts on Base. It runs entirely in the browser, so there is nothing to install and nothing to configure. It is similar to Cursor in interaction style, but purpose built for blockchain development with security and deployment integrated directly into the generation process.
 
-### 1) Required services
+Building on Base today often requires a developer to understand Solidity deeply, set up Foundry, configure Chainlink Runtime Environment manually, write workflow files by hand, and then wire everything together before a single production meaningful contract line is ready. That setup can consume a full day or more, and each manual step increases the chance of shipping vulnerable code that manages real value. Many teams skip security review early in development or delay it until late in the cycle.
 
-Run backend and socket from `lighthouse-main` first:
+BlackIn eliminates both problems at once. You open BlackIn, describe your project in plain language, and the AI takes over. It plans the application, writes Solidity smart contracts, generates frontend files, and creates Chainlink Runtime Environment workflow files in one pass. While contracts are being written, BlackIn runs audit oriented checks against known vulnerability patterns so developers can review code that is already screened during generation.
 
-- API: `http://localhost:8787`
-- Socket: `ws://localhost:8282`
+After initial generation, the project can be refined through chat in the same workspace by asking for function additions, logic changes, and structural updates. When the project is ready, deployment can be initiated for Base Sepolia or Base Mainnet. The deployment path runs through Chainlink Runtime Environment lifecycle stages including simulate, deploy, and activate so the workflow is not only deployed but brought to an active runtime state.
 
-### 2) Frontend env
+The final outcome is one prompt producing a complete Base application package with contracts, frontend, Chainlink Runtime Environment workflow, security aware generation, and deployment readiness. Work that previously took days of setup can be reduced to minutes of guided execution.
 
-Create or update `.env.local` with at least:
+## Project Links
 
-```bash
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8787
-NEXT_PUBLIC_SOCKET_URL=ws://localhost:8282
-NEXT_PUBLIC_DEV_ACCESS_MODE=true
-NEXT_PUBLIC_SKIP_AUTH=true
-NEXT_PUBLIC_CHAIN_BASE_ENABLED=true
-NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-NEXT_PUBLIC_BASE_MAINNET_RPC_URL=https://mainnet.base.org
-NEXT_PUBLIC_DISABLE_PRIVY=true
+The product walkthrough video is available at https://www.youtube.com/watch?v=UGXNKP0y-ZM. The Chainlink integration reference for this product is documented at https://github.com/Black-in/lighthouse-main/blob/main/Chainlink.md.
+
+## How to Build and Run the Frontend
+
+Install dependencies with `pnpm install`, ensure backend API and socket services from `lighthouse-main` are running, and start the frontend with `pnpm --filter web dev`. The web application runs on port `3000` and reads backend and socket endpoints through environment variables such as `NEXT_PUBLIC_BACKEND_URL` and `NEXT_PUBLIC_SOCKET_URL`. For validation and build quality, run `pnpm --filter web lint` and `pnpm --filter web build`.
+
+## Frontend Project Structure
+
+Frontend application routes and layouts are implemented in `apps/web/app`. Reusable UI modules and product panels are implemented in `apps/web/src/components`. Request utilities, runtime adapters, and server client helpers are implemented in `apps/web/src/lib`. Interaction orchestration logic is implemented in `apps/web/src/hooks`, while global client state is maintained in `apps/web/src/store`. This structure allows prompt flow, file rendering, terminal interaction, and deployment controls to stay connected in one interface.
+
+## Project Architecture Diagram
+
+```mermaid
+flowchart LR
+    U["User in Browser"] --> FE["BlackIn Frontend (lighthouse-club)"]
+    FE --> API["Backend API (apps/server)"]
+    FE --> WS["Socket Runtime (apps/socket)"]
+    API --> GEN["Prompt Planning and Code Generation"]
+    GEN --> OBJ["Object Store and Workspace Files"]
+    API --> Q["CRE Deploy Queue"]
+    Q --> WORKER["CRE Runtime Worker"]
+    WORKER --> CRE["Chainlink CRE CLI Lifecycle"]
+    CRE --> SIM["workflow simulate"]
+    CRE --> DEP["workflow deploy"]
+    CRE --> ACT["workflow activate"]
+    WORKER --> BASE["Base Sepolia or Base Mainnet"]
+    API --> DB["Postgres (Contracts, Build Jobs, Deployments)"]
+    API --> REDIS["Redis PubSub and Queue Transport"]
+    WS --> REDIS
+    REDIS --> FE
 ```
-
-Optional provider keys for full wallet and payments behavior:
-
-- `NEXT_PUBLIC_ONCHAINKIT_API_KEY`
-- `NEXT_PUBLIC_PRIVY_APP_ID` (if Privy enabled)
-- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-- `NEXT_PUBLIC_RAZORPAY_KEY_ID`
-
-### 3) Install and run
-
-```bash
-pnpm install
-pnpm --filter web dev
-```
-
-App URL:
-
-- `http://localhost:3000`
-
-## Quality Checks
-
-```bash
-pnpm --filter web lint
-pnpm --filter web build
-```
-
-## Deployment Command Surface
-
-The terminal command panel supports:
-
-- `winter build`
-- `winter test`
-- `winter deploy --base-sepolia`
-- `winter deploy --base-mainnet`
-
-Legacy Solana deploy commands are intentionally disabled in active behavior.
-
-## Repo Layout
-
-- `apps/web`: Next.js frontend
-- `packages/*`: shared types/config packages
-
-## Notes
-
-- If Privy credentials are unavailable, keep `NEXT_PUBLIC_DISABLE_PRIVY=true` for local runs.
-- For end-to-end generation/deploy flows, `lighthouse-main` must be running with DB/Redis reachable.
