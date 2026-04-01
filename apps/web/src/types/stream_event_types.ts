@@ -64,6 +64,7 @@ interface GeneratingData {
 interface EditingFileData {
     file: string;
     phase: string;
+    content?: string;
 }
 
 interface BuildingData {
