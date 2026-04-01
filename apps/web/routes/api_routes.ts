@@ -11,6 +11,7 @@ export const SIGNIN_URL = API_URL + '/sign-in';
 export const GENERATE_CONTRACT = API_URL + '/generate';
 export const PLAN_CONTEXT_URL = API_URL + '/plan';
 export const GET_CHAT_URL = API_URL + '/contract/get-chat';
+export const MODEL_CAPABILITIES_URL = API_URL + '/runtime/model-capabilities';
 
 // subscription
 export const SUBSCRIPTION_URL = API_URL + '/subscription';
