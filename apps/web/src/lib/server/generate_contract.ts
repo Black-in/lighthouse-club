@@ -20,8 +20,16 @@ import { DAILY_LIMIT } from '@lighthouse/types';
 import { shouldSkipAuthClient } from '../auth-bypass';
 import { shouldEnableDevAccessClient } from '../runtime-mode';
 import { toast } from 'sonner';
+import Playground from './playground';
 
 const inFlightGenerationContracts = new Set<string>();
+
+interface ByokPayload {
+    provider: 'openai_compatible';
+    model: string;
+    apiKey: string;
+    baseURL?: string;
+}
 
 function getStreamErrorMessage(data: unknown, fallback: string): string {
     if (!data || typeof data !== 'object') return fallback;
@@ -56,6 +64,7 @@ export default class GenerateContract {
         const { setMessage } = useBuilderChatStore.getState();
         try {
             const skipAuth = shouldSkipAuthClient();
+            const authToken = skipAuth ? '' : token;
             if ((!token && !skipAuth) || !contract_id || !instruction) {
                 return {
                     data: null,
@@ -68,12 +77,12 @@ export default class GenerateContract {
                 {
                     contract_id,
                     instruction,
-                    chain: Chain.BASE,
+                    chain: Chain.SOLANA,
                 },
                 {
-                    headers: token
+                    headers: authToken
                         ? {
-                              Authorization: `Bearer ${token}`,
+                              Authorization: `Bearer ${authToken}`,
                           }
                         : undefined,
                 },
@@ -98,10 +107,12 @@ export default class GenerateContract {
         instruction?: string,
         template_id?: string,
         model: MODEL = MODEL.GEMINI,
+        byok?: ByokPayload,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
-        const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
+        const { deleteFile, parseFileStructure, setCollapseFileTree, setLivePreview, clearLivePreview } =
+            useCodeEditor.getState();
         const { setShowContractLimit, setShowMessageLimit, setShowRegenerateTime } =
             useLimitStore.getState();
 
@@ -111,19 +122,23 @@ export default class GenerateContract {
             }
             inFlightGenerationContracts.add(contractId);
             setLoading(true);
+            clearLivePreview();
+            const skipAuth = shouldSkipAuthClient();
+            const authToken = skipAuth ? '' : token;
 
             const response = await fetch(GENERATE_CONTRACT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
                 },
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: instruction,
                     template_id: template_id,
-                    chain: Chain.BASE,
+                    chain: Chain.SOLANA,
                     model,
+                    byok,
                 }),
             });
 
@@ -225,6 +240,12 @@ export default class GenerateContract {
                                         deleteFile(event.data.file as string);
                                     } else {
                                         setCurrentFileEditing(event.data.file as string);
+                                        setLivePreview(
+                                            event.data.file as string,
+                                            'content' in event.data && typeof event.data.content === 'string'
+                                                ? event.data.content
+                                                : '',
+                                        );
                                     }
                                 }
                                 break;
@@ -254,6 +275,9 @@ export default class GenerateContract {
                                         upsertMessage(event.systemMessage);
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
+                                    clearLivePreview();
+                                    setCurrentFileEditing(null);
+                                    setPhase(PHASE_TYPES.COMPLETE);
                                     setLoading(false);
                                     setCollapseFileTree(true);
                                 }
@@ -271,6 +295,9 @@ export default class GenerateContract {
             // const data = await response.json();
             // parseFileStructure(data.data);
 
+            await Playground.get_chat(token, contractId);
+            setCurrentFileEditing(null);
+            setPhase(PHASE_TYPES.COMPLETE);
             setCollapseFileTree(true);
         } catch (error) {
             console.error('Chat stream error:', error);
@@ -290,7 +317,8 @@ export default class GenerateContract {
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
-        const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
+        const { deleteFile, parseFileStructure, setCollapseFileTree, setLivePreview, clearLivePreview } =
+            useCodeEditor.getState();
         const { setShowMessageLimit, setShowContractLimit, setShowRegenerateTime } =
             useLimitStore.getState();
 
@@ -300,8 +328,10 @@ export default class GenerateContract {
             }
             inFlightGenerationContracts.add(contractId);
             setLoading(true);
+            clearLivePreview();
 
             const skipAuth = shouldSkipAuthClient();
+            const authToken = skipAuth ? '' : token;
             if ((!token && !skipAuth) || !contractId || !message.trim()) {
                 throw new Error('Missing required parameters');
             }
@@ -310,12 +340,12 @@ export default class GenerateContract {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
                 },
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: message,
-                    chain: Chain.BASE,
+                    chain: Chain.SOLANA,
                     model,
                 }),
             });
@@ -435,6 +465,12 @@ export default class GenerateContract {
                                         deleteFile(event.data.file as string);
                                     } else {
                                         setCurrentFileEditing(event.data.file as string);
+                                        setLivePreview(
+                                            event.data.file as string,
+                                            'content' in event.data && typeof event.data.content === 'string'
+                                                ? event.data.content
+                                                : '',
+                                        );
                                     }
                                 }
                                 break;
@@ -470,6 +506,9 @@ export default class GenerateContract {
                                         upsertMessage(event.systemMessage);
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
+                                    clearLivePreview();
+                                    setCurrentFileEditing(null);
+                                    setPhase(PHASE_TYPES.COMPLETE);
                                     setLoading(false);
                                     setCollapseFileTree(true);
                                 }
@@ -484,6 +523,9 @@ export default class GenerateContract {
                 }
             }
 
+            await Playground.get_chat(token, contractId);
+            setCurrentFileEditing(null);
+            setPhase(PHASE_TYPES.COMPLETE);
             setCollapseFileTree(true);
         } catch (error) {
             console.error('Chat stream error:', error);
