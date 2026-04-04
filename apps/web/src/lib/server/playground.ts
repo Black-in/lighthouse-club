@@ -7,22 +7,27 @@ import { GET_CHAT_URL } from '@/routes/api_routes';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import axios from 'axios';
+import { shouldSkipAuthClient } from '../auth-bypass';
 
 export default class Playground {
     static async get_chat(token: string, contractId: string) {
         const { upsertMessage } = useBuilderChatStore.getState();
         const { parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
         try {
-            if (!token) return;
+            const skipAuth = shouldSkipAuthClient();
+            const authToken = skipAuth ? '' : token;
+            if (!authToken && !skipAuth) return;
             const { data } = await axios.post(
                 GET_CHAT_URL,
                 {
                     contractId: contractId,
                 },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: authToken
+                        ? {
+                              Authorization: `Bearer ${authToken}`,
+                          }
+                        : undefined,
                 },
             );
 
