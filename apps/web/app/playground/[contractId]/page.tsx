@@ -11,9 +11,7 @@ import { cleanWebSocketClient } from '@/src/lib/singletonWebSocket';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useChatStore } from '@/src/store/user/useChatStore';
-import React, { useEffect, use, useLayoutEffect, useState } from 'react';
-import ContractReviewCard from '@/src/components/base/ContractReviewCard';
-import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { ChatRole, STAGE } from '@lighthouse/types';
 import Marketplace from '@/src/lib/server/marketplace-server';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
@@ -27,7 +25,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
-    const { open, hide } = useReviewModalStore();
     const { setTemplates } = useTemplateStore();
     const contract = useCurrentContract();
     const { messages } = contract;
@@ -54,16 +51,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    });
-
-    useEffect(() => {
-        function handleHideContractReviewCard(e: KeyboardEvent) {
-            if (e.key === 'Escape') {
-                hide();
-            }
-        }
-        document.addEventListener('keydown', handleHideContractReviewCard);
-        return () => document.removeEventListener('keydown', handleHideContractReviewCard);
     });
 
     useLayoutEffect(() => {
@@ -138,12 +125,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
                     <BuilderDashboard />
                 </div>
             </div>
-            <ContractReviewCard
-                contractId={use(params).contractId}
-                open={open}
-                onClose={hide}
-                onSubmit={() => hide()}
-            />
         </div>
     );
 }
