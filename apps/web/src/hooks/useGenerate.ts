@@ -10,6 +10,14 @@ import { v4 as uuid } from 'uuid';
 import GenerateContract from '../lib/server/generate_contract';
 import { ChatRole, MODEL, STAGE, Template } from '@lighthouse/types';
 import { shouldSkipAuthClient } from '../lib/auth-bypass';
+import { getStoredQwenByokConfig, isByokModelEnum } from '../lib/byok-model';
+
+interface ByokPayload {
+    provider: 'openai_compatible';
+    model: string;
+    apiKey: string;
+    baseURL?: string;
+}
 
 interface SetStatesOptions {
     markLoading?: boolean;
@@ -17,6 +25,7 @@ interface SetStatesOptions {
 
 interface GenerationOptions {
     model?: MODEL;
+    byok?: ByokPayload;
 }
 
 export default function useGenerate() {
@@ -88,12 +97,15 @@ export default function useGenerate() {
         instruction?: string,
         templateId?: string,
         model?: MODEL,
+        byok?: ByokPayload,
     ) {
         const skipAuth = shouldSkipAuthClient();
         if (!session?.user.token && !skipAuth) return;
         const { setLoading } = useBuilderChatStore.getState();
         const selectedModel =
             model || useBuilderChatStore.getState().contracts[contractId]?.selectedModel || MODEL.GEMINI;
+        const resolvedByok =
+            byok || (isByokModelEnum(selectedModel) ? getStoredQwenByokConfig() || undefined : undefined);
         setLoading(true);
         GenerateContract.start_agentic_executor(
             session?.user?.token ?? '',
@@ -101,6 +113,7 @@ export default function useGenerate() {
             instruction,
             templateId,
             selectedModel,
+            resolvedByok,
         );
     }
 
