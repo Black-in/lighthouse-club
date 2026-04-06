@@ -84,7 +84,7 @@ export default function BuilderDashboard(): JSX.Element {
     const params = useParams();
     const contractId = params?.contractId as string | undefined;
     const { loading } = contract;
-    const { collapseChat } = useCodeEditor();
+    const { collapseChat, livePreviewFilePath } = useCodeEditor();
     const { isConnected, subscribeToHandler } = useWebSocket();
     const { addLog, setLogs, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();
     const chatSplitContainerRef = useRef<HTMLDivElement | null>(null);
@@ -240,7 +240,7 @@ export default function BuilderDashboard(): JSX.Element {
                         </div>
                         <div className="flex flex-1 pt-0 pb-4 pr-4 pl-0 h-full min-h-0 min-w-0">
                             <div className="playground-main-panel w-full h-full min-h-0 z-10 relative border border-neutral-800/90 rounded-[16px] overflow-hidden bg-[#08090a]">
-                                {loading ? <BuilderLoader /> : <Editing />}
+                                {loading && !livePreviewFilePath ? <BuilderLoader /> : <Editing />}
                             </div>
                         </div>
                     </div>
@@ -250,7 +250,7 @@ export default function BuilderDashboard(): JSX.Element {
             {collapseChat && (
                 <div className="hidden sm:flex sm:flex-1 pt-0 pb-4 px-4 h-full min-h-0 min-w-0">
                     <div className="playground-main-panel w-full h-full min-h-0 z-10 relative border-0 rounded-none overflow-visible bg-transparent">
-                        {loading ? <BuilderLoader /> : <Editing />}
+                        {loading && !livePreviewFilePath ? <BuilderLoader /> : <Editing />}
                     </div>
                 </div>
             )}
@@ -259,12 +259,14 @@ export default function BuilderDashboard(): JSX.Element {
 }
 
 function Editing() {
+    const params = useParams();
+    const contractId = params?.contractId as string | undefined;
     const { currentState } = useSidePanelStore();
     const { collapseChat, fileTree, parseFileStructure, selectFile } = useCodeEditor();
     const splitContainerRef = useRef<HTMLDivElement | null>(null);
     const [projectPanelWidth, setProjectPanelWidth] = useState<number>(DEFAULT_PROJECT_PANEL_WIDTH);
     const [isResizingPanels, setIsResizingPanels] = useState<boolean>(false);
-    const showDevFileStructure = shouldEnableDevAccessClient();
+    const showDevFileStructure = shouldEnableDevAccessClient() && !contractId;
     const showWorkspaceFileTree = showDevFileStructure || fileTree.length > 0;
 
     useEffect(() => {
