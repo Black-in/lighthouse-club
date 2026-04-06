@@ -14,6 +14,8 @@ interface CodeEditorState {
     fileTree: FileNode[];
     originalFileContents: Record<string, string>;
     editedFiles: Record<string, FileNode>;
+    livePreviewFilePath: string | null;
+    livePreviewCode: string;
     collapseFileTree: boolean;
     collapseChat: boolean;
     currentCursorPosition: { ln: number; col: number };
@@ -22,6 +24,8 @@ interface CodeEditorState {
     setCollapseFileTree: (collapse: boolean) => void;
     setCollapsechat: (collapse: boolean) => void;
     setCurrentCode: (code: string) => void;
+    setLivePreview: (filePath: string, code: string) => void;
+    clearLivePreview: () => void;
     updateFileContent: (fileId: string, content: string) => void;
     deleteFile: (path: string) => void;
     selectFile: (node: FileNode) => void;
@@ -37,6 +41,8 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
         fileTree: [],
         originalFileContents: {},
         editedFiles: {},
+        livePreviewFilePath: null,
+        livePreviewCode: '',
         collapseFileTree: false,
         collapseChat: false,
         currentCursorPosition: { ln: 0, col: 0 },
@@ -47,6 +53,18 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
         setCollapsechat: (value: boolean) => set({ collapseChat: value }),
         setCurrentCode: (code: string) => {
             set({ currentCode: code });
+        },
+        setLivePreview: (filePath: string, code: string) => {
+            set({
+                livePreviewFilePath: filePath,
+                livePreviewCode: code,
+            });
+        },
+        clearLivePreview: () => {
+            set({
+                livePreviewFilePath: null,
+                livePreviewCode: '',
+            });
         },
 
         updateFileContent: (fileId: string, content: string) => {
@@ -117,14 +135,12 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
 
         parseFileStructure: (files: FileContent[]) => {
             const state = get();
-            const existingTree = state.fileTree.length
-                ? state.fileTree[0]
-                : {
-                      id: 'root',
-                      name: 'root',
-                      type: NODE.FOLDER,
-                      children: [],
-                  };
+            const nextTree: FileNode = {
+                id: 'root',
+                name: inferProjectNameFromFiles(files),
+                type: NODE.FOLDER,
+                children: [],
+            };
             const nextOriginalFileContents = { ...state.originalFileContents };
 
             // Helper: recursively find folder by path
@@ -170,7 +186,7 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                     nextOriginalFileContents[path] = content;
                 }
 
-                const parentFolder = findOrCreateFolder(existingTree, parts);
+                const parentFolder = findOrCreateFolder(nextTree, parts);
                 const fileId = parts.length ? `${parts.join('/')}/${fileName}` : fileName;
 
                 // Remove any existing file with same id before adding
@@ -185,17 +201,19 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
             }
 
             const activeFile =
-                (state.currentFile && findFileById([existingTree], state.currentFile.id)) ||
-                findFirstFile(existingTree) ||
+                (state.currentFile && findFileById([nextTree], state.currentFile.id)) ||
+                findFirstFile(nextTree) ||
                 null;
 
             set({
-                fileTree: [existingTree],
+                fileTree: [nextTree],
                 originalFileContents: nextOriginalFileContents,
                 currentFile: activeFile,
                 currentCode: activeFile?.content ?? '',
+                livePreviewFilePath: null,
+                livePreviewCode: '',
             });
-            return existingTree;
+            return nextTree;
         },
 
         syncFiles: async () => {
@@ -221,10 +239,55 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
                 currentFile: null,
                 currentCode: '',
                 editedFiles: {},
+                livePreviewFilePath: null,
+                livePreviewCode: '',
             });
         },
     };
 });
+
+function inferProjectNameFromFiles(files: FileContent[]) {
+    const packageJson = files.find((file) => file.path === 'package.json');
+    if (packageJson?.content) {
+        try {
+            const parsed = JSON.parse(packageJson.content) as { name?: string };
+            if (parsed.name?.trim()) return parsed.name.trim();
+        } catch {
+            // Ignore invalid package.json content and continue with other strategies.
+        }
+    }
+
+    const cargoToml = files.find((file) => file.path.endsWith('Cargo.toml'));
+    if (cargoToml?.content) {
+        const packageSectionMatch = cargoToml.content.match(/\[package\][\s\S]*?(?:\n\[|$)/);
+        const section = packageSectionMatch ? packageSectionMatch[0] : cargoToml.content;
+        const nameMatch = section.match(/^\s*name\s*=\s*["']([^"']+)["']/m);
+        if (nameMatch?.[1]?.trim()) return nameMatch[1].trim();
+    }
+
+    const anchorToml = files.find((file) => file.path.endsWith('Anchor.toml'));
+    if (anchorToml?.content) {
+        const programSections = [
+            /\[programs\.localnet\][\s\S]*?(?:\n\[|$)/,
+            /\[programs\.devnet\][\s\S]*?(?:\n\[|$)/,
+            /\[programs\.mainnet\][\s\S]*?(?:\n\[|$)/,
+        ];
+
+        for (const pattern of programSections) {
+            const match = anchorToml.content.match(pattern);
+            if (!match) continue;
+            const nameMatch = match[0].match(/^\s*([A-Za-z0-9_-]+)\s*=\s*["'][^"']+["']/m);
+            if (nameMatch?.[1]?.trim()) return nameMatch[1].trim();
+        }
+    }
+
+    const topLevelFolder = files
+        .map((file) => file.path.split('/').filter(Boolean)[0])
+        .find((segment) => segment && !segment.includes('.'));
+    if (topLevelFolder) return topLevelFolder;
+
+    return 'BlackIn';
+}
 
 function findFileById(nodes: FileNode[], id: string): FileNode | null {
     for (const node of nodes) {
