@@ -19,6 +19,8 @@ export default function CodeEditor(): JSX.Element {
     const {
         currentCode,
         currentFile,
+        livePreviewCode,
+        livePreviewFilePath,
         collapseFileTree,
         setCurrentCursorPosition,
         collapseChat,
@@ -30,14 +32,20 @@ export default function CodeEditor(): JSX.Element {
     const editorInstanceRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const monacoInstanceRef = useRef<Monaco | null>(null);
 
+    const displayFilePath = livePreviewFilePath || currentFile?.id || null;
+    const displayCode = livePreviewFilePath ? livePreviewCode : currentCode;
+    const editorValue = displayCode;
+    const editorLanguage = inferLanguage(displayFilePath);
+    const titleLabel = displayFilePath;
+
     const applyEditorTheme = useCallback((monaco: Monaco, currentTheme: 'dark' | 'light' | 'legacy') => {
         monaco.editor.setTheme(getEditorTheme(currentTheme));
     }, []);
 
     function handleCopyFileContent() {
-        if (!currentCode || copyCooldown) return;
+        if (!displayCode || copyCooldown) return;
 
-        navigator.clipboard.writeText(currentCode);
+        navigator.clipboard.writeText(displayCode);
 
         setIsCopied(true);
         setCopyCooldown(true);
@@ -225,17 +233,33 @@ export default function CodeEditor(): JSX.Element {
         applyEditorTheme(monacoInstanceRef.current, theme);
     }, [applyEditorTheme, theme]);
 
-    function filePathModifier(filePath: string | undefined) {
+    useEffect(() => {
+        if (!livePreviewFilePath) return;
+
+        const instance = editorInstanceRef.current;
+        if (!instance) return;
+
+        const model = instance.getModel();
+        if (!model) return;
+
+        const lastLine = model.getLineCount();
+        const lastColumn = model.getLineMaxColumn(lastLine);
+
+        instance.setPosition({ lineNumber: lastLine, column: lastColumn });
+        instance.revealLine(lastLine);
+    }, [livePreviewCode, livePreviewFilePath]);
+
+    function filePathModifier(filePath: string | null | undefined) {
         return filePath ? filePath.replaceAll('/', ' / ') : '';
     }
 
     return (
         <div className="flex flex-col w-full h-full grow-0 relative bg-[#121318]">
             <div className="flex-1 min-w-0 h-full">
-                {currentFile ? (
+                {displayFilePath || currentFile ? (
                     <>
                         <div className="w-full flex items-center justify-between px-4 py-1 bg-[#121318] text-gray-300 text-sm playground-editor-topbar">
-                            <span>{filePathModifier(currentFile?.id)}</span>
+                            <span>{filePathModifier(titleLabel)}</span>
                             <div className="flex items-center gap-2">
                                 <button
                                     type="button"
@@ -269,7 +293,7 @@ export default function CodeEditor(): JSX.Element {
                         <Editor
                             key={collapseFileTree ? 'tree-collapsed' : 'tree-expanded'}
                             height="100%"
-                            language="rust"
+                            language={editorLanguage}
                             beforeMount={handleEditorWillMount}
                             onMount={handleEditorDidMount}
                             theme={getEditorTheme(theme)}
@@ -280,7 +304,7 @@ export default function CodeEditor(): JSX.Element {
                                 },
                                 minimap: { enabled: true },
                             }}
-                            value={currentCode}
+                            value={editorValue}
                         />
                     </>
                 ) : (
@@ -299,4 +323,20 @@ export default function CodeEditor(): JSX.Element {
             </div>
         </div>
     );
+}
+
+function inferLanguage(filePath: string | null) {
+    if (!filePath) return 'plaintext';
+    const lower = filePath.toLowerCase();
+    if (lower.endsWith('.tsx') || lower.endsWith('.ts')) return 'typescript';
+    if (lower.endsWith('.jsx') || lower.endsWith('.js')) return 'javascript';
+    if (lower.endsWith('.sol')) return 'sol';
+    if (lower.endsWith('.json')) return 'json';
+    if (lower.endsWith('.md')) return 'markdown';
+    if (lower.endsWith('.css')) return 'css';
+    if (lower.endsWith('.html')) return 'html';
+    if (lower.endsWith('.rs')) return 'rust';
+    if (lower.endsWith('.yml') || lower.endsWith('.yaml')) return 'yaml';
+    if (lower.endsWith('.toml')) return 'ini';
+    return 'plaintext';
 }

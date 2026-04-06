@@ -4,9 +4,8 @@ import ToolTipComponent from '../ui/TooltipComponent';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
-import { FaTelegramPlane } from 'react-icons/fa';
-import LighthouseChat from '../ui/svg/lighthouse-chat';
 import { MdHomeFilled } from 'react-icons/md';
+import { ClipboardList, MessageSquareText } from 'lucide-react';
 
 export enum SidePanelValues {
     FILE = 'FILE',
@@ -31,6 +30,15 @@ export default function EditorSidePanel({
     const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
         useCodeEditor();
     const { currentState, setCurrentState } = useSidePanelStore();
+    const activePanelValue =
+        currentState === SidePanelValues.PLAN
+            ? SidePanelValues.PLAN
+            : currentState === SidePanelValues.GITHUB
+              ? SidePanelValues.GITHUB
+              : !collapseChat
+                ? SidePanelValues.CHAT
+                : SidePanelValues.FILE;
+
     function toggleChatPanelForFileView() {
         setCurrentState(SidePanelValues.FILE);
         setCollapsechat(!collapseChat);
@@ -62,13 +70,13 @@ export default function EditorSidePanel({
             tooltip: 'GitHub Repository',
         },
         {
-            icon: <LighthouseChat size={22} />,
+            icon: <MessageSquareText className="h-[18px] w-[18px]" strokeWidth={1.8} />,
             value: SidePanelValues.CHAT,
             onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Toggle Chat Panel',
         },
         {
-            icon: <FaTelegramPlane size={19} />,
+            icon: <ClipboardList className="h-[18px] w-[18px]" strokeWidth={1.8} />,
             value: SidePanelValues.PLAN,
             onClick: () => {
                 handleToggleSidebar(SidePanelValues.PLAN);
@@ -130,21 +138,23 @@ export default function EditorSidePanel({
             )}
         >
             <div className="flex flex-col gap-y-7 items-center py-5">
-                {sidePanelData.map((item, index) => (
-                    <ToolTipComponent key={index} side="right" content={item.tooltip}>
-                        <div
-                            onClick={item.onClick}
-                            className={cn(
-                                'playground-editor-side-item cursor-pointer text-light/70 hover:text-primary/70 transition-colors',
-                                currentState && currentState === item.value
-                                    ? 'text-primary/70'
-                                    : 'text-light/70',
-                            )}
-                        >
-                            {item.icon}
-                        </div>
-                    </ToolTipComponent>
-                ))}
+                {sidePanelData.map((item, index) => {
+                    const isActive = item.value !== undefined && item.value === activePanelValue;
+
+                    return (
+                        <ToolTipComponent key={index} side="right" content={item.tooltip}>
+                            <div
+                                onClick={item.onClick}
+                                className={cn(
+                                    'playground-editor-side-item cursor-pointer transition-colors hover:text-primary/70',
+                                    isActive ? 'text-primary/70' : 'text-light/70',
+                                )}
+                            >
+                                {item.icon}
+                            </div>
+                        </ToolTipComponent>
+                    );
+                })}
             </div>
         </div>
     );
