@@ -140,6 +140,17 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
         if (!currentContractId) return;
 
         const currentContract = contracts[currentContractId] || getDefaultContractState();
+        const lastMessage = currentContract.messages.at(-1);
+        const isAdjacentDuplicate =
+            lastMessage?.contractId === message.contractId &&
+            lastMessage?.role === message.role &&
+            lastMessage?.content === message.content &&
+            lastMessage?.templateId === message.templateId;
+
+        if (isAdjacentDuplicate) {
+            return;
+        }
+
         set({
             contracts: {
                 ...contracts,
@@ -158,11 +169,25 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
         const currentContract = contracts[currentContractId] || getDefaultContractState();
         const messages = currentContract.messages;
         const existingIndex = messages.findIndex((msg) => msg.id === message.id);
+        const duplicateContentIndex =
+            existingIndex === -1
+                ? messages.findIndex(
+                      (msg) =>
+                          msg.contractId === message.contractId &&
+                          msg.role === message.role &&
+                          msg.content === message.content &&
+                          msg.role === 'USER',
+                  )
+                : -1;
 
         let updatedMessages: Message[];
         if (existingIndex !== -1) {
             updatedMessages = messages.map((msg) =>
                 msg.id === message.id ? { ...msg, ...message } : msg,
+            );
+        } else if (duplicateContentIndex !== -1) {
+            updatedMessages = messages.map((msg, index) =>
+                index === duplicateContentIndex ? ({ ...msg, ...message } as Message) : msg,
             );
         } else {
             updatedMessages = [...messages, message as Message];
