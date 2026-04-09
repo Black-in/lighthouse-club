@@ -58,7 +58,6 @@ export default function BuilderLoader() {
                     title: 'Complete',
                     description: 'Smart contract is ready',
                 };
-
             case STAGE.FINALIZING:
                 return {
                     title: 'Finalizing',
@@ -84,7 +83,7 @@ export default function BuilderLoader() {
             <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-md">
                 <LighthouseMark className="text-neutral-600 h-20 w-20 animate-pulse" />
 
-                <div className="">
+                <div>
                     <h2 className="text-xl font-medium text-neutral-200">{phaseInfo.title}</h2>
                     {!currentFileEditing && (
                         <p className="text-sm text-neutral-500">{phaseInfo.description}</p>

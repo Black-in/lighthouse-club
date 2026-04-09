@@ -5,11 +5,9 @@
 
 import { Message } from '@lighthouse/types';
 import { JSX, useState } from 'react';
-import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import AppLogo from '../tickers/AppLogo';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import Image from 'next/image';
-import { TextShimmer } from '../ui/shimmer-text';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
@@ -20,6 +18,8 @@ import SystemMessage from './SystemMessage';
 import { FiCopy, FiCheck } from 'react-icons/fi';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStore';
+import { usePacedText } from '@/src/hooks/usePacedText';
+import ClarificationQuestionCard, { parseClarificationPayload } from './ClarificationQuestionCard';
 
 interface BuilderMessageProps {
     message: Message;
@@ -41,6 +41,12 @@ export default function BuilderMessage({
     const { setCurrentState } = useSidePanelStore();
     const { setMessage } = useEditPlanStore();
     const { theme } = usePlaygroundThemeStore();
+    const latestAIMessageId = messages.filter((entry) => entry.role === 'AI').at(-1)?.id;
+    const shouldAnimateAIMessage = message.role === 'AI' && message.id === latestAIMessageId;
+    const pacedAIText = usePacedText(returnParsedData(message.content), shouldAnimateAIMessage);
+    const clarificationPayload = message.role === 'AI'
+        ? parseClarificationPayload(message.plannerContext)
+        : null;
 
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -170,9 +176,13 @@ export default function BuilderMessage({
                             <AppLogo showLogoText={false} size={22} />
                         </div>
                         <div className="flex flex-col group">
-                            <div className="playground-ai-message-bubble mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
-                                {returnParsedData(message.content)}
-                            </div>
+                            {clarificationPayload ? (
+                                <ClarificationQuestionCard payload={clarificationPayload} />
+                            ) : (
+                                <div className="playground-ai-message-bubble mt-2.5 w-fit max-w-[32rem] rounded-2xl border border-neutral-800 bg-[#08090a] px-4 py-2 text-sm font-normal text-white text-left tracking-wider whitespace-pre-wrap break-words">
+                                    {pacedAIText}
+                                </div>
+                            )}
 
                             <div className="flex items-center mt-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                                 <button
@@ -199,12 +209,6 @@ export default function BuilderMessage({
                 <div className="flex justify-start items-start w-full my-4 ">
                     <div className="flex items-start gap-x-2 w-full">
                         <div className="rounded-[4px] text-sm font-normal w-full text-light text-left tracking-wider text-[13px]">
-                            {loading && (
-                                <div className="flex items-center gap-x-1 mb-2">
-                                    <LayoutGrid shouldAnimate={loading} className="h-4 w-4" />
-                                    <TextShimmer>Processing your request...</TextShimmer>
-                                </div>
-                            )}
                             <SystemMessage message={message} />
                         </div>
                     </div>
