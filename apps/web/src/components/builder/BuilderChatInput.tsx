@@ -19,6 +19,7 @@ import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 import BuilderChatInputFeatures from './BuilderChatInputFeatures';
+import ByokModelModal from './ByokModelModal';
 import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { X } from 'lucide-react';
@@ -26,10 +27,19 @@ import { usePlaygroundThemeStore } from '@/src/store/code/usePlaygroundThemeStor
 import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
 import {
     DEFAULT_MODEL_OPTION,
+    getDevelopmentDefaultModelOption,
+    isByokModelOption,
     mapEnumToModelOption,
     mapModelOptionToEnum,
     type ModelOption,
 } from '@/src/lib/model-options';
+import {
+    clearQwenByokConfig,
+    getStoredQwenByokConfig,
+    QWEN_MODEL_OPTION,
+    saveQwenByokConfig,
+} from '@/src/lib/byok-model';
+import { toast } from 'sonner';
 
 interface AttachmentItem {
     id: string;
@@ -55,6 +65,9 @@ export default function BuilderChatInput() {
     const { session } = useUserSessionStore();
     const attachmentsRef = useRef<AttachmentItem[]>([]);
     const [selectedModel, setSelectedModel] = useState<ModelOption>(DEFAULT_MODEL_OPTION);
+    const pendingAutofillSubmitRef = useRef(false);
+    const pendingSubmissionValueRef = useRef<string | null>(null);
+    const [openByokModal, setOpenByokModal] = useState(false);
 
     // Get contract-specific data
     const contract = useCurrentContract();
@@ -111,6 +124,28 @@ export default function BuilderChatInput() {
     }, [contract.selectedModel]);
 
     useEffect(() => {
+        let cancelled = false;
+
+        async function hydrateDevelopmentDefaultModel() {
+            if (!shouldEnableDevAccessClient()) return;
+            if (contract.messages.length > 0) return;
+            if (selectedModel !== DEFAULT_MODEL_OPTION) return;
+
+            const preferredModel = await getDevelopmentDefaultModelOption();
+            if (cancelled) return;
+
+            setSelectedModel(preferredModel);
+            setSelectedContractModel(mapModelOptionToEnum(preferredModel), contractId);
+        }
+
+        void hydrateDevelopmentDefaultModel();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [contract.messages.length, contractId, selectedModel, setSelectedContractModel]);
+
+    useEffect(() => {
         return () => {
             attachmentsRef.current.forEach((attachment) => {
                 if (attachment.previewUrl) {
@@ -119,6 +154,34 @@ export default function BuilderChatInput() {
             });
         };
     }, []);
+
+    useEffect(() => {
+        function handlePrefill(event: Event) {
+            const customEvent = event as CustomEvent<{
+                value?: string;
+                submitValue?: string;
+                submit?: boolean;
+            }>;
+            const nextValue = customEvent.detail?.value?.trim();
+            if (!nextValue) return;
+            setInputValue(nextValue);
+            pendingSubmissionValueRef.current =
+                customEvent.detail?.submitValue?.trim() || nextValue || null;
+            pendingAutofillSubmitRef.current = Boolean(customEvent.detail?.submit);
+        }
+
+        window.addEventListener('builder-prefill-input', handlePrefill as EventListener);
+        return () =>
+            window.removeEventListener('builder-prefill-input', handlePrefill as EventListener);
+    }, []);
+
+    useEffect(() => {
+        if (!pendingAutofillSubmitRef.current) return;
+        if (!inputValue.trim()) return;
+        pendingAutofillSubmitRef.current = false;
+        void handleSubmit();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inputValue]);
 
     function formatPretty(isoString: string | null | undefined) {
         if (!isoString) return 'Time unavailable';
@@ -148,7 +211,9 @@ export default function BuilderChatInput() {
         if (contract.loading) {
             return;
         }
-        if (!inputValue.trim() && attachments.length === 0) {
+        const submittedValue = pendingSubmissionValueRef.current?.trim() || inputValue.trim();
+
+        if (!submittedValue && attachments.length === 0) {
             return;
         }
         if (!session?.user.id && !skipAuth) {
@@ -158,13 +223,26 @@ export default function BuilderChatInput() {
         if (shouldEnforceLimits && (showContractLimit || showMessageLimit)) {
             return;
         }
+        if (isByokModelOption(selectedModel) && !getStoredQwenByokConfig()) {
+            setOpenByokModal(true);
+            return;
+        }
         const selectedModelEnum = mapModelOptionToEnum(selectedModel);
-        set_states(contractId, inputValue, contract.activeTemplate?.id, undefined, {
+        const hasExistingContractMessages = contract.messages.length > 0;
+        set_states(contractId, inputValue.trim(), contract.activeTemplate?.id, undefined, {
             markLoading: true,
         }, {
             model: selectedModelEnum,
         });
-        handleGeneration(contractId, inputValue, contract.activeTemplate?.id, selectedModelEnum);
+        if (hasExistingContractMessages) {
+            handleGeneration(
+                contractId,
+                submittedValue,
+                contract.activeTemplate?.id,
+                selectedModelEnum,
+            );
+        }
+        pendingSubmissionValueRef.current = null;
         setInputValue('');
         setAttachments((prev) => {
             prev.forEach((attachment) => {
@@ -407,6 +485,10 @@ export default function BuilderChatInput() {
                                 inputValue={inputValue}
                                 selectedModel={selectedModel}
                                 onModelChange={(model) => {
+                                    if (isByokModelOption(model)) {
+                                        setOpenByokModal(true);
+                                        return;
+                                    }
                                     setSelectedModel(model);
                                     setSelectedContractModel(
                                         mapModelOptionToEnum(model),
@@ -423,6 +505,33 @@ export default function BuilderChatInput() {
                     </div>
                 </HoverBorderGradient>
             </div>
+
+            <ByokModelModal
+                open={openByokModal}
+                modelLabel={QWEN_MODEL_OPTION}
+                initialApiKey={getStoredQwenByokConfig()?.apiKey || ''}
+                initialBaseURL={getStoredQwenByokConfig()?.baseURL || ''}
+                onClose={() => {
+                    setOpenByokModal(false);
+                    if (selectedModel === QWEN_MODEL_OPTION && !getStoredQwenByokConfig()) {
+                        setSelectedModel(DEFAULT_MODEL_OPTION);
+                        setSelectedContractModel(mapModelOptionToEnum(DEFAULT_MODEL_OPTION), contractId);
+                    }
+                }}
+                onSave={({ apiKey, baseURL }) => {
+                    if (!apiKey.trim()) {
+                        clearQwenByokConfig();
+                        toast.error('Enter a valid API key to use this model');
+                        return;
+                    }
+
+                    saveQwenByokConfig({ apiKey, baseURL });
+                    setSelectedModel(QWEN_MODEL_OPTION);
+                    setSelectedContractModel(mapModelOptionToEnum(QWEN_MODEL_OPTION), contractId);
+                    setOpenByokModal(false);
+                    toast.success('Qwen model connected');
+                }}
+            />
 
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
         </>

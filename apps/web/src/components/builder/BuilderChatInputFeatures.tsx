@@ -11,7 +11,7 @@ import { ArrowRight, ChevronDown, FileUp, Loader2, Plus } from 'lucide-react';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { toast } from 'sonner';
-import { isProModelOption, MODEL_OPTIONS, type ModelOption } from '@/src/lib/model-options';
+import { isByokModelOption, isProModelOption, MODEL_OPTIONS, type ModelOption } from '@/src/lib/model-options';
 const ProTag = () => (
     <HoverBorderGradient
         as="span"
@@ -102,6 +102,10 @@ export default function BuilderChatInputFeatures({
                 <Select
                     value={selectedModel}
                     onValueChange={(val) => {
+                        if (isByokModelOption(val)) {
+                            onModelChange(val as ModelOption);
+                            return;
+                        }
                         if (isProModelOption(val)) {
                             toast.info('Upgrade to Pro to access this model');
                             return;
