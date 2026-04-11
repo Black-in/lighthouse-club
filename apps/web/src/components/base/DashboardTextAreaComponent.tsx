@@ -16,6 +16,7 @@ import {
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
+import ByokModelModal from '../builder/ByokModelModal';
 import Image from 'next/image';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
@@ -29,11 +30,19 @@ import { toast } from 'sonner';
 import { shouldEnableDevAccessClient } from '@/src/lib/runtime-mode';
 import {
     DEFAULT_MODEL_OPTION,
+    getDevelopmentDefaultModelOption,
+    isByokModelOption,
     isProModelOption,
     mapModelOptionToEnum,
     MODEL_OPTIONS,
     type ModelOption,
 } from '@/src/lib/model-options';
+import {
+    clearQwenByokConfig,
+    getStoredQwenByokConfig,
+    QWEN_MODEL_OPTION,
+    saveQwenByokConfig,
+} from '@/src/lib/byok-model';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -87,6 +96,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [selectedModel, setSelectedModel] = useState<ModelOption>(DEFAULT_MODEL_OPTION);
     const [isTextareaFocused, setIsTextareaFocused] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [openByokModal, setOpenByokModal] = useState(false);
     const plusButtonRef = useRef<HTMLButtonElement | null>(null);
     const plusMenuRef = useRef<HTMLDivElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -114,6 +124,27 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
         };
     }, []);
 
+    useEffect(() => {
+        let cancelled = false;
+
+        async function hydrateDevelopmentDefaultModel() {
+            if (!shouldEnableDevAccessClient()) return;
+
+            const preferredModel = await getDevelopmentDefaultModelOption();
+            if (cancelled) return;
+
+            setSelectedModel((current) =>
+                current === DEFAULT_MODEL_OPTION ? preferredModel : current,
+            );
+        }
+
+        void hydrateDevelopmentDefaultModel();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     function handleSubmit() {
         if (isSubmitting) return;
         if (!session?.user.id && !skipAuth) {
@@ -121,6 +152,10 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
             return;
         }
         if (shouldEnforceLimits && (showMessageLimit || showContractLimit)) return;
+        if (isByokModelOption(selectedModel) && !getStoredQwenByokConfig()) {
+            setOpenByokModal(true);
+            return;
+        }
 
         setIsSubmitting(true);
         const contractId = uuid();
@@ -306,6 +341,10 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                                 <Select
                                     value={selectedModel}
                                     onValueChange={(val) => {
+                                        if (isByokModelOption(val)) {
+                                            setOpenByokModal(true);
+                                            return;
+                                        }
                                         if (isProModelOption(val)) {
                                             toast.info('Upgrade to Pro to access this model');
                                             return;
@@ -404,6 +443,30 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                     </div>
                 )}
             </div>
+            <ByokModelModal
+                open={openByokModal}
+                modelLabel={QWEN_MODEL_OPTION}
+                initialApiKey={getStoredQwenByokConfig()?.apiKey || ''}
+                initialBaseURL={getStoredQwenByokConfig()?.baseURL || ''}
+                onClose={() => {
+                    setOpenByokModal(false);
+                    if (selectedModel === QWEN_MODEL_OPTION && !getStoredQwenByokConfig()) {
+                        setSelectedModel(DEFAULT_MODEL_OPTION);
+                    }
+                }}
+                onSave={({ apiKey, baseURL }) => {
+                    if (!apiKey.trim()) {
+                        clearQwenByokConfig();
+                        toast.error('Enter a valid API key to use this model');
+                        return;
+                    }
+
+                    saveQwenByokConfig({ apiKey, baseURL });
+                    setSelectedModel(QWEN_MODEL_OPTION);
+                    setOpenByokModal(false);
+                    toast.success('Qwen model connected');
+                }}
+            />
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
         </>
     );
