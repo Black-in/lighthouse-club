@@ -11,6 +11,7 @@ import axios from 'axios';
 import { SIGNIN_URL } from '@/routes/api_routes';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { AppSession, AppUserType } from '@/src/types/auth-session';
+import { shouldSkipAuthClient } from '@/src/lib/auth-bypass';
 
 function readCookie(name: string) {
     if (typeof document === 'undefined') return null;
@@ -72,7 +73,25 @@ function buildSessionFromUser({
     };
 }
 
+function buildDemoSession(): AppSession {
+    return {
+        user: {
+            id: 'dev-local-user',
+            privyId: 'dev-local-user',
+            email: 'dev@blackin.local',
+            name: 'Demo User',
+            image: null,
+            provider: 'dev',
+            token: 'dev-local-token',
+            hasGithub: false,
+            githubUsername: null,
+        },
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+}
+
 export default function PrivySessionSync() {
+    const skipAuth = shouldSkipAuthClient();
     const { ready, authenticated, user } = usePrivy();
     const { session, setSession, clearSession } = useUserSessionStore();
     const isCaptchaEnabled = process.env.NEXT_PUBLIC_ENABLE_CAPTCHA === 'true';
@@ -88,6 +107,17 @@ export default function PrivySessionSync() {
     });
 
     useEffect(() => {
+        if (skipAuth) {
+            const demoSession = buildDemoSession();
+            if (session?.user?.id !== demoSession.user.id || session?.user?.token !== demoSession.user.token) {
+                setSession(demoSession);
+            }
+            writeCookie('blackin_token', demoSession.user.token ?? '', 60 * 60 * 24 * 30);
+            clearCookie('linking_user_id');
+            clearCookie('turnstile_token');
+            return;
+        }
+
         if (!ready) return;
 
         if (!authenticated || !user) {
@@ -169,7 +199,7 @@ export default function PrivySessionSync() {
             .finally(() => {
                 isSyncingRef.current = false;
             });
-    }, [ready, authenticated, user, session, setSession, clearSession, isCaptchaEnabled]);
+    }, [skipAuth, ready, authenticated, user, session, setSession, clearSession, isCaptchaEnabled]);
 
     return null;
 }
