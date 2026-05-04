@@ -2,7 +2,7 @@
 
 ## Project Description
 
-BlackIn is an agentic AI powered code editor built for smart contract development on Base. It brings writing, auditing, and deploying smart contracts into a single browser based environment, designed for developers who want to ship on Base without the overhead of manual tooling and configuration.
+BlackIn is an agentic AI powered code editor built for smart contract development on Solana. It brings writing, auditing, and deploying smart contracts into a single browser based environment, designed for developers who want to ship on Base without the overhead of manual tooling and configuration.
 
 ## BlackIn - Agentic Smart Contract Auditor
 
